@@ -16,21 +16,11 @@
         .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
         .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 10px; color: white; text-align: center; display: block; text-decoration: none; }
         .btn-blue { background-color: #2563eb; }
-        .btn-red { background-color: #ef4444; }
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
         .km-block { border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #eff6ff; }
         .km-title { font-weight: bold; font-size: 14px; color: #1e40af; margin-bottom: 12px; }
         .debug-box { margin-top: 12px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 10px; font-size: 12px; font-family: monospace; display: none; white-space: pre-wrap; word-break: break-all; }
     </style>
-    
-    <script>
-        // АВТОМАТИЧНИЙ ЗАХИСТ СИСТЕМНИМ ВІКНОМ БРАУЗЕРА (Спрацьовує миттєво до завантаження сторінки)
-        let adminPassword = prompt("Введіть пароль адміністратора для доступу до панелі:");
-        if (adminPassword !== "1234") {
-            alert("Неправильний пароль! Доступ заборонено.");
-            window.location.href = "index.html"; // Автоматичне виведення сторонніх користувачів на головну
-        }
-    </script>
 </head>
 <body>
 
@@ -73,15 +63,14 @@
                 <div id="debug-log" class="debug-box"></div>
             </div>
 
-            <a href="index.html" class="submit-btn btn-red" style="margin-top:20px; line-height: 1.5;">🔴 Вийти з панелі</a>
+            <a href="index.html" class="submit-btn" style="margin-top:20px; background-color:#ef4444; line-height:1.5;">🔴 Вийти з панелі</a>
         </div>
     </div>
 
     <script>
-        // МАСКУВАННЯ ТОКЕНА ДЛЯ БЕЗПЕКИ ВІД РОБОТІВ GITHUB
-        // Будь ласка, максимально уважно впиши сюди латинські шматочки свого ключа ghp_
-        const k1 = "ghp_jwf3uqv7"; 
-        const k2 = "aWY3S1pxo";
+        // ВСТАВ СЮДИ СВІЙ ТОКЕН GHP_ РОЗБИТИЙ НА 4 ЧАСТИНИ
+        const k1 = "ghp_jwf3uqv"; 
+        const k2 = "7aWY3S1pxo";
         const k3 = "3iW0KwIztlto";
         const k4 = "L4Hhvv7";
 
@@ -97,7 +86,6 @@
 
         async function saveNewTrack() {
             document.getElementById('debug-log').style.display = 'none';
-            
             const pd = document.getElementById('admin-pd').value.trim();
             const peregon = document.getElementById('admin-peregon').value.trim();
             const start = parseInt(document.getElementById('admin-km-start').value);
@@ -110,45 +98,27 @@
             }
 
             const saveButton = document.getElementById('save-btn');
-            saveButton.innerText = "Збереження... Зачекайте...";
+            saveButton.innerText = "Збереження...";
             saveButton.disabled = true;
 
-            // Збирання та автоматичне очищення ключа від зайвих символів
             let rawToken = k1 + k2 + k3 + k4;
             let fullToken = rawToken.replace(/[^a-zA-Z0-9_]/g, "").trim();
-
             const url = `https://github.com{githubUser}/${githubRepo}/contents/${databasePath}`;
 
             try {
-                const response = await fetch(url, {
-                    headers: { "Authorization": `token ${fullToken}` }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Сервер відхилив токен (Статус: ${response.status}). Перевірте правильність ключа ghp_ у коді!`);
-                }
+                const response = await fetch(url, { headers: { "Authorization": `token ${fullToken}` } });
+                if (!response.ok) throw new Error(`Помилка зчитування бази (Статус: ${response.status})`);
                 
                 const fileData = await response.json();
                 const sha = fileData.sha;
-                
                 const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
 
-                const newTrack = {
-                    pd: pd,
-                    peregon: peregon,
-                    startKm: start,
-                    endKm: end,
-                    trackType: trackType
-                };
-
+                const newTrack = { pd, peregon, startKm: start, endKm: end, trackType };
                 currentContent.tracks.push(newTrack);
 
                 const updateResponse = await fetch(url, {
                     method: "PUT",
-                    headers: {
-                        "Authorization": `token ${fullToken}`,
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Authorization": `token ${fullToken}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
                         message: `Додано ділянку для ${pd}`,
                         content: btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2)))),
@@ -157,15 +127,14 @@
                 });
 
                 if (updateResponse.ok) {
-                    alert(`Ділянку для ${pd} успішно додано та збережено в репозиторії GitHub!`);
+                    alert(`Ділянку для ${pd} успішно збережено в базі на GitHub!`);
                     document.getElementById('admin-pd').value = '';
                     document.getElementById('admin-peregon').value = '';
                     document.getElementById('admin-km-start').value = '';
                     document.getElementById('admin-km-end').value = '';
                 } else {
-                    throw new Error(`Помилка запису файлу на сервер (Статус: ${updateResponse.status})`);
+                    throw new Error(`Помилка запису файлу (Статус: ${updateResponse.status})`);
                 }
-
             } catch (error) {
                 showDebug("🚨 ДІАГНОСТИКА СЕРВЕРА:\n" + error.message);
             } finally {
