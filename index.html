@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Контроль обкошування (v1.3)</title>
+    <title>Контроль обкошування (Фінал v1.4)</title>
     <style>
-        body { font-family: sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
+        body { font-family: -apple-system, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; }
         .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 16px; display: flex; gap: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .nav-btn { flex: 1; padding: 10px 4px; text-align: center; border: none; background: none; font-weight: bold; font-size: 14px; color: #4b5563; cursor: pointer; border-radius: 8px; }
+        .nav-btn { flex: 1; padding: 12px 4px; text-align: center; border: none; background: #f3f4f6; font-weight: bold; font-size: 14px; color: #4b5563; cursor: pointer; border-radius: 8px; transition: 0.2s; }
         .nav-btn.active { background-color: #2563eb; color: white; }
         .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
@@ -136,19 +136,19 @@
 
                 <label class="track-label">Натисніть на пікети, які обкосили:</label>
                 <div class="pिकेट-grid" style="margin-bottom: 20px;">
-                    <div class="pिकेट-cell cell-red pik-clickable" onclick="this.classList.toggle('selected')">1</div>
-                    <div class="pिकेट-cell cell-red pik-clickable" onclick="this.classList.toggle('selected')">2</div>
-                    <div class="pिकेट-cell cell-red pik-clickable" onclick="this.classList.toggle('selected')">3</div>
-                    <div class="pिकेट-cell cell-red pik-clickable" onclick="this.classList.toggle('selected')">4</div>
-                    <div class="pिकेट-cell cell-red pik-clickable" onclick="this.classList.toggle('selected')">5</div>
-                    <div class="pिकेट-cell cell-red pik-clickable" onclick="this.classList.toggle('selected')">6</div>
-                    <div class="pिकेट-cell cell-red pik-clickable" onclick="this.classList.toggle('selected')">7</div>
-                    <div class="pिकेट-cell cell-red pik-clickable" onclick="this.classList.toggle('selected')">8</div>
-                    <div class="pिकेट-cell cell-red pik-clickable" onclick="this.classList.toggle('selected')">9</div>
-                    <div class="pिकेट-cell cell-red pik-clickable" onclick="this.classList.toggle('selected')">10</div>
+                    <div class="pिकेट-cell cell-red pik-clickable">1</div>
+                    <div class="pिकेट-cell cell-red pik-clickable">2</div>
+                    <div class="pिकेट-cell cell-red pik-clickable">3</div>
+                    <div class="pिकेट-cell cell-red pik-clickable">4</div>
+                    <div class="pिकेट-cell cell-red pik-clickable">5</div>
+                    <div class="pिकेट-cell cell-red pik-clickable">6</div>
+                    <div class="pिकेट-cell cell-red pik-clickable">7</div>
+                    <div class="pिकेट-cell cell-red pik-clickable">8</div>
+                    <div class="pिकेट-cell cell-red pik-clickable">9</div>
+                    <div class="pिकेट-cell cell-red pik-clickable">10</div>
                 </div>
 
-                <button class="submit-btn btn-blue" onclick="alert('Звіт готовий до відправки!')">Зберегти звіт</button>
+                <button class="submit-btn btn-blue" id="btn-save-report">Зберегти звіт</button>
                 <button id="logout-master" class="submit-btn btn-dark" style="background:#4b5563;">Вийти з кабінету</button>
             </div>
 
@@ -156,3 +156,12 @@
             <div id="screen-admin-login" class="screen hidden">
                 <h2>⚙️ Вхід для Адміна</h2>
                 <p>Введіть пароль адміністратора.</p>
+                <input type="password" id="admin-pass" placeholder="Пароль: 1234" class="input-field">
+                <div id="admin-error" class="error-msg">Неправильний пароль адміністратора!</div>
+                <button id="submit-admin" class="submit-btn btn-dark">Увійти в панель</button>
+            </div>
+
+            <!-- ЕКРАН 3Б: ВНУТРЕННЯ ПАНЕЛЬ АДМІНІСТРАТОРА -->
+            <div id="screen-admin-panel" class="screen hidden">
+                <h2>🛠️ Панель Керування Адміна</h2>
+                
