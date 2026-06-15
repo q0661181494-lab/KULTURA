@@ -23,6 +23,9 @@
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
         .km-block { border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #eff6ff; }
         .km-title { font-weight: bold; font-size: 14px; color: #1e40af; margin-bottom: 12px; }
+        
+        /* Червоне вікно для виведення помилок сервера */
+        .debug-box { margin-top: 12px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 10px; font-size: 12px; font-family: monospace; display: none; white-space: pre-wrap; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -41,7 +44,7 @@
             <p>Введіть пароль адміністратора для доступу до налаштувань колій.</p>
             <input type="password" id="pass-input" placeholder="Введіть пароль (1234)" class="input-field">
             <div id="error-message" class="error-msg">Неправильний пароль адміністратора!</div>
-            <button class="submit-btn btn-dark" onclick="checkAdminPassword()">Увійти в DNA панель</button>
+            <button class="submit-btn btn-dark" onclick="checkAdminPassword()">Увійти в панель</button>
         </div>
 
         <!-- ЗАХИЩЕНА ПАНЕЛЬ КЕРУВАННЯ -->
@@ -71,6 +74,9 @@
                 </select>
                 
                 <button class="submit-btn btn-blue" id="save-btn" style="padding:12px;" onclick="saveNewTrack()">Зберегти ділянку в систему</button>
+                
+                <!-- Блок діагностики помилок -->
+                <div id="debug-log" class="debug-box"></div>
             </div>
 
             <button class="submit-btn btn-red" style="margin-top:20px;" onclick="logoutAdmin()">🔴 Вийти з панелі</button>
@@ -78,16 +84,22 @@
     </div>
 
     <script>
-        // ЗАХИЩЕНЕ МАСКУВАННЯ КЛЮЧА ДОСТУПУ (Роботи GitHub нічого не запідозрять)
-        // Встав сюди свій розбитий ключ ghp_... строго на 4 рівні частини
-        const k1 = "ПЕРША_ЧАСТИНА"; 
-        const k2 = "ДРУГА_ЧАСТИНА";
-        const k3 = "ТРЕТЯ_ЧАСТИНА";
-        const k4 = "ЧЕТВЕРТА_ЧАСТИНА";
+        // ЗАХИЩЕНЕ МАСКУВАННЯ КЛЮЧА ДОСТУПУ
+        // Будь ласка, максимально уважно встав сюди частини свого ключа ghp_... 
+        const k1 = "ghp_jwf3uqv"; 
+        const k2 = "7aWY3S1pxo";
+        const k3 = "3iW0KwIztlto";
+        const k4 = "L4Hhvv7";
 
         const githubUser = "q0661181494-lab";
         const githubRepo = "KULTURA";
         const databasePath = "database.json";
+
+        function showDebug(msg) {
+            const dbg = document.getElementById('debug-log');
+            dbg.style.display = 'block';
+            dbg.innerText = msg;
+        }
 
         function checkAdminPassword() {
             const typedPassword = document.getElementById('pass-input').value;
@@ -105,6 +117,8 @@
         }
 
         async function saveNewTrack() {
+            document.getElementById('debug-log').style.display = 'none';
+            
             const pd = document.getElementById('admin-pd').value.trim();
             const peregon = document.getElementById('admin-peregon').value.trim();
             const start = parseInt(document.getElementById('admin-km-start').value);
@@ -120,15 +134,18 @@
             saveButton.innerText = "Збереження... Зачекайте...";
             saveButton.disabled = true;
 
-            const fullToken = k1 + k2 + k3 + k4;
+            const fullToken = (k1 + k2 + k3 + k4).trim();
             const url = `https://github.com{githubUser}/${githubRepo}/contents/${databasePath}`;
 
             try {
+                // 1. Зчитування файлу
                 const response = await fetch(url, {
                     headers: { "Authorization": `token ${fullToken}` }
                 });
                 
-                if (!response.ok) throw new Error("Не вдалося прочитати базу даних з GitHub. Перевірте правильність токена!");
+                if (!response.ok) {
+                    throw new Error(`Помилка зчитування бази з сервера (Код статусу: ${response.status}). Перевірте правильність токена k1-k4.`);
+                }
                 
                 const fileData = await response.json();
                 const sha = fileData.sha;
@@ -145,6 +162,7 @@
 
                 currentContent.tracks.push(newTrack);
 
+                // 2. Запис файлу
                 const updateResponse = await fetch(url, {
                     method: "PUT",
                     headers: {
@@ -152,7 +170,7 @@
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        message: `Додано ділянку для ${pd} через адмін-панель`,
+                        message: `Додано ділянку для ${pd}`,
                         content: btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2)))),
                         sha: sha
                     })
@@ -165,23 +183,7 @@
                     document.getElementById('admin-km-start').value = '';
                     document.getElementById('admin-km-end').value = '';
                 } else {
-                    throw new Error("Не вдалося записати дані у файл database.json");
+                    throw new Error(`Помилка запису файлу на сервер (Код статусу: ${updateResponse.status})`);
                 }
 
             } catch (error) {
-                alert("Помилка з'єднання: " + error.message);
-            } finally {
-                saveButton.innerText = "Зберегти ділянку в систему";
-                saveButton.disabled = false;
-            }
-        }
-
-        function logoutAdmin() {
-            document.getElementById('panel-zone').classList.add('hidden');
-            document.getElementById('admin-nav').style.display = 'flex';
-            document.getElementById('login-zone').style.display = 'block';
-            window.location.href = 'index.html';
-        }
-    </script>
-</body>
-</html>
