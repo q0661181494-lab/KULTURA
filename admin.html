@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Панель Адміністратора</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; box-sizing: border-box; }
+        
+        .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 16px; display: flex; gap: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #4b5563; text-decoration: none; border-radius: 8px; background: #f3f4f6; }
+        .nav-link.active { background-color: #2563eb; color: white; }
+        
+        .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
+        h2 { margin-top: 0; margin-bottom: 4px; font-size: 20px; color: #1f2937; }
+        p { color: #6b7280; font-size: 14px; margin-top: 0; margin-bottom: 16px; }
+        
+        .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
+        .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 10px; color: white; text-align: center; display: block; text-decoration: none; }
+        .btn-blue { background-color: #2563eb; }
+        .btn-dark { background-color: #1f2937; }
+        .btn-red { background-color: #ef4444; }
+        .error-msg { color: #dc2626; font-size: 13px; margin-top: -10px; margin-bottom: 10px; display: none; font-weight: bold; }
+        .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
+        .km-block { border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #eff6ff; }
+        .km-title { font-weight: bold; font-size: 14px; color: #1e40af; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Меню навігації -->
+        <div id="admin-nav" class="nav-menu">
+            <a href="index.html" class="nav-link">📊 Графіки</a>
+            <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
+            <a href="admin.html" class="nav-link active">⚙️ Адмін</a>
+        </div>
+
+        <!-- ФОРМА ВХОДУ (ЗАХИСТ ПАРОЛЕМ) -->
+        <div id="login-zone" class="screen">
+            <h2>⚙️ Вхід для Адміна</h2>
+            <p>Введіть пароль адміністратора для доступу до налаштувань колій.</p>
+            <input type="password" id="pass-input" placeholder="Введіть пароль (1234)" class="input-field">
+            <div id="error-message" class="error-msg">Неправильний пароль адміністратора!</div>
+            <button class="submit-btn btn-dark" onclick="checkAdminPassword()">Увійти в панель</button>
+        </div>
+
+        <!-- ЗАХИЩЕНА ПАНЕЛЬ КЕРУВАННЯ (ВІДКРИВАЄТЬСЯ ТІЛЬКИ ПІСЛЯ ВВОДУ ПАРОЛЯ) -->
+        <div id="panel-zone" class="screen hidden">
+            <h2>🛠️ Панель Керування Адміна</h2>
+            <p>Режим налаштування ділянок залізниці.</p>
+            
+            <div class="km-block">
+                <div class="km-title">➕ Додати нову ділянку колії для ПД</div>
+                
+                <label class="track-label">Оберіть або введіть околоток (напр. ПД-13):</label>
+                <input type="text" id="admin-pd" placeholder="ПД-13" class="input-field" style="margin-bottom:8px; padding:10px;">
+                
+                <label class="track-label">Назва перегону:</label>
+                <input type="text" id="admin-peregon" placeholder="А — Б" class="input-field" style="margin-bottom:8px; padding:10px;">
+                
+                <label class="track-label">Початковий кілометр ділянки:</label>
+                <input type="number" id="admin-km-start" placeholder="10" class="input-field" style="margin-bottom:8px; padding:10px;">
+                
+                <label class="track-label">Кінцевий кілометр ділянки:</label>
+                <input type="number" id="admin-km-end" placeholder="20" class="input-field" style="margin-bottom:8px; padding:10px;">
+
+                <label class="track-label">Вибір колії:</label>
+                <select id="admin-track-type" class="input-field" style="margin-bottom:12px; padding:10px;">
+                    <option value="парна">Парна колія</option>
+                    <option value="непарна">Непарна колія</option>
+                </select>
+                
+                <button class="submit-btn btn-blue" style="padding:12px;" onclick="saveNewTrack()">Зберегти ділянку в систему</button>
+            </div>
+
+            <button class="submit-btn btn-red" style="margin-top:20px;" onclick="logoutAdmin()">🔴 Вийти з панелі</button>
+        </div>
+    </div>
+
+    <script>
+        // Логіка захисту та роботи форми адміна
+        function checkAdminPassword() {
+            const typedPassword = document.getElementById('pass-input').value;
+            const errBlock = document.getElementById('error-message');
+            
+            if (typedPassword === '1234') {
+                errBlock.style.display = 'none';
+                document.getElementById('pass-input').value = '';
+                
+                // Перемикаємо відображення блоків
+                document.getElementById('admin-nav').style.display = 'none';
+                document.getElementById('login-zone').style.display = 'none';
+                document.getElementById('panel-zone').classList.remove('hidden');
+            } else {
+                errBlock.style.display = 'block';
+            }
+        }
+
+        function saveNewTrack() {
+            const pd = document.getElementById('admin-pd').value;
+            const peregon = document.getElementById('admin-peregon').value;
+            const start = document.getElementById('admin-km-start').value;
+            const end = document.getElementById('admin-km-end').value;
+            
+            if(!pd || !peregon || !start || !end) {
+                alert('Будь ласка, заповніть усі поля форми!');
+                return;
+            }
+            
+            alert('Ділянку для ' + pd + ' на перегоні ' + peregon + ' з ' + start + ' по ' + end + ' км успішно створено!');
+        }
+
+        function logoutAdmin() {
+            // Повертаємо початковий стан сторінки
+            document.getElementById('panel-zone').classList.add('hidden');
+            document.getElementById('admin-nav').style.display = 'flex';
+            document.getElementById('login-zone').style.display = 'block';
+            
+            // Перенаправляємо користувача на головну сторінку графіків
+            window.location.href = 'index.html';
+        }
+    </script>
+
+</body>
+</html>
