@@ -21,7 +21,7 @@
         .error-msg { color: #dc2626; font-size: 13px; margin-top: -10px; margin-bottom: 10px; display: none; font-weight: bold; }
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
         .piket-grid { display: flex; gap: 3px; width: 100%; }
-        .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; background-color: #ef4444; cursor: pointer; }
+        .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; background-color: #ef4444; cursor: pointer; text-shadow: 0 1px 1px rgba(0,0,0,0.2); user-select: none; }
         .piket-cell.selected { background-color: #22c55e !important; border: 2px solid #1e3a8a; }
         .debug-box { margin-top: 12px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 10px; font-size: 12px; font-family: monospace; display: none; white-space: pre-wrap; word-break: break-all; }
     </style>
@@ -65,7 +65,7 @@
             </select>
 
             <label class="track-label">Кілометр:</label>
-            <input type="number" id="master-km" placeholder="Введіть кілометр, напр. 52" class="input-field">
+            <input type="number" id="master-km" placeholder="Введіть кілометр, напр. 55" class="input-field">
 
             <label class="track-label">Натисніть на пікети, які обкосили (стануть зеленими):</label>
             <div class="piket-grid" style="margin-bottom: 25px;">
@@ -92,11 +92,11 @@
         const masterPasswords = { '1313': 'ПД-13', '1414': 'ПД-14', '1515': 'ПД-15', '1616': 'ПД-16' };
         let activePd = "";
 
-        // СЕКРЕТНИЙ КЛЮЧ ДОСТУПУ (Встав сюди свій токен ghp_ розбитий на 4 частини)
-        const k1 = "hp_jwf3uqv7"; 
-        const k2 = "aWY3S1pxo";
-        const k3 = "3iW0KwIztlto";
-        const k4 = "L4Hhvv7";
+        // ТУТ ПОВИНЕН БУТИ ТВІЙ КЛЮЧ ghp_ (Поки що залишаємо порожнім, щоб кнопка входу не ламалася)
+        const k1 = ""; 
+        const k2 = "";
+        const k3 = "";
+        const k4 = "";
 
         const githubUser = "q0661181494-lab";
         const githubRepo = "KULTURA";
@@ -108,9 +108,11 @@
             dbg.innerText = msg;
         }
 
+        // АВТОНОМНА ФУНКЦІЯ ВХОДУ (Працює миттєво та безпомилково)
         function checkMasterPassword() {
-            const pass = document.getElementById('master-pass').value;
+            const pass = document.getElementById('master-pass').value.trim();
             const error = document.getElementById('master-error');
+            
             if (masterPasswords[pass]) {
                 error.style.display = 'none';
                 activePd = masterPasswords[pass];
@@ -118,6 +120,7 @@
                 document.getElementById('master-pass').value = '';
                 document.getElementById('mow-date').valueAsDate = new Date();
                 
+                // Перемикаємо відображення вікон
                 document.getElementById('master-nav').style.display = 'none';
                 document.getElementById('login-zone').style.display = 'none';
                 document.getElementById('panel-zone').classList.remove('hidden');
@@ -133,7 +136,6 @@
             const peregon = document.getElementById('master-peregon').value;
             const trackType = document.getElementById('master-track-type').value;
 
-            // Збираємо обрані майстром пікети
             const cells = document.querySelectorAll('.piket-cell');
             let selectedPikets = [];
             cells.forEach((cell, index) => {
@@ -148,32 +150,29 @@
             }
 
             const saveButton = document.getElementById('save-btn');
-            saveButton.innerText = "Збереження... Зачекайте...";
+            saveButton.innerText = "Збереження...";
             saveButton.disabled = true;
 
             let rawToken = k1 + k2 + k3 + k4;
             let fullToken = rawToken.replace(/[^a-zA-Z0-9_]/g, "").trim();
+            
+            if(!fullToken) {
+                alert("Помилка: Ключ ghp_ не вписано у код файлу master.html!");
+                saveButton.innerText = "Зберегти звіт в систему";
+                saveButton.disabled = false;
+                return;
+            }
+
             const url = `https://github.com{githubUser}/${githubRepo}/contents/${databasePath}`;
 
             try {
                 const response = await fetch(url, { headers: { "Authorization": `token ${fullToken}` } });
-                if (!response.ok) throw new Error(`Помилка зчитування бази (Статус: ${response.status})`);
+                if (!response.ok) throw new Error(`Помилка сервера (Статус: ${response.status})`);
                 
                 const fileData = await response.json();
                 const sha = fileData.sha;
                 const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
 
-                // Записуємо нові дані у журнал обкошування
-                const newMow = {
-                    pd: activePd,
-                    peregon: peregon,
-                    trackType: trackType,
-                    km: km,
-                    pikets: selectedPikets,
-                    date: date
-                };
-
+                const newMow = { pd: activePd, peregon, trackType, km, pikets: selectedPikets, date };
                 currentContent.mowing.push(newMow);
 
-                const updateResponse = await fetch(url, {
-                    method: "PUT",
