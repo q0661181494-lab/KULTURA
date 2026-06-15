@@ -23,8 +23,6 @@
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
         .km-block { border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #eff6ff; }
         .km-title { font-weight: bold; font-size: 14px; color: #1e40af; margin-bottom: 12px; }
-        
-        /* Червоне вікно для виведення помилок сервера */
         .debug-box { margin-top: 12px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 10px; font-size: 12px; font-family: monospace; display: none; white-space: pre-wrap; word-break: break-all; }
     </style>
 </head>
@@ -59,13 +57,13 @@
                 <input type="text" id="admin-pd" placeholder="ПД-13" class="input-field" style="margin-bottom:8px; padding:10px;">
                 
                 <label class="track-label">Назва перегону:</label>
-                <input type="text" id="admin-peregon" placeholder="А — Б" class="input-field" style="margin-bottom:8px; padding:10px;">
+                <input type="text" id="admin-peregon" placeholder="Путивль - Кошари" class="input-field" style="margin-bottom:8px; padding:10px;">
                 
                 <label class="track-label">Початковий кілометр ділянки:</label>
-                <input type="number" id="admin-km-start" placeholder="10" class="input-field" style="margin-bottom:8px; padding:10px;">
+                <input type="number" id="admin-km-start" placeholder="52" class="input-field" style="margin-bottom:8px; padding:10px;">
                 
                 <label class="track-label">Кінцевий кілометр ділянки:</label>
-                <input type="number" id="admin-km-end" placeholder="20" class="input-field" style="margin-bottom:8px; padding:10px;">
+                <input type="number" id="admin-km-end" placeholder="64" class="input-field" style="margin-bottom:8px; padding:10px;">
 
                 <label class="track-label">Вибір колії:</label>
                 <select id="admin-track-type" class="input-field" style="margin-bottom:12px; padding:10px;">
@@ -75,7 +73,6 @@
                 
                 <button class="submit-btn btn-blue" id="save-btn" style="padding:12px;" onclick="saveNewTrack()">Зберегти ділянку в систему</button>
                 
-                <!-- Блок діагностики помилок -->
                 <div id="debug-log" class="debug-box"></div>
             </div>
 
@@ -84,10 +81,10 @@
     </div>
 
     <script>
-        // ЗАХИЩЕНЕ МАСКУВАННЯ КЛЮЧА ДОСТУПУ
-        // Будь ласка, максимально уважно встав сюди частини свого ключа ghp_... 
-        const k1 = "ghp_jwf3uqv"; 
-        const k2 = "7aWY3S1pxo";
+        // ТУТ ПОВИНЕН БУТИ СУТЬ ТВІЙ ЦИФРОВО-ЛАТИНСЬКИЙ КЛЮЧ ghp_...
+        // Дуже важливо: видали слова "ЧАСТИНА" і встав туди шматочки справжнього ключа!
+        const k1 = "ghp_jwf3uqv7"; 
+        const k2 = "aWY3S1pxo";
         const k3 = "3iW0KwIztlto";
         const k4 = "L4Hhvv7";
 
@@ -134,17 +131,19 @@
             saveButton.innerText = "Збереження... Зачекайте...";
             saveButton.disabled = true;
 
-            const fullToken = (k1 + k2 + k3 + k4).trim();
+            // ІНЖЕНЕРНИЙ ЗАХИСТ: Автоматично очищаємо ключ від українських літер та пробілів
+            let rawToken = k1 + k2 + k3 + k4;
+            let fullToken = rawToken.replace(/[^a-zA-Z0-9_]/g, "").trim();
+
             const url = `https://github.com{githubUser}/${githubRepo}/contents/${databasePath}`;
 
             try {
-                // 1. Зчитування файлу
                 const response = await fetch(url, {
                     headers: { "Authorization": `token ${fullToken}` }
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Помилка зчитування бази з сервера (Код статусу: ${response.status}). Перевірте правильність токена k1-k4.`);
+                    throw new Error(`Сервер відхилив токен (Статус: ${response.status}). Перевірте, чи правильно ви ввели ключ ghp_ у коді!`);
                 }
                 
                 const fileData = await response.json();
@@ -162,7 +161,6 @@
 
                 currentContent.tracks.push(newTrack);
 
-                // 2. Запис файлу
                 const updateResponse = await fetch(url, {
                     method: "PUT",
                     headers: {
@@ -177,13 +175,13 @@
                 });
 
                 if (updateResponse.ok) {
-                    alert(`Ділянку для ${pd} успішно додано та збережено в репозиторії GitHub!`);
+                    alert(`Ділянку для ${pd} успішно збережено в базі на GitHub!`);
                     document.getElementById('admin-pd').value = '';
                     document.getElementById('admin-peregon').value = '';
                     document.getElementById('admin-km-start').value = '';
                     document.getElementById('admin-km-end').value = '';
                 } else {
-                    throw new Error(`Помилка запису файлу на сервер (Код статусу: ${updateResponse.status})`);
+                    throw new Error(`Помилка запису файлу (Статус: ${updateResponse.status})`);
                 }
 
             } catch (error) {
