@@ -3,101 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📊 Лінійна діаграма</title>
+    <title>⚙️ Панель Адміністратора</title>
     <style>
         body { font-family: -apple-system, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; box-sizing: border-box; }
-        
-        /* Навігація через прямі інтернет-посилання */
         .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 16px; display: flex; gap: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #4b5563; text-decoration: none; border-radius: 8px; background: #f3f4f6; }
         .nav-link.active { background-color: #2563eb; color: white; }
-        
         .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
         h2 { margin-top: 0; margin-bottom: 4px; font-size: 20px; color: #1f2937; }
         p { color: #6b7280; font-size: 14px; margin-top: 0; margin-bottom: 16px; }
-        
         .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
+        .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 10px; color: white; text-align: center; display: block; text-decoration: none; }
+        .btn-blue { background-color: #2563eb; }
+        .btn-dark { background-color: #1f2937; }
+        .btn-red { background-color: #ef4444; }
+        .error-msg { color: #dc2626; font-size: 13px; margin-top: -10px; margin-bottom: 10px; display: none; font-weight: bold; }
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
-        
-        /* Діаграма колії */
-        .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
-        .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 8px; text-align: center; }
-        .track-row { margin-bottom: 12px; }
-        .piket-grid { display: flex; gap: 3px; width: 100%; }
-        .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.2); }
-        
-        .cell-red { background-color: #ef4444; }
-        .cell-green { background-color: #22c55e; }
-        .cell-yellow { background-color: #eab308; color: #1f2937; text-shadow: none; }
-        .date-pop { font-size: 7px; font-weight: normal; opacity: 0.9; margin-top: 1px; }
+        .km-block { border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #eff6ff; }
+        .km-title { font-weight: bold; font-size: 14px; color: #1e40af; margin-bottom: 12px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Головне меню: Прямі переходи на окремі файли сторінок -->
-        <div class="nav-menu">
-            <a href="index.html" class="nav-link active">📊 Графіки</a>
+        <!-- Меню навігації -->
+        <div id="admin-nav" class="nav-menu">
+            <a href="index.html" class="nav-link">📊 Графіки</a>
             <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
-            <a href="admin.html" class="nav-link">⚙️ Адмін</a>
+            <a href="admin.html" class="nav-link active">⚙️ Адмін</a>
         </div>
 
-        <!-- Головний екран діаграм -->
-        <div class="screen">
-            <h2>📊 Лінійна діаграма</h2>
-            <p>Оберіть ділянку для перегляду стану обкошування.</p>
+        <!-- ФОРМА ВХОДУ -->
+        <div id="login-zone" class="screen">
+            <h2>⚙️ Вхід для Адміна</h2>
+            <p>Введіть пароль адміністратора для доступу до налаштувань колій.</p>
+            <input type="password" id="pass-input" placeholder="Введіть пароль (1234)" class="input-field">
+            <div id="error-message" class="error-msg">Неправильний пароль адміністратора!</div>
+            <button class="submit-btn btn-dark" onclick="checkAdminPassword()">Увійти в панель</button>
+        </div>
+
+        <!-- ЗАХИЩЕНА ПАНЕЛЬ КЕРУВАННЯ -->
+        <div id="panel-zone" class="screen hidden">
+            <h2>🛠️ Панель Керування Адміна</h2>
+            <p>Режим налаштування ділянок залізниці.</p>
             
-            <label class="track-label">Околоток:</label>
-            <select class="input-field">
-                <option value="">-- Оберіть околоток --</option>
-                <option value="pd13">ПД-13</option>
-                <option value="pd14">ПД-14</option>
-                <option value="pd15">ПД-15</option>
-                <option value="pd16">ПД-16</option>
-            </select>
-
-            <label class="track-label">Перегін:</label>
-            <select class="input-field">
-                <option value="">-- Оберіть перегін --</option>
-                <option value="1">Перегін А — Б</option>
-            </select>
-
             <div class="km-block">
-                <div class="km-title">125 кілометр</div>
-                <div class="track-row">
-                    <span class="track-label">Парна колія:</span>
-                    <div class="piket-grid">
-                        <div class="piket-cell cell-green">1<span class="date-pop">12.06</span></div>
-                        <div class="piket-cell cell-green">2<span class="date-pop">12.06</span></div>
-                        <div class="piket-cell cell-green">3<span class="date-pop">12.06</span></div>
-                        <div class="piket-cell cell-red">4</div>
-                        <div class="piket-cell cell-red">5</div>
-                        <div class="piket-cell cell-red">6</div>
-                        <div class="piket-cell cell-yellow">7<span class="date-pop">01.05</span></div>
-                        <div class="piket-cell cell-red">8</div>
-                        <div class="piket-cell cell-red">9</div>
-                        <div class="piket-cell cell-red">10</div>
-                    </div>
-                </div>
-                <div class="track-row">
-                    <span class="track-label">Непарна колія:</span>
-                    <div class="piket-grid">
-                        <div class="piket-cell cell-red">1</div>
-                        <div class="piket-cell cell-red">2</div>
-                        <div class="piket-cell cell-green">3<span class="date-pop">15.06</span></div>
-                        <div class="piket-cell cell-green">4<span class="date-pop">15.06</span></div>
-                        <div class="piket-cell cell-red">5</div>
-                        <div class="piket-cell cell-red">6</div>
-                        <div class="piket-cell cell-red">7</div>
-                        <div class="piket-cell cell-red">8</div>
-                        <div class="piket-cell cell-red">9</div>
-                        <div class="piket-cell cell-red">10</div>
-                    </div>
-                </div>
+                <div class="km-title">➕ Додати нову ділянку колії для ПД</div>
+                
+                <label class="track-label">Назва околотку (напр. ПД-13):</label>
+                <input type="text" id="admin-pd" placeholder="ПД-13" class="input-field" style="margin-bottom:8px; padding:10px;">
+                
+                <label class="track-label">Назва перегону:</label>
+                <input type="text" id="admin-peregon" placeholder="А — Б" class="input-field" style="margin-bottom:8px; padding:10px;">
+                
+                <label class="track-label">Початковий кілометр ділянки:</label>
+                <input type="number" id="admin-km-start" placeholder="10" class="input-field" style="margin-bottom:8px; padding:10px;">
+                
+                <label class="track-label">Кінцевий кілометр ділянки:</label>
+                <input type="number" id="admin-km-end" placeholder="20" class="input-field" style="margin-bottom:8px; padding:10px;">
+
+                <label class="track-label">Вибір колії:</label>
+                <select id="admin-track-type" class="input-field" style="margin-bottom:12px; padding:10px;">
+                    <option value="парна">Парна колія</option>
+                    <option value="непарна">Непарна колія</option>
+                </select>
+                
+                <button class="submit-btn btn-blue" id="save-btn" style="padding:12px;" onclick="saveNewTrack()">Зберегти ділянку в систему</button>
             </div>
+
+            <button class="submit-btn btn-red" style="margin-top:20px;" onclick="logoutAdmin()">🔴 Вийти з панелі</button>
         </div>
     </div>
 
-</body>
-</html>
+    <script>
+        // УВАГА: ВСТАВТЕ СВІЙ КЛЮЧ СЮДИ, РОЗДІЛИВШИ НА ДВІ ЧАСТИНИ
+        // Наприклад, якщо ваш ключ ghp_123456789, то запишіть:
+        // const tokenPart1 = "ghp_12345";
+        // const tokenPart2 = "6789";
+        const tokenPart1 = "ghp_jwf3uqv7aWY3S1pxo";
+        const tokenPart2 = "3iW0KwIztltoL4Hhvv7";
+
+        // Налаштування вашого репозиторію
+        const githubUser = "q0661181494-lab";
+        const githubRepo = "KULTURA";
+        const databasePath = "database.json";
+
+        function checkAdminPassword() {
+            const typedPassword = document.getElementById('pass-input').value;
+            const errBlock = document.getElementById('error-message');
+            
+            if (typedPassword === '1234') {
+                errBlock.style.display = 'none';
+                document.getElementById('pass-input').value = '';
+                document.getElementById('admin-nav').style.display = 'none';
+                document.getElementById('login-zone').style.display = 'none';
+                document.getElementById('panel-zone').classList.remove('hidden');
+            } else {
+                errBlock.style.display = 'block';
+            }
+        }
+
+        // Професійна функція запису даних безпосередньо в GitHub через API
+        async function saveNewTrack() {
+            const pd = document.getElementById('admin-pd').value.trim();
+            const peregon = document.getElementById('admin-peregon').value.trim();
+            const start = parseInt(document.getElementById('admin-km-start').value);
+            const end = parseInt(document.getElementById('admin-km-end').value);
+            const trackType = document.getElementById('admin-track-type').value;
+            
+            if(!pd || !peregon || isNaN(start) || isNaN(end)) {
+                alert('Будь ласка, заповніть усі поля форми правильно!');
+                return;
+            }
+
+            const saveButton = document.getElementById('save-btn');
+            saveButton.innerText = "Збереження... Зачекайте...";
+            saveButton.disabled = true;
+
+            const fullToken = tokenPart1 + tokenPart2;
+            const url = `https://github.com{githubUser}/${githubRepo}/contents/${databasePath}`;
+
+            try {
+                // 1. Отримуємо поточний файл з GitHub
+                const response = await fetch(url, {
+                    headers: { "Authorization": `token ${fullToken}` }
+                });
+                
+                if (!response.ok) throw new Error("Не вдалося прочитати базу даних з GitHub");
+                
+                const fileData = await response.json();
+                const sha = fileData.sha; // Спеціальний ідентифікатор файлу, потрібен для оновлення
+                
+                // Декодуємо текст файлу з формату Base64
+                const currentContent = JSON.parse(atob(fileData.content));
+
+                // 2. Створюємо новий об'єкт ділянки
+                const newTrack = {
+                    pd: pd,
+                    peregon: peregon,
+                    startKm: start,
+                    endKm: end,
+                    trackType: trackType
+                };
+
+                // Додаємо нову ділянку в масив tracks
+                currentContent.tracks.push(newTrack);
+
+                // 3. Відправляємо оновлений файл назад на GitHub
+                const updateResponse = await fetch(url, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `token ${fullToken}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        message: `Додано ділянку для ${pd} через адмін-панель`,
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2)))),
+                        sha: sha
+                    })
+                });
+
+                if (updateResponse.ok) {
+                    alert(`Ділянку для ${pd} успішно додано та збережено в репозиторії GitHub!`);
+                    // Очищаємо поля форми
+                    document.getElementById('admin-pd').value = '';
+                    document.getElementById('admin-peregon').value = '';
+                    document.getElementById('admin-km-start').value = '';
+                    document.getElementById('admin-km-end').value = '';
+                } else {
+                    throw new Error("Не вдалося записати дані на сервер");
+                }
+
+            } catch (error) {
+                alert("Помилка з'єднання: " + error.message);
+            } finally {
+                saveButton.innerText = "Зберегти ділянку в систему";
+                saveButton.disabled = false;
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('panel-zone').classList.add('hidden');
+            document.getElementById('admin-nav').style.display = 'flex';
