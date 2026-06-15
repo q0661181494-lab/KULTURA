@@ -4,75 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Контроль обкошування</title>
-    <script src="https://tailwindcss.com"></script>
+    <style>
+        /* Вбудовані стилі для гарантованого відображення дизайну */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
+        .container { w-index: 1; width: 100%; max-width: 450px; }
+        .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 16px; display: flex; gap: 4px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .nav-btn { flex: 1; padding: 10px 4px; text-align: center; border: none; background: none; font-weight: 640; font-size: 14px; color: #4b5563; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .nav-btn.active { background-color: #2563eb; color: white; }
+        .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
+        h2 { margin-top: 0; margin-bottom: 8px; font-size: 20px; color: #1f2937; }
+        p { color: #6b7280; font-size: 14px; margin-top: 0; margin-bottom: 16px; }
+        .info-box { padding: 12px; background-color: #fef08a; border: 1px solid #fde047; color: #854d0e; border-radius: 10px; font-size: 13px; line-height: 1.4; }
+        .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; }
+        .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
+        .btn-blue { background-color: #2563eb; color: white; }
+        .btn-dark { background-color: #1f2937; color: white; }
+        .error-msg { color: #dc2626; font-size: 13px; margin-top: -10px; margin-bottom: 10px; display: none; font-weight: 500; }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen flex flex-col items-center p-4">
+<body>
 
-    <!-- Навігаційне меню зверху (Кнопки перемикання екранів) -->
-    <div class="w-full max-w-md bg-white shadow-md rounded-xl p-2 mb-4 flex justify-between gap-1 text-xs sm:text-sm font-semibold">
-        <button id="btn-public" class="flex-1 py-2 px-1 text-center bg-blue-600 text-white rounded-lg transition">📊 Графіки</button>
-        <button id="btn-master" class="flex-1 py-2 px-1 text-center text-gray-600 hover:bg-gray-100 rounded-lg transition">🧑‍🔧 Майстер</button>
-        <button id="btn-admin" class="flex-1 py-2 px-1 text-center text-gray-600 hover:bg-gray-100 rounded-lg transition">⚙️ Адмін</button>
-    </div>
+    <div class="container">
+        <!-- Навігаційне меню зверху -->
+        <div class="nav-menu">
+            <button id="btn-public" class="nav-btn active">📊 Графіки</button>
+            <button id="btn-master" class="nav-btn">🧑‍🔧 Майстер</button>
+            <button id="btn-admin" class="nav-btn">⚙️ Адмін</button>
+        </div>
 
-    <!-- Контент додатка -->
-    <div class="w-full max-w-md">
-        
-        <!-- ЕКРАН 1: ПУБЛІЧНІ ГРАФІКИ -->
-        <div id="screen-public" class="bg-white p-6 rounded-2xl shadow-xl">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">📊 Лінійна діаграма обкошування</h2>
-            <p class="text-gray-500 text-sm mb-4">Тут будуть відкриті для всіх графіки колій по кілометрах.</p>
-            <div class="p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl text-xs">
-                Порада: Скоро ми виведемо сюди вибір околотків та покілометрові кубики-пікети.
+        <!-- Контент додатка -->
+        <div>
+            
+            <!-- ЕКРАН 1: ПУБЛІЧНІ ГРАФІКИ -->
+            <div id="screen-public" class="screen">
+                <h2>📊 Лінійна діаграма</h2>
+                <p>Тут будуть відкриті для всіх графіки залізничних колій по кілометрах.</p>
+                <div class="info-box">
+                    <strong>Порада:</strong> На наступному кроці ми виведемо сюди випадаючі списки для вибору околотку й перегону, та згенеруємо саму лінійну схему.
+                </div>
             </div>
-        </div>
 
-        <!-- ЕКРАН 2: ВХІД ДЛЯ МАЙСТРА (Захований за замовчуванням) -->
-        <div id="screen-master" class="bg-white p-6 rounded-2xl shadow-xl hidden">
-            <h2 class="text-xl font-bold text-gray-800 mb-2">🧑‍🔧 Кабінет шляхового майстра</h2>
-            <p class="text-gray-500 text-sm mb-4">Внесіть дані про виконане обкошування.</p>
-            <input type="password" placeholder="Введіть пароль вашого ПД" class="w-full p-3 border border-gray-300 rounded-xl mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">Увійти</button>
-        </div>
+            <!-- ЕКРАН 2: ВХІД ДЛЯ МАЙСТРА -->
+            <div id="screen-master" class="screen hidden">
+                <h2>🧑‍🔧 Вхід для ПД</h2>
+                <p>Внесіть дані про виконане обкошування на вашому околотку.</p>
+                <input type="password" id="master-pass" placeholder="Введіть пароль вашого околотку" class="input-field">
+                <div id="master-error" class="error-msg">Неправильний пароль!</div>
+                <button id="submit-master" class="submit-btn btn-blue">Увійти в кабінет</button>
+            </div>
 
-        <!-- ЕКРАН 3: ПАНЕЛЬ АДМІНІСТРАТОРА (Захована за замовчуванням) -->
-        <div id="screen-admin" class="bg-white p-6 rounded-2xl shadow-xl hidden">
-            <h2 class="text-xl font-bold text-gray-800 mb-2">⚙️ Панель адміністратора</h2>
-            <p class="text-gray-500 text-sm mb-4">Керування околотками, перегонами та паролями.</p>
-            <input type="password" placeholder="Введіть пароль адміністратора" class="w-full p-3 border border-gray-300 rounded-xl mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold hover:bg-gray-900 transition">Увійти</button>
-        </div>
+            <!-- ЕКРАН 3: ПАНЕЛЬ АДМІНІСТРАТОРА -->
+            <div id="screen-admin" class="screen hidden">
+                <h2>⚙️ Вхід для Адміна</h2>
+                <p>Додавання нових околотків, перегонів та керування паролями.</p>
+                <input type="password" id="admin-pass" placeholder="Введіть пароль адміністратора (1234)" class="input-field">
+                <div id="admin-error" class="error-msg">Неправильний пароль адміністратора!</div>
+                <button id="submit-admin" class="submit-btn btn-dark">Увійти в панель</button>
+            </div>
 
+        </div>
     </div>
 
-    <!-- Скрипт для перемикання екранів -->
     <script>
-        const btnPublic = document.getElementById('btn-public');
-        const btnMaster = document.getElementById('btn-master');
-        const btnAdmin = document.getElementById('btn-admin');
+        // Логіка перемикання меню
+        const buttons = {
+            public: document.getElementById('btn-public'),
+            master: document.getElementById('btn-master'),
+            admin: document.getElementById('btn-admin')
+        };
 
-        const scrPublic = document.getElementById('screen-public');
-        const scrMaster = document.getElementById('screen-master');
-        const scrAdmin = document.getElementById('screen-admin');
+        const screens = {
+            public: document.getElementById('screen-public'),
+            master: document.getElementById('screen-master'),
+            admin: document.getElementById('screen-admin')
+        };
 
-        function switchScreen(activeBtn, activeScr) {
-            // Скидаємо стилі всіх кнопок
-            [btnPublic, btnMaster, btnAdmin].forEach(b => {
-                b.classList.remove('bg-blue-600', 'text-white');
-                b.classList.add('text-gray-600');
+        function activeTab(tabName) {
+            Object.keys(buttons).forEach(key => {
+                buttons[key].classList.remove('active');
+                screens[key].classList.add('hidden');
             });
-            // Ховаємо всі екрани
-            [scrPublic, scrMaster, scrAdmin].forEach(s => s.classList.add('hidden'));
-
-            // Активуємо потрібну кнопку та екран
-            activeBtn.classList.add('bg-blue-600', 'text-white');
-            activeBtn.classList.remove('text-gray-600');
-            activeScr.classList.remove('hidden');
+            buttons[tabName].classList.add('active');
+            screens[tabName].classList.remove('hidden');
+            
+            // Скидаємо помилки при переході на вкладку
+            document.getElementById('admin-error').style.display = 'none';
+            document.getElementById('master-error').style.display = 'none';
         }
 
-        btnPublic.addEventListener('click', () => switchScreen(btnPublic, scrPublic));
-        btnMaster.addEventListener('click', () => switchScreen(btnMaster, scrMaster));
-        btnAdmin.addEventListener('click', () => switchScreen(btnAdmin, scrAdmin));
+        buttons.public.addEventListener('click', () => activeTab('public'));
+        buttons.master.addEventListener('click', () => activeTab('master'));
+        buttons.admin.addEventListener('click', () => activeTab('admin'));
+
+        // Перевірка пароля адміна (Тестовий пароль: 1234)
+        document.getElementById('submit-admin').addEventListener('click', () => {
+            const pass = document.getElementById('admin-pass').value;
+            const error = document.getElementById('admin-error');
+            if(pass === '1234') {
+                error.style.display = 'none';
+                alert('Чудово! Пароль вірний. Сюди ми додамо налаштування колій.');
+            } else {
+                error.style.display = 'block';
+            }
+        });
+
+        // Заглушка для пароля майстра
+        document.getElementById('submit-master').addEventListener('click', () => {
+            document.getElementById('master-error').style.display = 'block';
+        });
     </script>
 
 </body>
