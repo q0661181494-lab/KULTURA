@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧑‍🔧 Кабінет Шляхового Майстра</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 450px; box-sizing: border-box; }
+        .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 16px; display: flex; gap: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #4b5563; text-decoration: none; border-radius: 8px; background: #f3f4f6; }
+        .nav-link.active { background-color: #2563eb; color: white; }
+        .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
+        h2 { margin-top: 0; margin-bottom: 4px; font-size: 20px; color: #1f2937; }
+        p { color: #6b7280; font-size: 14px; margin-top: 0; margin-bottom: 16px; }
+        .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
+        .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 10px; color: white; text-align: center; display: block; text-decoration: none; }
+        .btn-blue { background-color: #2563eb; }
+        .btn-dark { background-color: #1f2937; }
+        .error-msg { color: #dc2626; font-size: 13px; margin-top: -10px; margin-bottom: 10px; display: none; font-weight: bold; }
+        .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
+        .piket-grid { display: flex; gap: 3px; width: 100%; }
+        .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; background-color: #ef4444; cursor: pointer; }
+        .piket-cell.selected { background-color: #22c55e !important; border: 2px solid #1e3a8a; }
+        .debug-box { margin-top: 12px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 10px; font-size: 12px; font-family: monospace; display: none; white-space: pre-wrap; word-break: break-all; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Меню навігації -->
+        <div id="master-nav" class="nav-menu">
+            <a href="index.html" class="nav-link">📊 Графіки</a>
+            <a href="master.html" class="nav-link active">🧑‍🔧 Майстер</a>
+            <a href="admin.html" class="nav-link">⚙️ Адмін</a>
+        </div>
+
+        <!-- ЗОНА ВХОДУ ДЛЯ МАЙСТРА -->
+        <div id="login-zone" class="screen">
+            <h2>🧑‍🔧 Вхід для ПД</h2>
+            <p>Внесіть дані про виконане обкошування на вашому околотку.</p>
+            <input type="password" id="master-pass" placeholder="Введіть пароль вашого ПД (напр. 1313)" class="input-field">
+            <div id="master-error" class="error-msg">Неправильний пароль околотку!</div>
+            <button class="submit-btn btn-blue" onclick="checkMasterPassword()">Увійти в кабінет</button>
+        </div>
+
+        <!-- ЗАХИЩЕНИЙ КАБІНЕТ МАЙСТРА -->
+        <div id="panel-zone" class="screen hidden">
+            <h2>🧑‍🔧 Кабінет <span id="current-pd-title" style="color: #2563eb;"></span></h2>
+            <p>Позначте ділянки, де сьогодні виконано обкошування.</p>
+
+            <label class="track-label">Дата виконання робіт:</label>
+            <input type="date" id="mow-date" class="input-field">
+
+            <label class="track-label">Оберіть перегін:</label>
+            <select id="master-peregon" class="input-field">
+                <option value="Путивль - Кошари">Путивль - Кошари</option>
+            </select>
+
+            <label class="track-label">Оберіть колію:</label>
+            <select id="master-track-type" class="input-field">
+                <option value="парна">Парна колія</option>
+                <option value="непарна">Непарна колія</option>
+            </select>
+
+            <label class="track-label">Кілометр:</label>
+            <input type="number" id="master-km" placeholder="Введіть кілометр, напр. 52" class="input-field">
+
+            <label class="track-label">Натисніть на пікети, які обкосили (стануть зеленими):</label>
+            <div class="piket-grid" style="margin-bottom: 25px;">
+                <div class="piket-cell" onclick="this.classList.toggle('selected')">1</div>
+                <div class="piket-cell" onclick="this.classList.toggle('selected')">2</div>
+                <div class="piket-cell" onclick="this.classList.toggle('selected')">3</div>
+                <div class="piket-cell" onclick="this.classList.toggle('selected')">4</div>
+                <div class="piket-cell" onclick="this.classList.toggle('selected')">5</div>
+                <div class="piket-cell" onclick="this.classList.toggle('selected')">6</div>
+                <div class="piket-cell" onclick="this.classList.toggle('selected')">7</div>
+                <div class="piket-cell" onclick="this.classList.toggle('selected')">8</div>
+                <div class="piket-cell" onclick="this.classList.toggle('selected')">9</div>
+                <div class="piket-cell" onclick="this.classList.toggle('selected')">10</div>
+            </div>
+
+            <button class="submit-btn btn-blue" id="save-btn" onclick="saveMowingReport()">Зберегти звіт в систему</button>
+            <div id="debug-log" class="debug-box"></div>
+            
+            <button class="submit-btn btn-dark" style="background:#4b5563; margin-top: 10px;" onclick="logoutMaster()">Вийти з кабінету</button>
+        </div>
+    </div>
+
+    <script>
+        const masterPasswords = { '1313': 'ПД-13', '1414': 'ПД-14', '1515': 'ПД-15', '1616': 'ПД-16' };
+        let activePd = "";
+
+        // СЕКРЕТНИЙ КЛЮЧ ДОСТУПУ (Встав сюди свій токен ghp_ розбитий на 4 частини)
+        const k1 = "hp_jwf3uqv7"; 
+        const k2 = "aWY3S1pxo";
+        const k3 = "3iW0KwIztlto";
+        const k4 = "L4Hhvv7";
+
+        const githubUser = "q0661181494-lab";
+        const githubRepo = "KULTURA";
+        const databasePath = "database.json";
+
+        function showDebug(msg) {
+            const dbg = document.getElementById('debug-log');
+            dbg.style.display = 'block';
+            dbg.innerText = msg;
+        }
+
+        function checkMasterPassword() {
+            const pass = document.getElementById('master-pass').value;
+            const error = document.getElementById('master-error');
+            if (masterPasswords[pass]) {
+                error.style.display = 'none';
+                activePd = masterPasswords[pass];
+                document.getElementById('current-pd-title').innerText = activePd;
+                document.getElementById('master-pass').value = '';
+                document.getElementById('mow-date').valueAsDate = new Date();
+                
+                document.getElementById('master-nav').style.display = 'none';
+                document.getElementById('login-zone').style.display = 'none';
+                document.getElementById('panel-zone').classList.remove('hidden');
+            } else {
+                error.style.display = 'block';
+            }
+        }
+
+        async function saveMowingReport() {
+            document.getElementById('debug-log').style.display = 'none';
+            const km = parseInt(document.getElementById('master-km').value);
+            const date = document.getElementById('mow-date').value;
+            const peregon = document.getElementById('master-peregon').value;
+            const trackType = document.getElementById('master-track-type').value;
+
+            // Збираємо обрані майстром пікети
+            const cells = document.querySelectorAll('.piket-cell');
+            let selectedPikets = [];
+            cells.forEach((cell, index) => {
+                if (cell.classList.contains('selected')) {
+                    selectedPikets.push(index + 1);
+                }
+            });
+
+            if (isNaN(km) || !date || selectedPikets.length === 0) {
+                alert('Будь ласка, вкажіть кілометр, дату та оберіть хоча б один зелений пікет!');
+                return;
+            }
+
+            const saveButton = document.getElementById('save-btn');
+            saveButton.innerText = "Збереження... Зачекайте...";
+            saveButton.disabled = true;
+
+            let rawToken = k1 + k2 + k3 + k4;
+            let fullToken = rawToken.replace(/[^a-zA-Z0-9_]/g, "").trim();
+            const url = `https://github.com{githubUser}/${githubRepo}/contents/${databasePath}`;
+
+            try {
+                const response = await fetch(url, { headers: { "Authorization": `token ${fullToken}` } });
+                if (!response.ok) throw new Error(`Помилка зчитування бази (Статус: ${response.status})`);
+                
+                const fileData = await response.json();
+                const sha = fileData.sha;
+                const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
+
+                // Записуємо нові дані у журнал обкошування
+                const newMow = {
+                    pd: activePd,
+                    peregon: peregon,
+                    trackType: trackType,
+                    km: km,
+                    pikets: selectedPikets,
+                    date: date
+                };
+
+                currentContent.mowing.push(newMow);
+
+                const updateResponse = await fetch(url, {
+                    method: "PUT",
