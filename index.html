@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Контроль обкошування (Виправлено v1.6)</title>
+    <title>Контроль обкошування (Захищено v1.7)</title>
     <style>
-        /* Чистий, автономний CSS без сторонніх інтернет-залежностей */
+        /* Автономний CSS, який працює на будь-яких мобільних пристроях */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; box-sizing: border-box; }
         
@@ -18,11 +18,11 @@
         .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); box-sizing: border-box; }
         .hidden { display: none !important; }
         
-        /* Текстові елементи */
+        /* Тексти */
         h2 { margin-top: 0; margin-bottom: 4px; font-size: 20px; color: #1f2937; }
         p { color: #6b7280; font-size: 14px; margin-top: 0; margin-bottom: 16px; }
         
-        /* Поля введення */
+        /* Компоненти форм вводу */
         .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
         .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 10px; color: white; }
         .btn-blue { background-color: #2563eb; }
@@ -36,7 +36,7 @@
         .track-row { margin-bottom: 12px; }
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
         
-        /* Сетка пікетів (Строго латиницею) */
+        /* Сітка кубиків-пікетів */
         .piket-grid { display: flex; gap: 3px; width: 100%; }
         .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.2); }
         
@@ -46,104 +46,20 @@
         .cell-yellow { background-color: #eab308; color: #1f2937; text-shadow: none; }
         .date-pop { font-size: 7px; font-weight: normal; opacity: 0.9; margin-top: 1px; }
 
-        /* Елементи майстра */
+        /* Натискання пікетів для майстра */
         .pik-clickable { cursor: pointer; transition: 0.1s; }
         .pik-clickable:active { transform: scale(0.9); }
         .pik-clickable.selected { background-color: #16a34a !important; border: 2px solid #1e3a8a; }
     </style>
-    
-    <script>
-        // Скрипт керування (Завантажується першим для надійності)
-        const masterPasswords = { '1313': 'ПД-13', '1414': 'ПД-14', '1515': 'ПД-15', '1616': 'ПД-16' };
-
-        function switchTab(tabName) {
-            const btnPublic = document.getElementById('btn-public');
-            const btnMaster = document.getElementById('btn-master');
-            const btnAdmin = document.getElementById('btn-admin');
-
-            const scrPublic = document.getElementById('screen-public');
-            const scrMasterLogin = document.getElementById('screen-master-login');
-            const scrMasterPanel = document.getElementById('screen-master-panel');
-            const scrAdminLogin = document.getElementById('screen-admin-login');
-            const scrAdminPanel = document.getElementById('screen-admin-panel');
-            const mainNav = document.getElementById('main-nav');
-
-            // Скидаємо всі класи активності
-            btnPublic.className = 'nav-btn';
-            btnMaster.className = 'nav-btn';
-            btnAdmin.className = 'nav-btn';
-
-            // Ховаємо всі вікна
-            scrPublic.className = 'screen hidden';
-            scrMasterLogin.className = 'screen hidden';
-            scrMasterPanel.className = 'screen hidden';
-            scrAdminLogin.className = 'screen hidden';
-            scrAdminPanel.className = 'screen hidden';
-            mainNav.className = 'nav-menu';
-
-            // Відкриваємо потрібну вкладку
-            if (tabName === 'public') {
-                btnPublic.className = 'nav-btn active';
-                scrPublic.className = 'screen';
-            } else if (tabName === 'master') {
-                btnMaster.className = 'nav-btn active';
-                scrMasterLogin.className = 'screen';
-                document.getElementById('master-error').style.display = 'none';
-            } else if (tabName === 'admin') {
-                btnAdmin.className = 'nav-btn active';
-                scrAdminLogin.className = 'screen';
-                document.getElementById('admin-error').style.display = 'none';
-            }
-        }
-
-        function loginMaster() {
-            const pass = document.getElementById('master-pass').value;
-            const error = document.getElementById('master-error');
-            if (masterPasswords[pass]) {
-                error.style.display = 'none';
-                document.getElementById('current-pd-title').innerText = masterPasswords[pass];
-                document.getElementById('master-pass').value = '';
-                document.getElementById('mow-date').valueAsDate = new Date();
-                
-                document.getElementById('main-nav').className = 'nav-menu hidden';
-                document.getElementById('screen-master-login').className = 'screen hidden';
-                document.getElementById('screen-master-panel').className = 'screen';
-            } else {
-                error.style.display = 'block';
-            }
-        }
-
-        function loginAdmin() {
-            const pass = document.getElementById('admin-pass').value;
-            const error = document.getElementById('admin-error');
-            if (pass === '1234') {
-                error.style.display = 'none';
-                document.getElementById('admin-pass').value = '';
-                document.getElementById('main-nav').className = 'nav-menu hidden';
-                document.getElementById('screen-admin-login').className = 'screen hidden';
-                document.getElementById('screen-admin-panel').className = 'screen';
-            } else {
-                error.style.display = 'block';
-            }
-        }
-
-        function togglePiketCell(element) {
-            if (element.className.indexOf('selected') !== -1) {
-                element.className = 'piket-cell cell-red pik-clickable';
-            } else {
-                element.className = 'piket-cell cell-red pik-clickable selected';
-            }
-        }
-    </script>
 </head>
 <body>
 
     <div class="container">
-        <!-- Головне меню навігації -->
+        <!-- Меню навігації -->
         <div id="main-nav" class="nav-menu">
-            <button id="btn-public" class="nav-btn active" onclick="switchTab('public')">📊 Графіки</button>
-            <button id="btn-master" class="nav-btn" onclick="switchTab('master')">🧑‍🔧 Майстер</button>
-            <button id="btn-admin" class="nav-btn" onclick="switchTab('admin')">⚙️ Адмін</button>
+            <button id="btn-public" class="nav-btn active">📊 Графіки</button>
+            <button id="btn-master" class="nav-btn">🧑‍🔧 Майстер</button>
+            <button id="btn-admin" class="nav-btn">⚙️ Адмін</button>
         </div>
 
         <!-- Контент додатку -->
@@ -174,7 +90,7 @@
                         <span class="track-label">Парна колія:</span>
                         <div class="piket-grid">
                             <div class="piket-cell cell-green">1<span class="date-pop">12.06</span></div>
-                            <div class="piket-cell cell-green">2<span class="date-pop">12.06</span></div>
+                            <div class="pिकेट-cell cell-green">2<span class="date-pop">12.06</span></div>
                             <div class="piket-cell cell-green">3<span class="date-pop">12.06</span></div>
                             <div class="piket-cell cell-red">4</div>
                             <div class="piket-cell cell-red">5</div>
@@ -182,3 +98,74 @@
                             <div class="piket-cell cell-yellow">7<span class="date-pop">01.05</span></div>
                             <div class="piket-cell cell-red">8</div>
                             <div class="piket-cell cell-red">9</div>
+                            <div class="piket-cell cell-red">10</div>
+                        </div>
+                    </div>
+                    <div class="track-row">
+                        <span class="track-label">Непарна колія:</span>
+                        <div class="piket-grid">
+                            <div class="piket-cell cell-red">1</div>
+                            <div class="piket-cell cell-red">2</div>
+                            <div class="piket-cell cell-green">3<span class="date-pop">15.06</span></div>
+                            <div class="piket-cell cell-green">4<span class="date-pop">15.06</span></div>
+                            <div class="piket-cell cell-red">5</div>
+                            <div class="piket-cell cell-red">6</div>
+                            <div class="piket-cell cell-red">7</div>
+                            <div class="piket-cell cell-red">8</div>
+                            <div class="piket-cell cell-red">9</div>
+                            <div class="piket-cell cell-red">10</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ЕКРАН 2: ВХІД ДЛЯ МАЙСТРІВ -->
+            <div id="screen-master-login" class="screen hidden">
+                <h2>🧑‍🔧 Вхід для ПД</h2>
+                <p>Внесіть дані про виконане обкошування.</p>
+                <input type="password" id="master-pass" placeholder="Введіть пароль вашого ПД (напр. 1313)" class="input-field">
+                <div id="master-error" class="error-msg">Неправильний пароль околотку!</div>
+                <button class="submit-btn btn-blue" id="submit-master">Увійти в кабінет</button>
+            </div>
+
+            <!-- ЕКРАН 2Б: ВНУТРІШНІЙ КАБІНЕТ МАЙСТРА -->
+            <div id="screen-master-panel" class="screen hidden">
+                <h2>🧑‍🔧 Кабінет <span id="current-pd-title" style="color: #2563eb;"></span></h2>
+                <p>Позначте ділянки, де сьогодні виконано обкошування.</p>
+
+                <label class="track-label">Дата виконання:</label>
+                <input type="date" id="mow-date" class="input-field">
+
+                <label class="track-label">Оберіть перегін:</label>
+                <select class="input-field">
+                    <option value="1">Перегін А — Б</option>
+                </select>
+
+                <label class="track-label">Оберіть колію:</label>
+                <select class="input-field">
+                    <option value="парна">Парна колія</option>
+                    <option value="непарна">Непарна колія</option>
+                </select>
+
+                <label class="track-label">Кілометр:</label>
+                <input type="number" id="master-km" placeholder="Введіть кілометр, напр. 125" class="input-field">
+
+                <label class="track-label">Натисніть на пікети, які обкосили:</label>
+                <div class="piket-grid" style="margin-bottom: 20px;" id="piket-picker-container">
+                    <div class="piket-cell cell-red pik-clickable">1</div>
+                    <div class="piket-cell cell-red pik-clickable">2</div>
+                    <div class="piket-cell cell-red pik-clickable">3</div>
+                    <div class="piket-cell cell-red pik-clickable">4</div>
+                    <div class="piket-cell cell-red pik-clickable">5</div>
+                    <div class="piket-cell cell-red pik-clickable">6</div>
+                    <div class="piket-cell cell-red pik-clickable">7</div>
+                    <div class="piket-cell cell-red pik-clickable">8</div>
+                    <div class="piket-cell cell-red pik-clickable">9</div>
+                    <div class="piket-cell cell-red pik-clickable">10</div>
+                </div>
+
+                <button class="submit-btn btn-blue" id="btn-save-report">Зберегти звіт</button>
+                <button class="submit-btn btn-dark" style="background:#4b5563;" id="logout-master">Вийти з кабінету</button>
+            </div>
+
+            <!-- ЕКРАН 3: ВХІД ДЛЯ АДМІНІСТРАТОРА -->
