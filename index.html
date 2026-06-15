@@ -81,12 +81,11 @@
     </div>
 
     <script>
-        // ТУТ ПОВИНЕН БУТИ СУТЬ ТВІЙ ЦИФРОВО-ЛАТИНСЬКИЙ КЛЮЧ ghp_...
-        // Дуже важливо: видали слова "ЧАСТИНА" і встав туди шматочки справжнього ключа!
-        const k1 = "ghp_jwf3uqv7"; 
-        const k2 = "aWY3S1pxo";
-        const k3 = "3iW0KwIztlto";
-        const k4 = "L4Hhvv7";
+        // ВСТАВ СЮДИ СВІЙ КЛЮЧ ДОСТУПУ ghp_... РОЗБИТИЙ НА 4 ЧАСТИНИ
+        const k1 = "ghp_ЗАМІНИ_НА_СВОЄ"; 
+        const k2 = "ЗАМІНИ_НА_СВОЄ";
+        const k3 = "ЗАМІНИ_НА_СВОЄ";
+        const k4 = "ЗАМІНИ_НА_СВОЄ";
 
         const githubUser = "q0661181494-lab";
         const githubRepo = "KULTURA";
@@ -131,7 +130,7 @@
             saveButton.innerText = "Збереження... Зачекайте...";
             saveButton.disabled = true;
 
-            // ІНЖЕНЕРНИЙ ЗАХИСТ: Автоматично очищаємо ключ від українських літер та пробілів
+            // Очищення ключа від пробілів та зайвих символів
             let rawToken = k1 + k2 + k3 + k4;
             let fullToken = rawToken.replace(/[^a-zA-Z0-9_]/g, "").trim();
 
@@ -143,7 +142,7 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Сервер відхилив токен (Статус: ${response.status}). Перевірте, чи правильно ви ввели ключ ghp_ у коді!`);
+                    throw new Error(`Сервер відхилив токен (Статус: ${response.status}). Перевірте правильність ключа у коді!`);
                 }
                 
                 const fileData = await response.json();
@@ -185,3 +184,6 @@
                 }
 
             } catch (error) {
+                showDebug("🚨 ДІАГНОСТИКА СЕРВЕРА:\n" + error.message);
+            } finally {
+                saveButton.innerText = "Зберегти ділянку в систему";
