@@ -15,9 +15,10 @@
         h2 { margin-top: 0; margin-bottom: 4px; font-size: 20px; color: #1f2937; }
         p { color: #6b7280; font-size: 14px; margin-top: 0; margin-bottom: 16px; }
         .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
-        .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
+        .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
         .btn-blue { background-color: #2563eb; color: white; }
         .btn-dark { background-color: #1f2937; color: white; }
+        .btn-red { background-color: #ef4444; color: white; }
         .error-msg { color: #dc2626; font-size: 13px; margin-top: -10px; margin-bottom: 10px; display: none; font-weight: 500; }
         
         /* Стилі для лінійної діаграми колій */
@@ -27,10 +28,10 @@
         .track-row:last-child { margin-bottom: 0; }
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; }
         .pिकेट-grid { display: flex; gap: 3px; width: 100%; }
-        .pिकेट-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; position: relative; cursor: pointer; }
-        .cell-red { background-color: #ef4444; } /* Не обкошено */
-        .cell-green { background-color: #22c55e; } /* Обкошено */
-        .cell-yellow { background-color: #eab308; color: #1f2937; } /* Застаріло */
+        .pिकेट-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; position: relative; }
+        .cell-red { background-color: #ef4444; }
+        .cell-green { background-color: #22c55e; }
+        .cell-yellow { background-color: #eab308; color: #1f2937; }
         .date-pop { font-size: 7px; font-weight: normal; opacity: 0.9; margin-top: 1px; }
     </style>
 </head>
@@ -38,7 +39,7 @@
 
     <div class="container">
         <!-- Навігаційне меню зверху -->
-        <div class="nav-menu">
+        <div id="main-nav" class="nav-menu">
             <button id="btn-public" class="nav-btn active">📊 Графіки</button>
             <button id="btn-master" class="nav-btn">🧑‍🔧 Майстер</button>
             <button id="btn-admin" class="nav-btn">⚙️ Адмін</button>
@@ -52,7 +53,6 @@
                 <h2>📊 Лінійна діаграма</h2>
                 <p>Оберіть ділянку для перегляду стану обкошування.</p>
                 
-                <!-- Вибір околотку -->
                 <label class="track-label">Околоток:</label>
                 <select class="input-field">
                     <option value="">-- Оберіть околоток --</option>
@@ -62,22 +62,18 @@
                     <option value="pd16">ПД-16</option>
                 </select>
 
-                <!-- Вибір перегону -->
                 <label class="track-label">Перегін:</label>
                 <select class="input-field">
                     <option value="">-- Оберіть перегін --</option>
                     <option value="1">Перегін А — Б</option>
                 </select>
 
-                <!-- ЗРАЗОК ВІЗУАЛІЗАЦІЇ КОЛІЇ (125 КІЛОМЕТР) -->
+                <!-- ЗРАЗОК ВІЗУАЛІЗАЦІЇ КОЛІЇ -->
                 <div class="km-block">
                     <div class="km-title">125 кілометр</div>
-                    
-                    <!-- Парна колія -->
                     <div class="track-row">
                         <div class="track-label">Парна колія:</div>
                         <div class="pिकेट-grid">
-                            <!-- Кубики пікетів з 1 по 10 -->
                             <div class="pिकेट-cell cell-green">1<span class="date-pop">12.06</span></div>
                             <div class="pिकेट-cell cell-green">2<span class="date-pop">12.06</span></div>
                             <div class="pिकेट-cell cell-green">3<span class="date-pop">12.06</span></div>
@@ -90,8 +86,6 @@
                             <div class="pिकेट-cell cell-red">10</div>
                         </div>
                     </div>
-
-                    <!-- Непарна колія -->
                     <div class="track-row">
                         <div class="track-label">Непарна колія:</div>
                         <div class="pिकेट-grid">
@@ -108,7 +102,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <!-- ЕКРАН 2: ВХІД ДЛЯ МАЙСТРА -->
@@ -120,13 +113,45 @@
                 <button id="submit-master" class="submit-btn btn-blue">Увійти в кабінет</button>
             </div>
 
-            <!-- ЕКРАН 3: ПАНЕЛЬ АДМІНІСТРАТОРА -->
-            <div id="screen-admin" class="screen hidden">
+            <!-- ЕКРАН 3: ФОРМА АВТОРИЗАЦІЇ АДМІНІСТРАТОРА -->
+            <div id="screen-admin-login" class="screen hidden">
                 <h2>⚙️ Вхід для Адміна</h2>
-                <p>Додавання нових околотків, перегонів та керування паролями.</p>
-                <input type="password" id="admin-pass" placeholder="Введіть пароль адміністратора (1234)" class="input-field">
+                <p>Введіть пароль адміністратора для керування додатком.</p>
+                <input type="password" id="admin-pass" placeholder="Пароль за замовчуванням: 1234" class="input-field">
                 <div id="admin-error" class="error-msg">Неправильний пароль адміністратора!</div>
                 <button id="submit-admin" class="submit-btn btn-dark">Увійти в панель</button>
+            </div>
+
+            <!-- ЕКРАН 4: ВНУТРІШНЯ ПАНЕЛЬ КЕРУВАННЯ АДМІНІСТРАТОРА (ЗАХИЩЕНА) -->
+            <div id="screen-admin-panel" class="screen hidden">
+                <h2>🛠️ Панель Керування</h2>
+                <p class="text-xs">Ви увійшли як Адміністратор.</p>
+                
+                <div class="km-block" style="background: #eff6ff; border-color: #bfdbfe;">
+                    <div class="km-title" style="font-size:14px; text-align:left;">➕ Додати нову ділянку колії</div>
+                    
+                    <label class="track-label">Назва околотку (напр. ПД-13):</label>
+                    <input type="text" placeholder="ПД-17" class="input-field" style="margin-bottom:8px; padding:8px;">
+                    
+                    <label class="track-label">Назва перегону:</label>
+                    <input type="text" placeholder="А — Б" class="input-field" style="margin-bottom:8px; padding:8px;">
+                    
+                    <label class="track-label">Початковий кілометр:</label>
+                    <input type="number" placeholder="10" class="input-field" style="margin-bottom:8px; padding:8px;">
+                    
+                    <label class="track-label">Кінцевий кілометр:</label>
+                    <input type="number" placeholder="20" class="input-field" style="margin-bottom:8px; padding:8px;">
+
+                    <label class="track-label">Колія:</label>
+                    <select class="input-field" style="margin-bottom:12px; padding:8px;">
+                        <option value="парна">Парна</option>
+                        <option value="непарна">Непарна</option>
+                    </select>
+                    
+                    <button class="submit-btn btn-blue" style="padding:10px; font-size:13px;">Зберегти ділянку</button>
+                </div>
+
+                <button id="logout-admin" class="submit-btn btn-red" style="margin-top:16px; padding:10px;">🔴 Вийти з панелі</button>
             </div>
 
         </div>
@@ -140,41 +165,3 @@
         };
 
         const screens = {
-            public: document.getElementById('screen-public'),
-            master: document.getElementById('screen-master'),
-            admin: document.getElementById('screen-admin')
-        };
-
-        function activeTab(tabName) {
-            Object.keys(buttons).forEach(key => {
-                buttons[key].classList.remove('active');
-                screens[key].classList.add('hidden');
-            });
-            buttons[tabName].classList.add('active');
-            screens[tabName].classList.remove('hidden');
-            document.getElementById('admin-error').style.display = 'none';
-            document.getElementById('master-error').style.display = 'none';
-        }
-
-        buttons.public.addEventListener('click', () => activeTab('public'));
-        buttons.master.addEventListener('click', () => activeTab('master'));
-        buttons.admin.addEventListener('click', () => activeTab('admin'));
-
-        document.getElementById('submit-admin').addEventListener('click', () => {
-            const pass = document.getElementById('admin-pass').value;
-            const error = document.getElementById('admin-error');
-            if(pass === '1234') {
-                error.style.display = 'none';
-                alert('Чудово! Пароль вірний. Сюди ми додамо налаштування колій.');
-            } else {
-                error.style.display = 'block';
-            }
-        });
-
-        document.getElementById('submit-master').addEventListener('click', () => {
-            document.getElementById('master-error').style.display = 'block';
-        });
-    </script>
-
-</body>
-</html>
