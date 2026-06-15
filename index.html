@@ -5,22 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Контроль обкошування</title>
     <style>
-        /* Вбудовані стилі для гарантованого відображення дизайну */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
-        .container { w-index: 1; width: 100%; max-width: 450px; }
+        .container { width: 100%; max-width: 450px; }
         .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 16px; display: flex; gap: 4px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .nav-btn { flex: 1; padding: 10px 4px; text-align: center; border: none; background: none; font-weight: 640; font-size: 14px; color: #4b5563; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .nav-btn { flex: 1; padding: 10px 4px; text-align: center; border: none; background: none; font-weight: 600; font-size: 14px; color: #4b5563; cursor: pointer; border-radius: 8px; transition: 0.2s; }
         .nav-btn.active { background-color: #2563eb; color: white; }
         .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
-        h2 { margin-top: 0; margin-bottom: 8px; font-size: 20px; color: #1f2937; }
+        h2 { margin-top: 0; margin-bottom: 4px; font-size: 20px; color: #1f2937; }
         p { color: #6b7280; font-size: 14px; margin-top: 0; margin-bottom: 16px; }
-        .info-box { padding: 12px; background-color: #fef08a; border: 1px solid #fde047; color: #854d0e; border-radius: 10px; font-size: 13px; line-height: 1.4; }
-        .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; }
+        .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
         .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
         .btn-blue { background-color: #2563eb; color: white; }
         .btn-dark { background-color: #1f2937; color: white; }
         .error-msg { color: #dc2626; font-size: 13px; margin-top: -10px; margin-bottom: 10px; display: none; font-weight: 500; }
+        
+        /* Стилі для лінійної діаграми колій */
+        .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
+        .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 8px; text-align: center; }
+        .track-row { margin-bottom: 12px; }
+        .track-row:last-child { margin-bottom: 0; }
+        .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; }
+        .pिकेट-grid { display: flex; gap: 3px; width: 100%; }
+        .pिकेट-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; position: relative; cursor: pointer; }
+        .cell-red { background-color: #ef4444; } /* Не обкошено */
+        .cell-green { background-color: #22c55e; } /* Обкошено */
+        .cell-yellow { background-color: #eab308; color: #1f2937; } /* Застаріло */
+        .date-pop { font-size: 7px; font-weight: normal; opacity: 0.9; margin-top: 1px; }
     </style>
 </head>
 <body>
@@ -39,10 +50,65 @@
             <!-- ЕКРАН 1: ПУБЛІЧНІ ГРАФІКИ -->
             <div id="screen-public" class="screen">
                 <h2>📊 Лінійна діаграма</h2>
-                <p>Тут будуть відкриті для всіх графіки залізничних колій по кілометрах.</p>
-                <div class="info-box">
-                    <strong>Порада:</strong> На наступному кроці ми виведемо сюди випадаючі списки для вибору околотку й перегону, та згенеруємо саму лінійну схему.
+                <p>Оберіть ділянку для перегляду стану обкошування.</p>
+                
+                <!-- Вибір околотку -->
+                <label class="track-label">Околоток:</label>
+                <select class="input-field">
+                    <option value="">-- Оберіть околоток --</option>
+                    <option value="pd13">ПД-13</option>
+                    <option value="pd14">ПД-14</option>
+                    <option value="pd15">ПД-15</option>
+                    <option value="pd16">ПД-16</option>
+                </select>
+
+                <!-- Вибір перегону -->
+                <label class="track-label">Перегін:</label>
+                <select class="input-field">
+                    <option value="">-- Оберіть перегін --</option>
+                    <option value="1">Перегін А — Б</option>
+                </select>
+
+                <!-- ЗРАЗОК ВІЗУАЛІЗАЦІЇ КОЛІЇ (125 КІЛОМЕТР) -->
+                <div class="km-block">
+                    <div class="km-title">125 кілометр</div>
+                    
+                    <!-- Парна колія -->
+                    <div class="track-row">
+                        <div class="track-label">Парна колія:</div>
+                        <div class="pिकेट-grid">
+                            <!-- Кубики пікетів з 1 по 10 -->
+                            <div class="pिकेट-cell cell-green">1<span class="date-pop">12.06</span></div>
+                            <div class="pिकेट-cell cell-green">2<span class="date-pop">12.06</span></div>
+                            <div class="pिकेट-cell cell-green">3<span class="date-pop">12.06</span></div>
+                            <div class="pिकेट-cell cell-red">4</div>
+                            <div class="pिकेट-cell cell-red">5</div>
+                            <div class="pिकेट-cell cell-red">6</div>
+                            <div class="pिकेट-cell cell-yellow">7<span class="date-pop">01.05</span></div>
+                            <div class="pिकेट-cell cell-red">8</div>
+                            <div class="pिकेट-cell cell-red">9</div>
+                            <div class="pिकेट-cell cell-red">10</div>
+                        </div>
+                    </div>
+
+                    <!-- Непарна колія -->
+                    <div class="track-row">
+                        <div class="track-label">Непарна колія:</div>
+                        <div class="pिकेट-grid">
+                            <div class="pिकेट-cell cell-red">1</div>
+                            <div class="pिकेट-cell cell-red">2</div>
+                            <div class="pिकेट-cell cell-green">3<span class="date-pop">15.06</span></div>
+                            <div class="pिकेट-cell cell-green">4<span class="date-pop">15.06</span></div>
+                            <div class="pिकेट-cell cell-red">5</div>
+                            <div class="pिकेट-cell cell-red">6</div>
+                            <div class="pिकेट-cell cell-red">7</div>
+                            <div class="pिकेट-cell cell-red">8</div>
+                            <div class="pिकेट-cell cell-red">9</div>
+                            <div class="pिकेट-cell cell-red">10</div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
 
             <!-- ЕКРАН 2: ВХІД ДЛЯ МАЙСТРА -->
@@ -67,7 +133,6 @@
     </div>
 
     <script>
-        // Логіка перемикання меню
         const buttons = {
             public: document.getElementById('btn-public'),
             master: document.getElementById('btn-master'),
@@ -87,8 +152,6 @@
             });
             buttons[tabName].classList.add('active');
             screens[tabName].classList.remove('hidden');
-            
-            // Скидаємо помилки при переході на вкладку
             document.getElementById('admin-error').style.display = 'none';
             document.getElementById('master-error').style.display = 'none';
         }
@@ -97,7 +160,6 @@
         buttons.master.addEventListener('click', () => activeTab('master'));
         buttons.admin.addEventListener('click', () => activeTab('admin'));
 
-        // Перевірка пароля адміна (Тестовий пароль: 1234)
         document.getElementById('submit-admin').addEventListener('click', () => {
             const pass = document.getElementById('admin-pass').value;
             const error = document.getElementById('admin-error');
@@ -109,7 +171,6 @@
             }
         });
 
-        // Заглушка для пароля майстра
         document.getElementById('submit-master').addEventListener('click', () => {
             document.getElementById('master-error').style.display = 'block';
         });
