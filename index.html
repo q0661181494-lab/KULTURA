@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Контроль обкошування</title>
+    <title>Контроль обкошування (v1.2)</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; }
@@ -21,7 +21,7 @@
         .btn-red { background-color: #ef4444; color: white; }
         .error-msg { color: #dc2626; font-size: 13px; margin-top: -10px; margin-bottom: 10px; display: none; font-weight: 500; }
         
-        /* Стилі для лінійної діаграми колій */
+        /* Стили линейной диаграммы и сетки пикетов */
         .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
         .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 8px; text-align: center; }
         .track-row { margin-bottom: 12px; }
@@ -33,22 +33,26 @@
         .cell-green { background-color: #22c55e; }
         .cell-yellow { background-color: #eab308; color: #1f2937; }
         .date-pop { font-size: 7px; font-weight: normal; opacity: 0.9; margin-top: 1px; }
+
+        /* Кнопки пикетов для нажатия мастером */
+        .pik-clickable { cursor: pointer; border: 2px solid transparent; }
+        .pik-clickable.selected { border-color: #1e3a8a; background-color: #16a34a !important; box-shadow: inset 0 0 4px rgba(0,0,0,0.4); }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Навігаційне меню зверху -->
+        <!-- Главное навигационное меню -->
         <div id="main-nav" class="nav-menu">
             <button id="btn-public" class="nav-btn active">📊 Графіки</button>
             <button id="btn-master" class="nav-btn">🧑‍🔧 Майстер</button>
             <button id="btn-admin" class="nav-btn">⚙️ Адмін</button>
         </div>
 
-        <!-- Контент додатка -->
+        <!-- Контент приложения -->
         <div>
             
-            <!-- ЕКРАН 1: ПУБЛІЧНІ ГРАФІКИ -->
+            <!-- ЭКРАН 1: ПУБЛИЧНЫЕ ГРАФИКИ (ОТКРЫТЫ ДЛЯ ВСЕХ) -->
             <div id="screen-public" class="screen">
                 <h2>📊 Лінійна діаграма</h2>
                 <p>Оберіть ділянку для перегляду стану обкошування.</p>
@@ -68,7 +72,7 @@
                     <option value="1">Перегін А — Б</option>
                 </select>
 
-                <!-- ЗРАЗОК ВІЗУАЛІЗАЦІЇ КОЛІЇ -->
+                <!-- ДЕМО КИЛОМЕТР ДЛЯ ГРАФИКИ -->
                 <div class="km-block">
                     <div class="km-title">125 кілометр</div>
                     <div class="track-row">
@@ -104,64 +108,50 @@
                 </div>
             </div>
 
-            <!-- ЕКРАН 2: ВХІД ДЛЯ МАЙСТРА -->
-            <div id="screen-master" class="screen hidden">
+            <!-- ЭКРАН 2: ФОРМА ВХОДА ДЛЯ МАСТЕРОВ -->
+            <div id="screen-master-login" class="screen hidden">
                 <h2>🧑‍🔧 Вхід для ПД</h2>
                 <p>Внесіть дані про виконане обкошування на вашому околотку.</p>
-                <input type="password" id="master-pass" placeholder="Введіть пароль вашого околотку" class="input-field">
-                <div id="master-error" class="error-msg">Неправильний пароль!</div>
+                <input type="password" id="master-pass" placeholder="Введіть пароль вашого ПД (напр. 1313)" class="input-field">
+                <div id="master-error" class="error-msg">Неправильний пароль околотку!</div>
                 <button id="submit-master" class="submit-btn btn-blue">Увійти в кабінет</button>
             </div>
 
-            <!-- ЕКРАН 3: ФОРМА АВТОРИЗАЦІЇ АДМІНІСТРАТОРА -->
-            <div id="screen-admin-login" class="screen hidden">
-                <h2>⚙️ Вхід для Адміна</h2>
-                <p>Введіть пароль адміністратора для керування додатком.</p>
-                <input type="password" id="admin-pass" placeholder="Пароль за замовчуванням: 1234" class="input-field">
-                <div id="admin-error" class="error-msg">Неправильний пароль адміністратора!</div>
-                <button id="submit-admin" class="submit-btn btn-dark">Увійти в панель</button>
-            </div>
+            <!-- ЭКРАН 2Б: ВНУТРЕННИЙ КАБИНЕТ МАСТЕРА (ЗАЩИЩЕННЫЙ) -->
+            <div id="screen-master-panel" class="screen hidden">
+                <h2>🧑‍🔧 Кабінет <span id="current-pd-title" class="text-blue-600"></span></h2>
+                <p>Позначте ділянки, де сьогодні було виконано обкошування.</p>
 
-            <!-- ЕКРАН 4: ВНУТРІШНЯ ПАНЕЛЬ КЕРУВАННЯ АДМІНІСТРАТОРА (ЗАХИЩЕНА) -->
-            <div id="screen-admin-panel" class="screen hidden">
-                <h2>🛠️ Панель Керування</h2>
-                <p class="text-xs">Ви увійшли як Адміністратор.</p>
-                
-                <div class="km-block" style="background: #eff6ff; border-color: #bfdbfe;">
-                    <div class="km-title" style="font-size:14px; text-align:left;">➕ Додати нову ділянку колії</div>
-                    
-                    <label class="track-label">Назва околотку (напр. ПД-13):</label>
-                    <input type="text" placeholder="ПД-17" class="input-field" style="margin-bottom:8px; padding:8px;">
-                    
-                    <label class="track-label">Назва перегону:</label>
-                    <input type="text" placeholder="А — Б" class="input-field" style="margin-bottom:8px; padding:8px;">
-                    
-                    <label class="track-label">Початковий кілометр:</label>
-                    <input type="number" placeholder="10" class="input-field" style="margin-bottom:8px; padding:8px;">
-                    
-                    <label class="track-label">Кінцевий кілометр:</label>
-                    <input type="number" placeholder="20" class="input-field" style="margin-bottom:8px; padding:8px;">
+                <label class="track-label">Дата виконання:</label>
+                <input type="date" id="mow-date" class="input-field">
 
-                    <label class="track-label">Колія:</label>
-                    <select class="input-field" style="margin-bottom:12px; padding:8px;">
-                        <option value="парна">Парна</option>
-                        <option value="непарна">Непарна</option>
-                    </select>
-                    
-                    <button class="submit-btn btn-blue" style="padding:10px; font-size:13px;">Зберегти ділянку</button>
+                <label class="track-label">Оберіть перегін:</label>
+                <select class="input-field">
+                    <option value="1">Перегін А — Б</option>
+                </select>
+
+                <label class="track-label">Оберіть колію:</label>
+                <select class="input-field">
+                    <option value="парна">Парна колія</option>
+                    <option value="непарна">Непарна колія</option>
+                </select>
+
+                <label class="track-label">Кілометр:</label>
+                <input type="number" placeholder="Введіть кілометр, напр. 125" class="input-field">
+
+                <!-- ИНТЕРФЕЙС ВЫБОРА ПИКЕТОВ ДЛЯ МАСТЕРА -->
+                <label class="track-label">Натисніть на пікети, які обкосили:</label>
+                <div class="pिकेट-grid" style="margin-bottom: 20px;">
+                    <div class="pिकेट-cell cell-red pik-clickable" onclick="togglePiket(this)">1</div>
+                    <div class="pिकेट-cell cell-red pik-clickable" onclick="togglePiket(this)">2</div>
+                    <div class="pिकेट-cell cell-red pik-clickable" onclick="togglePiket(this)">3</div>
+                    <div class="pिकेट-cell cell-red pik-clickable" onclick="togglePiket(this)">4</div>
+                    <div class="pिकेट-cell cell-red pik-clickable" onclick="togglePiket(this)">5</div>
+                    <div class="pिकेट-cell cell-red pik-clickable" onclick="togglePiket(this)">6</div>
+                    <div class="pिकेट-cell cell-red pik-clickable" onclick="togglePiket(this)">7</div>
+                    <div class="pिकेट-cell cell-red pik-clickable" onclick="togglePiket(this)">8</div>
+                    <div class="pिकेट-cell cell-red pik-clickable" onclick="togglePiket(this)">9</div>
+                    <div class="pिकेट-cell cell-red pik-clickable" onclick="togglePiket(this)">10</div>
                 </div>
 
-                <button id="logout-admin" class="submit-btn btn-red" style="margin-top:16px; padding:10px;">🔴 Вийти з панелі</button>
-            </div>
-
-        </div>
-    </div>
-
-    <script>
-        const buttons = {
-            public: document.getElementById('btn-public'),
-            master: document.getElementById('btn-master'),
-            admin: document.getElementById('btn-admin')
-        };
-
-        const screens = {
+                <button class="submit-btn btn-blue" onclick="alert('Дані збережено локально! На наступному етапі підключимо базу.')">Зберегти звіт</button>
