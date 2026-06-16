@@ -31,7 +31,6 @@
 <body>
 
     <div class="container">
-        <!-- Меню навігації -->
         <div class="nav-menu">
             <a href="index.html" class="nav-link active">📊 Графіки</a>
             <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
@@ -40,7 +39,7 @@
 
         <div class="screen">
             <h2>📊 Лінійна діаграма</h2>
-            <p>Оберіть ділянку для перегляду стану обкошування робіт.</p>
+            <p>Оберіть ділянку для перегляду стану робіт.</p>
             
             <label class="track-label">Околоток:</label>
             <select id="select-pd" class="input-field" onchange="updatePeregonList()">
@@ -60,44 +59,36 @@
 
     <script>
         const supabaseUrl = "https://supabase.co";
-        
-        // ІНЖЕНЕРНИЙ ЗАХИСТ: Склеюємо токен без жодного зайвого пробілу чи перенесення рядка
-        const rawKey = "sb_publishable_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjeW50eXdvZnRjYWhmdndxbGRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTYwMjIsImV4cCI6MjA4NTAxNjAyMn0._6_6_f0MY82M4MPhakQ9adUQ_BWhwmR10";
-        const supabaseKey = rawKey.replace(/[^a-zA-Z0-9_.-]/g, "").trim();
+        const supabaseKey = "sb_publishable_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjeW50eXdvZnRjYWhmdndxbGRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTYwMjIsImV4cCI6MjA4NTAxNjAyMn0._6_6_f0MY82M4MPhakQ9adUQ_BWhwmR10";
 
         let dbTracks = [];
         let dbMowing = [];
 
         window.onload = async function() {
             try {
-                const [resTracks, resMowing] = await Promise.all([
-                    fetch(`${supabaseUrl}/rest/v1/tracks`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }),
-                    fetch(`${supabaseUrl}/rest/v1/mowing`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } })
-                ]);
+                const resTracks = await fetch(`${supabaseUrl}/rest/v1/tracks`, { headers: { 'apikey': supabaseKey } });
+                const resMowing = await fetch(`${supabaseUrl}/rest/v1/mowing`, { headers: { 'apikey': supabaseKey } });
 
-                if (!resTracks.ok || !resMowing.ok) throw new Error("Хмара відхилила ключ доступу. Статус: " + resTracks.status);
+                if (!resTracks.ok) throw new Error("Помилка сервера");
 
                 dbTracks = await resTracks.json();
                 dbMowing = await resMowing.json();
 
                 initPdDropdown();
             } catch (error) {
-                document.getElementById('diagram-container').innerHTML = `<div class="status-msg" style="color:#dc2626;">🚨 ПОМИЛКА БАЗИ ДАНИХ:<br>${error.message}</div>`;
-                document.getElementById('select-pd').innerHTML = '<option value="">Помилка підключення</option>';
+                document.getElementById('diagram-container').innerHTML = `<div class="status-msg" style="color:#dc2626;">🚨 Помилка підключення</div>`;
             }
         };
 
         function initPdDropdown() {
             const pdSelect = document.getElementById('select-pd');
             pdSelect.innerHTML = '<option value="">-- Оберіть околоток --</option>';
-            
             const uniquePds = [...new Set(dbTracks.map(t => t.pd))];
             
             if(uniquePds.length === 0) {
-                pdSelect.innerHTML = '<option value="">База порожня (додайте ділянки в адмінці)</option>';
+                pdSelect.innerHTML = '<option value="">База порожня</option>';
                 return;
             }
-
             uniquePds.forEach(pd => {
                 const opt = document.createElement('option');
                 opt.value = pd; opt.innerText = pd; pdSelect.appendChild(opt);
@@ -107,16 +98,9 @@
         function updatePeregonList() {
             const selectedPd = document.getElementById('select-pd').value;
             const peregonSelect = document.getElementById('select-peregon');
-            const container = document.getElementById('diagram-container');
-            
             peregonSelect.innerHTML = '<option value="">-- Оберіть перегін --</option>';
-            container.innerHTML = '<div class="status-msg">Будь ласка, оберіть перегін.</div>';
             
-            if (!selectedPd) {
-                peregonSelect.innerHTML = '<option value="">-- Спочатку оберіть околоток --</option>';
-                return;
-            }
-
+            if (!selectedPd) return;
             const filtered = dbTracks.filter(t => t.pd === selectedPd);
             const uniquePeregons = [...new Set(filtered.map(t => t.peregon))];
 
@@ -130,10 +114,9 @@
             const selectedPd = document.getElementById('select-pd').value;
             const selectedPeregon = document.getElementById('select-peregon').value;
             const container = document.getElementById('diagram-container');
-            
             container.innerHTML = '';
-            if (!selectedPd || !selectedPeregon) return;
 
+            if (!selectedPd || !selectedPeregon) return;
             const activeTracks = dbTracks.filter(t => t.pd === selectedPd && t.peregon === selectedPeregon);
 
             let minKm = Infinity; let maxKm = -Infinity;
@@ -150,14 +133,12 @@
 
                 const kmBlock = document.createElement('div');
                 kmBlock.className = 'km-block';
-                
                 const kmTitle = document.createElement('div');
                 kmTitle.className = 'km-title'; kmTitle.innerText = `${km} кілометр`;
                 kmBlock.appendChild(kmTitle);
 
                 if (hasUpTrack) kmBlock.appendChild(createTrackRow("Парна колія:", km, "парна", selectedPeregon));
                 if (hasDownTrack) kmBlock.appendChild(createTrackRow("Непарна колія:", km, "непарна", selectedPeregon));
-
                 container.appendChild(kmBlock);
             }
         }
@@ -165,31 +146,41 @@
         function createTrackRow(labelText, km, trackType, peregon) {
             const row = document.createElement('div');
             row.className = 'track-row';
-            
             const label = document.createElement('span');
             label.className = 'track-label'; label.innerText = labelText;
             row.appendChild(label);
             
             const grid = document.createElement('div');
             grid.className = 'piket-grid';
-
             const cellMows = dbMowing.filter(m => m.peregon === peregon && m.track_type === trackType && m.km === km);
 
             for (let p = 1; p <= 10; p++) {
                 const cell = document.createElement('div');
                 cell.innerText = p;
-
                 let latestMow = null;
                 cellMows.forEach(m => {
                     if (m.pikets.includes(p)) {
-                        if (!latestMow || new Date(m.mow_date) > new Date(latestMow.mow_date)) {
-                            latestMow = m;
-                        }
+                        if (!latestMow || new Date(m.mow_date) > new Date(latestMow.mow_date)) latestMow = m;
                     }
-                }); 
+                });
 
                 if (!latestMow) {
                     cell.className = 'piket-cell cell-red';
                 } else {
                     const mowDate = new Date(latestMow.mow_date);
                     const today = new Date();
+                    const diffDays = Math.ceil(Math.abs(today - mowDate) / (1000 * 60 * 60 * 24));
+                    const d = mowDate.getDate().toString().padStart(2, '0');
+                    const m = (mowDate.getMonth() + 1).toString().padStart(2, '0');
+
+                    cell.className = diffDays > 45 ? 'piket-cell cell-yellow' : 'piket-cell cell-green';
+                    cell.innerHTML = `${p}<span class="date-pop">${d}.${m}</span>`;
+                }
+                grid.appendChild(cell);
+            }
+            row.appendChild(grid);
+            return row;
+        }
+    </script>
+</body>
+</html>
