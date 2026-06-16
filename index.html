@@ -26,6 +26,9 @@
         .cell-yellow { background-color: #eab308; color: #1f2937; text-shadow: none; }
         .date-pop { font-size: 7px; font-weight: normal; opacity: 0.9; margin-top: 1px; }
         .status-msg { text-align: center; color: #6b7280; font-size: 14px; font-style: italic; margin-top: 20px; }
+        
+        /* Червоне вікно для діагностики помилок */
+        .debug-box { margin-top: 16px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 10px; font-size: 12px; font-family: monospace; display: none; white-space: pre-wrap; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -53,18 +56,27 @@
             </select>
 
             <div id="diagram-container">
-                <div class="status-msg">Будь ласка, оберіть околоток та перегін для відображення графіків колій.</div>
+                <div class="status-msg" id="loading-text">Будь ласка, зачекайте, йде з'єднання з хмарою...</div>
+                
+                <!-- Вікно діагностики -->
+                <div id="debug-log" class="debug-box"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // ТВОЯ РЕАЛЬНА АДРЕСА ЗІ СКРІНШОТУ SUPABASE
         const supabaseUrl = "https://supabase.co";
         const supabaseKey = "sb_publishable_k16F0MY02MA4pbaKQ9ADuQ_0VhnmRJO";
 
         let dbTracks = [];
         let dbMowing = [];
+
+        function showDebug(msg) {
+            document.getElementById('loading-text').style.display = 'none';
+            const dbg = document.getElementById('debug-log');
+            dbg.style.display = 'block';
+            dbg.innerText = msg;
+        }
 
         window.onload = async function() {
             try {
@@ -80,14 +92,18 @@
                     fetch(`${supabaseUrl}/rest/v1/mowing?select=*`, { headers })
                 ]);
 
-                if (!resTracks.ok) throw new Error("Код відповіді сервера: " + resTracks.status);
+                if (!resTracks.ok) {
+                    throw new Error(`Хмара відхилила запит. Код статусу сервера: ${resTracks.status} (Ймовірно, увімкнено захист RLS у Supabase)`);
+                }
 
                 dbTracks = await resTracks.json();
                 dbMowing = await resMowing.json();
 
+                document.getElementById('loading-text').innerText = "Будь ласка, оберіть околоток та перегін для відображення графіків колій.";
                 initPdDropdown();
             } catch (error) {
-                document.getElementById('diagram-container').innerHTML = `<div class="status-msg" style="color:#dc2626;">🚨 ПОМИЛКА ЗВ'ЯЗКУ З БАЗОЮ:<br>${error.message}</div>`;
+                showDebug("🚨 ДІАГНОСТИКА ХМАРИ:\n" + error.message);
+                document.getElementById('select-pd').innerHTML = '<option value="">Помилка підключення</option>';
             }
         };
 
@@ -181,23 +197,3 @@
 
             for (let p = 1; p <= 10; p++) {
                 const cell = document.createElement('div');
-                cell.innerText = p;
-
-                let latestMow = null;
-                cellMows.forEach(m => {
-                    if (m.pikets.includes(p)) {
-                        if (!latestMow || new Date(m.mow_date) > new Date(latestMow.mow_date)) {
-                            latestMow = m;
-                        }
-                    }
-                });
-
-                if (!latestMow) {
-                    cell.className = 'piket-cell cell-red';
-                } else {
-                    const mowDate = new Date(latestMow.mow_date);
-                    const today = new Date();
-                    const diffTime = Math.abs(today - mowDate);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                    const d = mowDate.getDate().toString().padStart(2, '0');
