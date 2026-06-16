@@ -60,16 +60,17 @@
 
     <script>
         const supabaseUrl = "https://supabase.co";
-        const supabaseKey = "sb_publishable_k16F0MY02MA4pbaKQ9ADuQ_0VhnmRJO";
+        const supabaseKey = "sb_publishable_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjeW50eXdvZnRjYWhmdndxbGRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTYwMjIsImV4cCI6MjA4NTAxNjAyMn0._6_6_f0MY82M4MPhakQ9adUQ_BWhwmR10";
 
         let dbTracks = [];
         let dbMowing = [];
 
         window.onload = async function() {
             try {
-                // Додаємо заголовки авторизації Bearer для повної сумісності з увімкненим RLS та створеними політиками
+                // ПОВНИЙ ІНЖЕНЕРНИЙ ЗАХИСТ: Передаємо токен і великими, і малими літерами для 100% сумісності з PostgREST
                 const headers = {
                     'apikey': supabaseKey,
+                    'authorization': 'Bearer ' + supabaseKey,
                     'Authorization': 'Bearer ' + supabaseKey,
                     'Content-Type': 'application/json'
                 };
@@ -196,7 +197,3 @@
                 } else {
                     const mowDate = new Date(latestMow.mow_date);
                     const today = new Date();
-                    const diffTime = Math.abs(today - mowDate);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                    const d = mowDate.getDate().toString().padStart(2, '0');
