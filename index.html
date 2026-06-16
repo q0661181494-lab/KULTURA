@@ -26,11 +26,15 @@
         .cell-yellow { background-color: #eab308; color: #1f2937; text-shadow: none; }
         .date-pop { font-size: 7px; font-weight: normal; opacity: 0.9; margin-top: 1px; }
         .status-msg { text-align: center; color: #6b7280; font-size: 14px; font-style: italic; margin-top: 20px; }
+        
+        .submit-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; color: white; background-color: #2563eb; }
+        .setup-box { margin-top: 16px; padding: 12px; border: 1px dashed #d1d5db; border-radius: 12px; background: #fafafa; display: none; }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <!-- Меню навігації -->
         <div class="nav-menu">
             <a href="index.html" class="nav-link active">📊 Графіки</a>
             <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
@@ -39,7 +43,7 @@
 
         <div class="screen">
             <h2>📊 Лінійна діаграма</h2>
-            <p>Оберіть ділянку для перегляду стану робіт.</p>
+            <p>Оберіть ділянку для перегляду стану обкошування робіт.</p>
             
             <label class="track-label">Околоток:</label>
             <select id="select-pd" class="input-field" onchange="updatePeregonList()">
@@ -52,33 +56,72 @@
             </select>
 
             <div id="diagram-container">
-                <div class="status-msg">Будь ласка, оберіть околоток та перегін.</div>
+                <div id="error-block" class="status-msg" style="color:#dc2626; display:none;">🚨 Помилка підключення до бази danych</div>
+                <div id="normal-msg" class="status-msg">Будь ласка, оберіть околоток та перегін.</div>
+                
+                <!-- Приховане поле ручного налаштування ключа (якщо в коді пробіл) -->
+                <div id="setup-key-zone" class="setup-box">
+                    <label class="track-label" style="color:#374151;">Вставте ваш публічний ключ Supabase (anon key):</label>
+                    <input type="text" id="manual-key-input" placeholder="sb_publishable_..." class="input-field" style="padding:8px; margin-bottom:8px; font-size:12px;">
+                    <button class="submit-btn" onclick="saveManualKey()">🔄 Підключити базу</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         const supabaseUrl = "https://supabase.co";
-        const supabaseKey = "sb_publishable_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjeW50eXdvZnRjYWhmdndxbGRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTYwMjIsImV4cCI6MjA4NTAxNjAyMn0._6_6_f0MY82M4MPhakQ9adUQ_BWhwmR10";
+        
+        // Початковий вшитий ключ
+        const embeddedKey = "sb_publishable_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjeW50eXdvZnRjYWhmdndxbGRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTYwMjIsImV4cCI6MjA4NTAxNjAyMn0._6_6_f0MY82M4MPhakQ9adUQ_BWhwmR10";
+        
+        // Перевіряємо, чи є вже збережений ключ в пам'яті телефону, якщо ні — беремо вшитий
+        let supabaseKey = localStorage.getItem('user_supabase_key') || embeddedKey;
+        supabaseKey = supabaseKey.replace(/[^a-zA-Z0-9_.-]/g, "").trim();
 
         let dbTracks = [];
         let dbMowing = [];
 
-        window.onload = async function() {
+        window.onload = function() {
+            startDatabaseConnection();
+        };
+
+        async function startDatabaseConnection() {
             try {
                 const resTracks = await fetch(`${supabaseUrl}/rest/v1/tracks`, { headers: { 'apikey': supabaseKey } });
                 const resMowing = await fetch(`${supabaseUrl}/rest/v1/mowing`, { headers: { 'apikey': supabaseKey } });
 
-                if (!resTracks.ok) throw new Error("Помилка сервера");
+                if (!resTracks.ok) throw new Error();
 
                 dbTracks = await resTracks.json();
                 dbMowing = await resMowing.json();
 
+                // Якщо підключення успішне — ховаємо помилки й запускаємо списки
+                document.getElementById('error-block').style.display = 'none';
+                document.getElementById('setup-key-zone').style.display = 'none';
+                document.getElementById('normal-msg').style.display = 'block';
+                
                 initPdDropdown();
             } catch (error) {
-                document.getElementById('diagram-container').innerHTML = `<div class="status-msg" style="color:#dc2626;">🚨 Помилка підключення</div>`;
+                // Якщо хмара видала відмову — вмикаємо вікно введення ключа
+                document.getElementById('normal-msg').style.display = 'none';
+                document.getElementById('error-block').style.display = 'block';
+                document.getElementById('setup-key-zone').style.display = 'block';
+                document.getElementById('select-pd').innerHTML = '<option value="">Помилка підключення</option>';
             }
-        };
+        }
+
+        function saveManualKey() {
+            const inputVal = document.getElementById('manual-key-input').value.trim();
+            if(!inputVal) { alert("Введіть ключ!"); return; }
+            
+            // Зберігаємо в пам'ять телефону
+            localStorage.setItem('user_supabase_key', inputVal);
+            supabaseKey = inputVal.replace(/[^a-zA-Z0-9_.-]/g, "").trim();
+            
+            alert("Ключ збережено в пам'ять додатка! Перепідключаємося...");
+            startDatabaseConnection();
+        }
 
         function initPdDropdown() {
             const pdSelect = document.getElementById('select-pd');
@@ -134,53 +177,3 @@
                 const kmBlock = document.createElement('div');
                 kmBlock.className = 'km-block';
                 const kmTitle = document.createElement('div');
-                kmTitle.className = 'km-title'; kmTitle.innerText = `${km} кілометр`;
-                kmBlock.appendChild(kmTitle);
-
-                if (hasUpTrack) kmBlock.appendChild(createTrackRow("Парна колія:", km, "парна", selectedPeregon));
-                if (hasDownTrack) kmBlock.appendChild(createTrackRow("Непарна колія:", km, "непарна", selectedPeregon));
-                container.appendChild(kmBlock);
-            }
-        }
-
-        function createTrackRow(labelText, km, trackType, peregon) {
-            const row = document.createElement('div');
-            row.className = 'track-row';
-            const label = document.createElement('span');
-            label.className = 'track-label'; label.innerText = labelText;
-            row.appendChild(label);
-            
-            const grid = document.createElement('div');
-            grid.className = 'piket-grid';
-            const cellMows = dbMowing.filter(m => m.peregon === peregon && m.track_type === trackType && m.km === km);
-
-            for (let p = 1; p <= 10; p++) {
-                const cell = document.createElement('div');
-                cell.innerText = p;
-                let latestMow = null;
-                cellMows.forEach(m => {
-                    if (m.pikets.includes(p)) {
-                        if (!latestMow || new Date(m.mow_date) > new Date(latestMow.mow_date)) latestMow = m;
-                    }
-                });
-
-                if (!latestMow) {
-                    cell.className = 'piket-cell cell-red';
-                } else {
-                    const mowDate = new Date(latestMow.mow_date);
-                    const today = new Date();
-                    const diffDays = Math.ceil(Math.abs(today - mowDate) / (1000 * 60 * 60 * 24));
-                    const d = mowDate.getDate().toString().padStart(2, '0');
-                    const m = (mowDate.getMonth() + 1).toString().padStart(2, '0');
-
-                    cell.className = diffDays > 45 ? 'piket-cell cell-yellow' : 'piket-cell cell-green';
-                    cell.innerHTML = `${p}<span class="date-pop">${d}.${m}</span>`;
-                }
-                grid.appendChild(cell);
-            }
-            row.appendChild(grid);
-            return row;
-        }
-    </script>
-</body>
-</html>
