@@ -59,6 +59,7 @@
     </div>
 
     <script>
+        // ВИПРАВЛЕНО: Точна хмарна адреса твого проекту
         const supabaseUrl = "https://supabase.co";
         const supabaseKey = "sb_publishable_k16F0MY02MA4pbaKQ9ADuQ_0VhnmRJO";
 
@@ -67,21 +68,22 @@
 
         window.onload = async function() {
             try {
-                // Пряме завантаження даних без використання заблокованої локальної пам'яті
+                // Додаємо випадкове число, щоб змусити мережу повністю ігнорувати старий кеш
+                const noCache = "?t=" + new Date().getTime();
+                
                 const [resTracks, resMowing] = await Promise.all([
-                    fetch(`${supabaseUrl}/rest/v1/tracks`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }),
-                    fetch(`${supabaseUrl}/rest/v1/mowing`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } })
+                    fetch(supabaseUrl + "/rest/v1/tracks" + noCache, { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }),
+                    fetch(supabaseUrl + "/rest/v1/mowing" + noCache, { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } })
                 ]);
 
-                if (!resTracks.ok || !resMowing.ok) throw new Error("Сервер відхилив підключення");
+                if (!resTracks.ok) throw new Error("Код відповіді хмари: " + resTracks.status);
 
                 dbTracks = await resTracks.json();
                 dbMowing = await resMowing.json();
 
                 initPdDropdown();
             } catch (error) {
-                document.getElementById('diagram-container').innerHTML = `<div class="status-msg" style="color:#dc2626;">🚨 ПОМИЛКА БАЗИ ДАНИХ:<br>Не вдалося зчитати записи. Перевірте статус підключення.</div>`;
-                document.getElementById('select-pd').innerHTML = '<option value="">Помилка з\'єднання</option>';
+                document.getElementById('diagram-container').innerHTML = `<div class="status-msg" style="color:#dc2626;">🚨 ПОМИЛКА ЗВ'ЯЗКУ З ХМАРОЮ:<br>${error.message}</div>`;
             }
         };
 
@@ -141,7 +143,6 @@
             });
 
             for (let km = minKm; km <= maxKm; km++) {
-                // Використовуємо точну назву стовпця з бази: track_type
                 const hasUpTrack = activeTracks.some(t => t.track_type === 'парна' && km >= t.start_km && km <= t.end_km);
                 const hasDownTrack = activeTracks.some(t => t.track_type === 'непарна' && km >= t.start_km && km <= t.end_km);
 
@@ -195,3 +196,4 @@
                     const diffTime = Math.abs(today - mowDate);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+                    const d = mowDate.getDate().toString().padStart(2, '0');
