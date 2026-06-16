@@ -26,15 +26,12 @@
         .cell-yellow { background-color: #eab308; color: #1f2937; text-shadow: none; }
         .date-pop { font-size: 7px; font-weight: normal; opacity: 0.9; margin-top: 1px; }
         .status-msg { text-align: center; color: #6b7280; font-size: 14px; font-style: italic; margin-top: 20px; }
-        
-        .submit-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; color: white; background-color: #2563eb; }
-        .setup-box { margin-top: 16px; padding: 12px; border: 1px dashed #d1d5db; border-radius: 12px; background: #fafafa; display: none; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Меню навігації -->
+        <!-- Навігаційне меню сайту -->
         <div class="nav-menu">
             <a href="index.html" class="nav-link active">📊 Графіки</a>
             <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
@@ -56,82 +53,53 @@
             </select>
 
             <div id="diagram-container">
-                <div id="error-block" class="status-msg" style="color:#dc2626; display:none;">🚨 Помилка підключення до бази danych</div>
-                <div id="normal-msg" class="status-msg">Будь ласка, оберіть околоток та перегін.</div>
-                
-                <!-- Приховане поле ручного налаштування ключа (якщо в коді пробіл) -->
-                <div id="setup-key-zone" class="setup-box">
-                    <label class="track-label" style="color:#374151;">Вставте ваш публічний ключ Supabase (anon key):</label>
-                    <input type="text" id="manual-key-input" placeholder="sb_publishable_..." class="input-field" style="padding:8px; margin-bottom:8px; font-size:12px;">
-                    <button class="submit-btn" onclick="saveManualKey()">🔄 Підключити базу</button>
-                </div>
+                <div class="status-msg">Будь ласка, оберіть околоток та перегін для відображення графіків колій.</div>
             </div>
         </div>
     </div>
 
     <script>
+        // ВШИТІ НАЛАШТУВАННЯ ТВОЄЇ ХМАРНОЇ БАЗИ
         const supabaseUrl = "https://supabase.co";
-        
-        // Початковий вшитий ключ
-        const embeddedKey = "sb_publishable_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjeW50eXdvZnRjYWhmdndxbGRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTYwMjIsImV4cCI6MjA4NTAxNjAyMn0._6_6_f0MY82M4MPhakQ9adUQ_BWhwmR10";
-        
-        // Перевіряємо, чи є вже збережений ключ в пам'яті телефону, якщо ні — беремо вшитий
-        let supabaseKey = localStorage.getItem('user_supabase_key') || embeddedKey;
-        supabaseKey = supabaseKey.replace(/[^a-zA-Z0-9_.-]/g, "").trim();
+        const supabaseKey = "sb_publishable_k16F0MY02MA4pbaKQ9ADuQ_0VhnmRJO";
 
         let dbTracks = [];
         let dbMowing = [];
 
-        window.onload = function() {
-            startDatabaseConnection();
-        };
-
-        async function startDatabaseConnection() {
+        // Автоматичне підключення та викачування даних при запуску сторінки
+        window.onload = async function() {
             try {
-                const resTracks = await fetch(`${supabaseUrl}/rest/v1/tracks`, { headers: { 'apikey': supabaseKey } });
-                const resMowing = await fetch(`${supabaseUrl}/rest/v1/mowing`, { headers: { 'apikey': supabaseKey } });
+                // Чистимо локальну пам'ять примусово, щоб стерти старі невірні ручні спроби
+                localStorage.removeItem('user_supabase_key');
 
-                if (!resTracks.ok) throw new Error();
+                const [resTracks, resMowing] = await Promise.all([
+                    fetch(`${supabaseUrl}/rest/v1/tracks`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }),
+                    fetch(`${supabaseUrl}/rest/v1/mowing`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } })
+                ]);
+
+                if (!resTracks.ok || !resMowing.ok) throw new Error("Сервер не прийняв ключ");
 
                 dbTracks = await resTracks.json();
                 dbMowing = await resMowing.json();
 
-                // Якщо підключення успішне — ховаємо помилки й запускаємо списки
-                document.getElementById('error-block').style.display = 'none';
-                document.getElementById('setup-key-zone').style.display = 'none';
-                document.getElementById('normal-msg').style.display = 'block';
-                
                 initPdDropdown();
             } catch (error) {
-                // Якщо хмара видала відмову — вмикаємо вікно введення ключа
-                document.getElementById('normal-msg').style.display = 'none';
-                document.getElementById('error-block').style.display = 'block';
-                document.getElementById('setup-key-zone').style.display = 'block';
-                document.getElementById('select-pd').innerHTML = '<option value="">Помилка підключення</option>';
+                document.getElementById('diagram-container').innerHTML = `<div class="status-msg" style="color:#dc2626;">🚨 ПОМИЛКА БАЗИ ДАНИХ:<br>Будь ласка, перевірте правильність введеного ключа в коді.</div>`;
+                document.getElementById('select-pd').innerHTML = '<option value="">Помилка зв\'язку</option>';
             }
-        }
-
-        function saveManualKey() {
-            const inputVal = document.getElementById('manual-key-input').value.trim();
-            if(!inputVal) { alert("Введіть ключ!"); return; }
-            
-            // Зберігаємо в пам'ять телефону
-            localStorage.setItem('user_supabase_key', inputVal);
-            supabaseKey = inputVal.replace(/[^a-zA-Z0-9_.-]/g, "").trim();
-            
-            alert("Ключ збережено в пам'ять додатка! Перепідключаємося...");
-            startDatabaseConnection();
-        }
+        };
 
         function initPdDropdown() {
             const pdSelect = document.getElementById('select-pd');
             pdSelect.innerHTML = '<option value="">-- Оберіть околоток --</option>';
+            
             const uniquePds = [...new Set(dbTracks.map(t => t.pd))];
             
             if(uniquePds.length === 0) {
-                pdSelect.innerHTML = '<option value="">База порожня</option>';
+                pdSelect.innerHTML = '<option value="">База порожня (додайте ділянки в адмінці)</option>';
                 return;
             }
+
             uniquePds.forEach(pd => {
                 const opt = document.createElement('option');
                 opt.value = pd; opt.innerText = pd; pdSelect.appendChild(opt);
@@ -141,9 +109,16 @@
         function updatePeregonList() {
             const selectedPd = document.getElementById('select-pd').value;
             const peregonSelect = document.getElementById('select-peregon');
-            peregonSelect.innerHTML = '<option value="">-- Оберіть перегін --</option>';
+            const container = document.getElementById('diagram-container');
             
-            if (!selectedPd) return;
+            peregonSelect.innerHTML = '<option value="">-- Оберіть перегін --</option>';
+            container.innerHTML = '<div class="status-msg">Будь ласка, оберіть перегін.</div>';
+            
+            if (!selectedPd) {
+                peregonSelect.innerHTML = '<option value="">-- Спочатку оберіть околоток --</option>';
+                return;
+            }
+
             const filtered = dbTracks.filter(t => t.pd === selectedPd);
             const uniquePeregons = [...new Set(filtered.map(t => t.peregon))];
 
@@ -157,9 +132,10 @@
             const selectedPd = document.getElementById('select-pd').value;
             const selectedPeregon = document.getElementById('select-peregon').value;
             const container = document.getElementById('diagram-container');
+            
             container.innerHTML = '';
-
             if (!selectedPd || !selectedPeregon) return;
+
             const activeTracks = dbTracks.filter(t => t.pd === selectedPd && t.peregon === selectedPeregon);
 
             let minKm = Infinity; let maxKm = -Infinity;
@@ -176,4 +152,46 @@
 
                 const kmBlock = document.createElement('div');
                 kmBlock.className = 'km-block';
+                
                 const kmTitle = document.createElement('div');
+                kmTitle.className = 'km-title'; kmTitle.innerText = `${km} кілометр`;
+                kmBlock.appendChild(kmTitle);
+
+                if (hasUpTrack) kmBlock.appendChild(createTrackRow("Парна колія:", km, "парна", selectedPeregon));
+                if (hasDownTrack) kmBlock.appendChild(createTrackRow("Непарна колія:", km, "непарна", selectedPeregon));
+
+                container.appendChild(kmBlock);
+            }
+        }
+
+        function createTrackRow(labelText, km, trackType, peregon) {
+            const row = document.createElement('div');
+            row.className = 'track-row';
+            
+            const label = document.createElement('span');
+            label.className = 'track-label'; label.innerText = labelText;
+            row.appendChild(label);
+            
+            const grid = document.createElement('div');
+            grid.className = 'piket-grid';
+
+            const cellMows = dbMowing.filter(m => m.peregon === peregon && m.track_type === trackType && m.km === km);
+
+            for (let p = 1; p <= 10; p++) {
+                const cell = document.createElement('div');
+                cell.innerText = p;
+
+                let latestMow = null;
+                cellMows.forEach(m => {
+                    if (m.pikets.includes(p)) {
+                        if (!latestMow || new Date(m.mow_date) > new Date(latestMow.mow_date)) {
+                            latestMow = m;
+                        }
+                    }
+                });
+
+                if (!latestMow) {
+                    cell.className = 'piket-cell cell-red';
+                } else {
+                    const mowDate = new Date(latestMow.mow_date);
+                    const today = new Date();
