@@ -59,7 +59,6 @@
     </div>
 
     <script>
-        // ВИПРАВЛЕНО: Точна хмарна адреса твого проекту
         const supabaseUrl = "https://supabase.co";
         const supabaseKey = "sb_publishable_k16F0MY02MA4pbaKQ9ADuQ_0VhnmRJO";
 
@@ -68,22 +67,26 @@
 
         window.onload = async function() {
             try {
-                // Додаємо випадкове число, щоб змусити мережу повністю ігнорувати старий кеш
-                const noCache = "?t=" + new Date().getTime();
-                
+                // Додаємо заголовки авторизації Bearer для повної сумісності з увімкненим RLS та створеними політиками
+                const headers = {
+                    'apikey': supabaseKey,
+                    'Authorization': 'Bearer ' + supabaseKey,
+                    'Content-Type': 'application/json'
+                };
+
                 const [resTracks, resMowing] = await Promise.all([
-                    fetch(supabaseUrl + "/rest/v1/tracks" + noCache, { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }),
-                    fetch(supabaseUrl + "/rest/v1/mowing" + noCache, { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } })
+                    fetch(`${supabaseUrl}/rest/v1/tracks?select=*`, { headers }),
+                    fetch(`${supabaseUrl}/rest/v1/mowing?select=*`, { headers })
                 ]);
 
-                if (!resTracks.ok) throw new Error("Код відповіді хмари: " + resTracks.status);
+                if (!resTracks.ok) throw new Error("Код відповіді сервера: " + resTracks.status);
 
                 dbTracks = await resTracks.json();
                 dbMowing = await resMowing.json();
 
                 initPdDropdown();
             } catch (error) {
-                document.getElementById('diagram-container').innerHTML = `<div class="status-msg" style="color:#dc2626;">🚨 ПОМИЛКА ЗВ'ЯЗКУ З ХМАРОЮ:<br>${error.message}</div>`;
+                document.getElementById('diagram-container').innerHTML = `<div class="status-msg" style="color:#dc2626;">🚨 ПОМИЛКА ЗВ'ЯЗКУ З БАЗОЮ:<br>${error.message}</div>`;
             }
         };
 
