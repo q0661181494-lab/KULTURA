@@ -17,7 +17,7 @@
         .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
         .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 10px; color: white; text-align: center; display: block; text-decoration: none; }
         .btn-blue { background-color: #2563eb; }
-        .btn-dark { background-color: #1f2937; }
+        .btn-dark { background-color: #4b5563; }
         .error-msg { color: #dc2626; font-size: 13px; margin-top: -10px; margin-bottom: 10px; display: none; font-weight: bold; }
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
         .piket-grid { display: flex; gap: 3px; width: 100%; }
@@ -54,9 +54,7 @@
             <input type="date" id="mow-date" class="input-field">
 
             <label class="track-label">Оберіть перегін:</label>
-            <select id="master-peregon" class="input-field">
-                <option value="Путивль - Кошари">Путивль - Кошари</option>
-            </select>
+            <select id="master-peregon" class="input-field"></select>
 
             <label class="track-label">Оберіть колію:</label>
             <select id="master-track-type" class="input-field">
@@ -65,7 +63,7 @@
             </select>
 
             <label class="track-label">Кілометр:</label>
-            <input type="number" id="master-km" placeholder="Введіть кілометр, напр. 55" class="input-field">
+            <input type="number" id="master-km" placeholder="Введіть кілометр, напр. 52" class="input-field">
 
             <label class="track-label">Натисніть на пікети, які обкосили (стануть зеленими):</label>
             <div class="piket-grid" style="margin-bottom: 25px;">
@@ -81,34 +79,31 @@
                 <div class="piket-cell" onclick="this.classList.toggle('selected')">10</div>
             </div>
 
-            <button class="submit-btn btn-blue" id="save-btn" onclick="saveMowingReport()">Зберегти звіт в систему</button>
+            <button class="submit-btn btn-blue" id="save-btn" onclick="saveMowingReportSupabase()">Зберегти звіт в хмару</button>
             <div id="debug-log" class="debug-box"></div>
-            
-            <button class="submit-btn btn-dark" style="background:#4b5563; margin-top: 10px;" onclick="logoutMaster()">Вийти з кабінету</button>
+            <button class="submit-btn btn-dark" onclick="logoutMaster()">Вийти з кабінету</button>
         </div>
     </div>
 
     <script>
         const masterPasswords = { '1313': 'ПД-13', '1414': 'ПД-14', '1515': 'ПД-15', '1616': 'ПД-16' };
         let activePd = "";
+        let dbTracks = [];
 
-        // ТУТ ПОВИНЕН БУТИ ТВІЙ КЛЮЧ ghp_ (Поки що залишаємо порожнім, щоб кнопка входу не ламалася)
-        const k1 = ""; 
-        const k2 = "";
-        const k3 = "";
-        const k4 = "";
+        // АДРЕСИ ТВОЄЇ ХМАРНОЇ БАЗИ СУПАБЕЙС
+        const supabaseUrl = "https://supabase.co";
+        const supabaseKey = "sb_publishable_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjeW50eXdvZnRjYWhmdndxbGRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MTYwMjIsImV4cCI6MjA4NTAxNjAyMn0._6_6_f0MY82M4MPhakQ9adUQ_BWhwmR10";
 
-        const githubUser = "q0661181494-lab";
-        const githubRepo = "KULTURA";
-        const databasePath = "database.json";
+        // Автоматично завантажуємо налаштування колій при старті сайту
+        window.onload = async function() {
+            try {
+                const res = await fetch(`${supabaseUrl}/rest/v1/tracks`, {
+                    headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+                });
+                if (res.ok) dbTracks = await res.json();
+            } catch (e) { console.log("Помилка завантаження дільниць"); }
+        };
 
-        function showDebug(msg) {
-            const dbg = document.getElementById('debug-log');
-            dbg.style.display = 'block';
-            dbg.innerText = msg;
-        }
-
-        // АВТОНОМНА ФУНКЦІЯ ВХОДУ (Працює миттєво та безпомилково)
         function checkMasterPassword() {
             const pass = document.getElementById('master-pass').value.trim();
             const error = document.getElementById('master-error');
@@ -120,7 +115,8 @@
                 document.getElementById('master-pass').value = '';
                 document.getElementById('mow-date').valueAsDate = new Date();
                 
-                // Перемикаємо відображення вікон
+                initMasterPeregons();
+
                 document.getElementById('master-nav').style.display = 'none';
                 document.getElementById('login-zone').style.display = 'none';
                 document.getElementById('panel-zone').classList.remove('hidden');
@@ -129,19 +125,40 @@
             }
         }
 
-        async function saveMowingReport() {
+        // Показуємо майстру тільки його перегони з бази
+        function initMasterPeregons() {
+            const select = document.getElementById('master-peregon');
+            select.innerHTML = '';
+            
+            const myTracks = dbTracks.filter(t => t.pd === activePd);
+            const uniquePeregons = [...new Set(myTracks.map(t => t.peregon))];
+
+            if(uniquePeregons.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = ""; opt.innerText = "Для вас немає дільниць (додайте в адмінці)";
+                select.appendChild(opt);
+                return;
+            }
+
+            uniquePeregons.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p; opt.innerText = p; select.appendChild(opt);
+            });
+        }
+
+        async function saveMowingReportSupabase() {
             document.getElementById('debug-log').style.display = 'none';
             const km = parseInt(document.getElementById('master-km').value);
             const date = document.getElementById('mow-date').value;
             const peregon = document.getElementById('master-peregon').value;
             const trackType = document.getElementById('master-track-type').value;
 
+            if(!peregon) { alert("У вас немає доступних перегонів робіт!"); return; }
+
             const cells = document.querySelectorAll('.piket-cell');
             let selectedPikets = [];
             cells.forEach((cell, index) => {
-                if (cell.classList.contains('selected')) {
-                    selectedPikets.push(index + 1);
-                }
+                if (cell.classList.contains('selected')) { selectedPikets.push(index + 1); }
             });
 
             if (isNaN(km) || !date || selectedPikets.length === 0) {
@@ -150,29 +167,7 @@
             }
 
             const saveButton = document.getElementById('save-btn');
-            saveButton.innerText = "Збереження...";
+            saveButton.innerText = "Збереження в хмару...";
             saveButton.disabled = true;
 
-            let rawToken = k1 + k2 + k3 + k4;
-            let fullToken = rawToken.replace(/[^a-zA-Z0-9_]/g, "").trim();
-            
-            if(!fullToken) {
-                alert("Помилка: Ключ ghp_ не вписано у код файлу master.html!");
-                saveButton.innerText = "Зберегти звіт в систему";
-                saveButton.disabled = false;
-                return;
-            }
-
-            const url = `https://github.com{githubUser}/${githubRepo}/contents/${databasePath}`;
-
             try {
-                const response = await fetch(url, { headers: { "Authorization": `token ${fullToken}` } });
-                if (!response.ok) throw new Error(`Помилка сервера (Статус: ${response.status})`);
-                
-                const fileData = await response.json();
-                const sha = fileData.sha;
-                const currentContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
-
-                const newMow = { pd: activePd, peregon, trackType, km, pikets: selectedPikets, date };
-                currentContent.mowing.push(newMow);
-
