@@ -31,7 +31,7 @@
 <body>
 
     <div class="container">
-        <!-- Навігаційне меню сайту -->
+        <!-- Меню навігації -->
         <div class="nav-menu">
             <a href="index.html" class="nav-link active">📊 Графіки</a>
             <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
@@ -59,33 +59,29 @@
     </div>
 
     <script>
-        // ВШИТІ НАЛАШТУВАННЯ ТВОЄЇ ХМАРНОЇ БАЗИ
         const supabaseUrl = "https://supabase.co";
         const supabaseKey = "sb_publishable_k16F0MY02MA4pbaKQ9ADuQ_0VhnmRJO";
 
         let dbTracks = [];
         let dbMowing = [];
 
-        // Автоматичне підключення та викачування даних при запуску сторінки
         window.onload = async function() {
             try {
-                // Чистимо локальну пам'ять примусово, щоб стерти старі невірні ручні спроби
-                localStorage.removeItem('user_supabase_key');
-
+                // Пряме завантаження даних без використання заблокованої локальної пам'яті
                 const [resTracks, resMowing] = await Promise.all([
                     fetch(`${supabaseUrl}/rest/v1/tracks`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }),
                     fetch(`${supabaseUrl}/rest/v1/mowing`, { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } })
                 ]);
 
-                if (!resTracks.ok || !resMowing.ok) throw new Error("Сервер не прийняв ключ");
+                if (!resTracks.ok || !resMowing.ok) throw new Error("Сервер відхилив підключення");
 
                 dbTracks = await resTracks.json();
                 dbMowing = await resMowing.json();
 
                 initPdDropdown();
             } catch (error) {
-                document.getElementById('diagram-container').innerHTML = `<div class="status-msg" style="color:#dc2626;">🚨 ПОМИЛКА БАЗИ ДАНИХ:<br>Будь ласка, перевірте правильність введеного ключа в коді.</div>`;
-                document.getElementById('select-pd').innerHTML = '<option value="">Помилка зв\'язку</option>';
+                document.getElementById('diagram-container').innerHTML = `<div class="status-msg" style="color:#dc2626;">🚨 ПОМИЛКА БАЗИ ДАНИХ:<br>Не вдалося зчитати записи. Перевірте статус підключення.</div>`;
+                document.getElementById('select-pd').innerHTML = '<option value="">Помилка з\'єднання</option>';
             }
         };
 
@@ -145,6 +141,7 @@
             });
 
             for (let km = minKm; km <= maxKm; km++) {
+                // Використовуємо точну назву стовпця з бази: track_type
                 const hasUpTrack = activeTracks.some(t => t.track_type === 'парна' && km >= t.start_km && km <= t.end_km);
                 const hasDownTrack = activeTracks.some(t => t.track_type === 'непарна' && km >= t.start_km && km <= t.end_km);
 
@@ -195,3 +192,6 @@
                 } else {
                     const mowDate = new Date(latestMow.mow_date);
                     const today = new Date();
+                    const diffTime = Math.abs(today - mowDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
