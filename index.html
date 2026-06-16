@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📊 Лінійна діаграма</title>
+    <title>📊 Лінійна діаграма (Прозорий Код v2.0)</title>
     <style>
         body { font-family: -apple-system, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; box-sizing: border-box; }
@@ -15,20 +15,22 @@
         p { color: #6b7280; font-size: 14px; margin-top: 0; margin-bottom: 16px; }
         .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
+        
+        /* Чорний екран моніторингу помилок */
+        .debug-panel { margin-top: 20px; padding: 14px; background-color: #1e293b; border: 2px solid #334155; color: #38bdf8; border-radius: 12px; font-size: 11px; font-family: monospace; text-align: left; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .debug-title { font-weight: bold; color: #f43f5e; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #334155; padding-bottom: 4px; }
+        .debug-line { margin-bottom: 4px; line-height: 1.3; }
+        .debug-success { color: #4ade80; }
+        .debug-error { color: #f87171; font-weight: bold; background: rgba(248,113,113,0.1); padding: 2px 4px; border-radius: 4px; display: block; margin-top: 4px; }
+        
         .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
         .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 8px; text-align: center; }
         .track-row { margin-bottom: 12px; }
-        .track-row:last-child { margin-bottom: 0; }
         .piket-grid { display: flex; gap: 3px; width: 100%; }
-        .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+        .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; }
         .cell-red { background-color: #ef4444; }
         .cell-green { background-color: #22c55e; }
-        .cell-yellow { background-color: #eab308; color: #1f2937; text-shadow: none; }
-        .date-pop { font-size: 7px; font-weight: normal; opacity: 0.9; margin-top: 1px; }
-        .status-msg { text-align: center; color: #6b7280; font-size: 14px; font-style: italic; margin-top: 20px; }
-        
-        /* Червоне вікно для діагностики помилок */
-        .debug-box { margin-top: 16px; padding: 12px; background-color: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 10px; font-size: 12px; font-family: monospace; display: none; white-space: pre-wrap; word-break: break-all; }
+        .status-msg { text-align: center; color: #6b7280; font-size: 14px; font-style: italic; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -36,18 +38,18 @@
     <div class="container">
         <!-- Меню навігації -->
         <div class="nav-menu">
-            <a href="index.html" class="nav-link active">📊 Графіки</a>
+            <a href="index.html" class="nav-link active">📊 <strong>Графіки</strong></a>
             <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
             <a href="admin.html" class="nav-link">⚙️ Адмін</a>
         </div>
 
         <div class="screen">
             <h2>📊 Лінійна діаграма</h2>
-            <p>Оберіть ділянку для перегляду стану обкошування робіт.</p>
+            <p>Система автоматичного контролю стану обкошування.</p>
             
-            <label class="track-label">Околоток:</label>
+            <label class="track-label">Околоток (ПД):</label>
             <select id="select-pd" class="input-field" onchange="updatePeregonList()">
-                <option value="">-- Завантаження даних... --</option>
+                <option value="">-- Очікування відповіді хмари... --</option>
             </select>
 
             <label class="track-label">Перегін:</label>
@@ -56,10 +58,15 @@
             </select>
 
             <div id="diagram-container">
-                <div class="status-msg" id="loading-text">Будь ласка, зачекайте, йде з'єднання з хмарою...</div>
-                
-                <!-- Вікно діагностики -->
-                <div id="debug-log" class="debug-box"></div>
+                <div class="status-msg" id="main-status-text">Ініціалізація додатку...</div>
+            </div>
+
+            <!-- ПРОЗОРИЙ МОНІТОР ДЛЯ ВИЯВЛЕННЯ ПОМИЛОК -->
+            <div class="debug-panel">
+                <div class="debug-title">🖥️ МОНІТОР ПОМИЛОК ТА ЛОГІВ БАЗИ ДАНИХ</div>
+                <div id="debug-console">
+                    <div class="debug-line">[СИСТЕМА]: Додаток запущено. Очікування завантаження сторінки...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -71,72 +78,90 @@
         let dbTracks = [];
         let dbMowing = [];
 
-        function showDebug(msg) {
-            document.getElementById('loading-text').style.display = 'none';
-            const dbg = document.getElementById('debug-log');
-            dbg.style.display = 'block';
-            dbg.innerText = msg;
+        // Функція прозорого запису логів на екран
+        function logToScreen(text, type = 'info') {
+            const consoleElem = document.getElementById('debug-console');
+            const line = document.createElement('div');
+            line.className = 'debug-line';
+            
+            if (type === 'success') line.className += ' debug-success';
+            if (type === 'error') line.className += ' debug-error';
+            
+            line.innerText = `[${new Date().toLocaleTimeString()}]: ${text}`;
+            consoleElem.appendChild(line);
         }
 
         window.onload = async function() {
+            logToScreen("Сторінка завантажена. Початок підключення до Supabase...");
+            
+            const headers = {
+                'apikey': supabaseKey,
+                'authorization': 'Bearer ' + supabaseKey,
+                'Authorization': 'Bearer ' + supabaseKey,
+                'Content-Type': 'application/json'
+            };
+
+            // КРОК 1: ТЕСТ ЗАПИТУ ДО ТАБЛИЦІ TRACKS
             try {
-                const headers = {
-                    'apikey': supabaseKey,
-                    'authorization': 'Bearer ' + supabaseKey,
-                    'Authorization': 'Bearer ' + supabaseKey,
-                    'Content-Type': 'application/json'
-                };
-
-                const [resTracks, resMowing] = await Promise.all([
-                    fetch(`${supabaseUrl}/rest/v1/tracks?select=*`, { headers }),
-                    fetch(`${supabaseUrl}/rest/v1/mowing?select=*`, { headers })
-                ]);
-
+                logToScreen(`Надсилання запиту fetch до таблиці 'tracks' за адресою: ${supabaseUrl}/rest/v1/tracks?select=*`);
+                const resTracks = await fetch(`${supabaseUrl}/rest/v1/tracks?select=*`, { headers });
+                
+                logToScreen(`Рівень мережі: Отримано статус відповіді від хмари: ${resTracks.status} (${resTracks.statusText})`);
+                
                 if (!resTracks.ok) {
-                    throw new Error(`Хмара відхилила запит. Код статусу сервера: ${resTracks.status} (Ймовірно, увімкнено захист RLS у Supabase)`);
+                    const rawErr = await resTracks.text();
+                    throw new Error(`Хмара відхилила запит tracks (Статус: ${resTracks.status}). Відповідь сервера: ${rawErr}`);
                 }
 
                 dbTracks = await resTracks.json();
-                dbMowing = await resMowing.json();
+                logToScreen(`Успішно прочитано таблицю 'tracks'. Кількість знайдених рядків у базі: ${dbTracks.length}`, 'success');
 
-                document.getElementById('loading-text').innerText = "Будь ласка, оберіть околоток та перегін для відображення графіків колій.";
+                // КРОК 2: ТЕСТ ЗАПИТУ ДО ТАБЛИЦІ MOWING
+                logToScreen("Надсилання запиту fetch до таблиці 'mowing'...");
+                const resMowing = await fetch(`${supabaseUrl}/rest/v1/mowing?select=*`, { headers });
+                
+                if (!resMowing.ok) {
+                    const rawErr = await resMowing.text();
+                    throw new Error(`Хмара відхилила запит mowing (Статус: ${resMowing.status}). Відповідь сервера: ${rawErr}`);
+                }
+
+                dbMowing = await resMowing.json();
+                logToScreen(`Успішно прочитано таблицю 'mowing'. Кількість звітів у базі: ${dbMowing.length}`, 'success');
+
+                // КРОК 3: ІНІЦІАЛІЗАЦІЯ ІНТЕРФЕЙСУ
+                document.getElementById('main-status-text').innerText = "Будь ласка, оберіть околоток та перегін для відображення графіків колій.";
                 initPdDropdown();
+
             } catch (error) {
-                showDebug("🚨 ДІАГНОСТИКА ХМАРИ:\n" + error.message);
-                document.getElementById('select-pd').innerHTML = '<option value="">Помилка підключення</option>';
+                logToScreen(`КРИТИЧНИЙ ЗБІЙ ПРОГРАМИ: ${error.message}`, 'error');
+                document.getElementById('main-status-text').innerHTML = `<span style="color:#dc2626; font-weight:bold;">Збій додатка. Дивіться точний лог помилки в чорному моніторі знизу.</span>`;
+                document.getElementById('select-pd').innerHTML = '<option value="">Збій зв\'язку</option>';
             }
         };
 
         function initPdDropdown() {
             const pdSelect = document.getElementById('select-pd');
             pdSelect.innerHTML = '<option value="">-- Оберіть околоток --</option>';
-            
             const uniquePds = [...new Set(dbTracks.map(t => t.pd))];
             
             if(uniquePds.length === 0) {
-                pdSelect.innerHTML = '<option value="">База порожня (додайте ділянки в адмінці)</option>';
+                pdSelect.innerHTML = '<option value="">База порожня</option>';
+                logToScreen("Попередження інтерфейсу: Масив ділянок порожній. Перевірте, чи є дані в Supabase.", "error");
                 return;
             }
-
             uniquePds.forEach(pd => {
                 const opt = document.createElement('option');
                 opt.value = pd; opt.innerText = pd; pdSelect.appendChild(opt);
             });
+            logToScreen("Списоковий елемент Околотків успішно заповнений даними.", "success");
         }
 
         function updatePeregonList() {
             const selectedPd = document.getElementById('select-pd').value;
             const peregonSelect = document.getElementById('select-peregon');
-            const container = document.getElementById('diagram-container');
-            
             peregonSelect.innerHTML = '<option value="">-- Оберіть перегін --</option>';
-            container.innerHTML = '<div class="status-msg">Будь ласка, оберіть перегін.</div>';
             
-            if (!selectedPd) {
-                peregonSelect.innerHTML = '<option value="">-- Спочатку оберіть околоток --</option>';
-                return;
-            }
-
+            if (!selectedPd) return;
             const filtered = dbTracks.filter(t => t.pd === selectedPd);
             const uniquePeregons = [...new Set(filtered.map(t => t.peregon))];
 
@@ -150,50 +175,6 @@
             const selectedPd = document.getElementById('select-pd').value;
             const selectedPeregon = document.getElementById('select-peregon').value;
             const container = document.getElementById('diagram-container');
-            
             container.innerHTML = '';
+
             if (!selectedPd || !selectedPeregon) return;
-
-            const activeTracks = dbTracks.filter(t => t.pd === selectedPd && t.peregon === selectedPeregon);
-
-            let minKm = Infinity; let maxKm = -Infinity;
-            activeTracks.forEach(t => {
-                if(t.start_km < minKm) minKm = t.start_km;
-                if(t.end_km > maxKm) maxKm = t.end_km;
-            });
-
-            for (let km = minKm; km <= maxKm; km++) {
-                const hasUpTrack = activeTracks.some(t => t.track_type === 'парна' && km >= t.start_km && km <= t.end_km);
-                const hasDownTrack = activeTracks.some(t => t.track_type === 'непарна' && km >= t.start_km && km <= t.end_km);
-
-                if (!hasUpTrack && !hasDownTrack) continue;
-
-                const kmBlock = document.createElement('div');
-                kmBlock.className = 'km-block';
-                
-                const kmTitle = document.createElement('div');
-                kmTitle.className = 'km-title'; kmTitle.innerText = `${km} кілометр`;
-                kmBlock.appendChild(kmTitle);
-
-                if (hasUpTrack) kmBlock.appendChild(createTrackRow("Парна колія:", km, "парна", selectedPeregon));
-                if (hasDownTrack) kmBlock.appendChild(createTrackRow("Непарна колія:", km, "непарна", selectedPeregon));
-
-                container.appendChild(kmBlock);
-            }
-        }
-
-        function createTrackRow(labelText, km, trackType, peregon) {
-            const row = document.createElement('div');
-            row.className = 'track-row';
-            
-            const label = document.createElement('span');
-            label.className = 'track-label'; label.innerText = labelText;
-            row.appendChild(label);
-            
-            const grid = document.createElement('div');
-            grid.className = 'piket-grid';
-
-            const cellMows = dbMowing.filter(m => m.peregon === peregon && m.track_type === trackType && m.km === km);
-
-            for (let p = 1; p <= 10; p++) {
-                const cell = document.createElement('div');
