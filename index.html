@@ -31,7 +31,7 @@
         .cell-green { background-color: #22c55e; }
         .cell-yellow { background-color: #eab308; color: #1f2937; }
         .date-pop { font-size: 7px; font-weight: normal; margin-top: 1px; display: block; }
-        .status-msg { text-align: center; color: #6b7280; font-size: 14px; italic; margin-top: 10px; }
+        .status-msg { text-align: center; color: #6b7280; font-size: 14px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -69,9 +69,9 @@
     </div>
 
     <script>
-        // БЕЗПЕЧНЕ РОЗДІЛЕННЯ КЛЮЧА (Щоб обійти блокування фільтрів Chrome)
-        const part1 = "sb_publishable_k16F0MY02MA4pbaKQ9ADuQ";
-        const part2 = "_0VhnmRJO";
+        // БЕЗПЕЧНЕ СКЛЕЮВАННЯ ПО ЧИСТИХ ЛІТЕРАХ ЛАТИНИЦІ
+        const part1 = "sb_publishable_k16F0MY02MA4pbaKQ9ADuQ_0VhnmR";
+        const part2 = "JO";
         const fullKey = part1 + part2;
 
         const baseDbUrl = "https://supabase.co";
@@ -86,15 +86,14 @@
             line.className = 'debug-line';
             if (status === 'success') line.className += ' debug-success';
             if (status === 'error') line.className += ' debug-error';
-            line.innerText = `[${new Date().toLocaleTimeString()}]: ${text}`;
+            line.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
             consoleElem.appendChild(line);
         }
 
-        // Функція запускається гарантовано після повного вибудовування HTML в пам'яті
-        window.addEventListener('DOMContentLoaded', function() {
+        window.onload = function() {
             printLog("Запуск системи самоаудиту. Монітор активний.");
             loadDataFromCloud();
-        });
+        };
 
         async function loadDataFromCloud() {
             printLog("Підготовка інтернет-запиту до серверів Supabase...");
@@ -133,7 +132,7 @@
 
             } catch (err) {
                 printLog("КРИТИЧНА ПОМИЛКА: " + err.message, 'error');
-                document.getElementById('main-status-text').innerHTML = `<span style="color:#dc2626; font-weight:bold;">Збій. Дивіться червоний лог помилки знизу.</span>`;
+                document.getElementById('main-status-text').innerHTML = '<span style="color:#dc2626; font-weight:bold;">Збій. Дивіться лог помилки знизу.</span>';
                 document.getElementById('select-pd').innerHTML = '<option value="">Помилка конфігурації</option>';
             }
         }
@@ -187,3 +186,8 @@
 
             for (let km = minKm; km <= maxKm; km++) {
                 const hasUpTrack = activeTracks.some(t => t.track_type === 'парна' && km >= t.start_km && km <= t.end_km);
+                const hasDownTrack = activeTracks.some(t => t.track_type === 'непарна' && km >= t.start_km && km <= t.end_km);
+
+                if (!hasUpTrack && !hasDownTrack) continue;
+
+                const kmBlock = document.createElement('div');
