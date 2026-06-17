@@ -128,11 +128,9 @@
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
 
             try {
-                // 1. Завантажуємо паспорти ділянок колії
                 const resTracks = await fetch(`${baseDbUrl}/rest/v1/tracks?select=*`, { headers });
                 globalTracks = await resTracks.json();
 
-                // 2. Завантажуємо записи про обкошування
                 const resMow = await fetch(`${baseDbUrl}/rest/v1/mowing?select=*`, { headers });
                 globalMowing = await resMow.json();
 
@@ -141,15 +139,11 @@
                 populateFilters();
                 renderGlobalDashboard();
 
-                // ПЕРЕВІРКА СИГНАЛУ З КАБІНЕТУ МАЙСТРА
-                checkAdminSignalFromMaster();
-
             } catch (e) {
                 logMain("Помилка ініціалізації: " + e.message, "error");
             }
         }
 
-        // Створення списків для фільтрації
         function populateFilters() {
             const pdSelect = document.getElementById('filter-pd');
             const peregonSelect = document.getElementById('filter-peregon');
@@ -165,10 +159,9 @@
             });
         }
 
-        // ЛОГІКА СТАРІННЯ (ВІДРОСТАННЯ) ТРАВИ ТА КУЩІВ ЗА ДАТАМИ
         function calculateStatusByAge(cloudRecord) {
             if (!cloudRecord || cloudRecord.status !== 'green') {
-                return 'red'; // Даних немає — автоматично червоний
+                return 'red';
             }
             if (!cloudRecord.date) return 'green';
 
@@ -178,19 +171,17 @@
             const diffTime = Math.abs(today - mowedDate);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            if (diffDays >= 45) return 'red';     // ≥ 45 діб — трава виросла (червоний)
-            if (diffDays >= 30) return 'yellow';  // 30-44 доби — підростає (жовтий)
-            return 'green';                       // 0-29 діб — чисто (зелений)
+            if (diffDays >= 45) return 'red';
+            if (diffDays >= 30) return 'yellow';
+            return 'green';
         }
 
-        // РЕНДЕР ЗАГАЛЬНОЇ КАРТИ ДЛЯ КЕРІВНИЦТВА
         function renderGlobalDashboard() {
             const selectedPd = document.getElementById('filter-pd').value;
             const selectedPeregon = document.getElementById('filter-peregon').value;
             const container = document.getElementById('global-dashboard-container');
             container.innerHTML = "";
 
-            // Фільтруємо ділянки згідно вибору користувача
             const filteredTracks = globalTracks.filter(t => {
                 const matchPd = (selectedPd === 'ALL' || t.pd === selectedPd);
                 const matchPer = (selectedPeregon === 'ALL' || t.peregon === selectedPeregon);
@@ -202,9 +193,7 @@
                 return;
             }
 
-            // Йдемо по кожній ділянці колії
             filteredTracks.forEach(track => {
-                // Малюємо блоки для кожного кілометра всередині ділянки
                 for (let km = track.start_km; km <= track.end_km; km++) {
                     const kmBlock = document.createElement('div');
                     kmBlock.className = 'km-block';
@@ -217,24 +206,20 @@
                     const kmDateInfo = document.createElement('div');
                     kmDateInfo.className = 'km-date-info';
                     kmDateInfo.innerText = "Обкошування в цьому сезоні не зафіксовано";
-                    kmBlock.appendChild(kmDateInfo);
 
                     const piketGrid = document.createElement('div');
                     piketGrid.className = 'piket-grid';
 
                     let latestMowedDate = null;
 
-                    // Будуємо 10 пікетів для цього кілометра
                     for (let pk = 1; pk <= 10; pk++) {
                         const cell = document.createElement('div');
                         cell.innerText = pk;
 
-                        // Шукаємо запис в базі саме для цього пікета
                         const record = globalMowing.find(m => 
                             m.peregon === track.peregon && m.track_type === track.track_type && parseInt(m.km) === km && parseInt(m.piket) === pk
                         );
 
-                        // Проганяємо через календарний фільтр старіння
                         let visualStatus = calculateStatusByAge(record);
                         cell.className = `piket-cell cell-${visualStatus}`;
 
@@ -250,19 +235,23 @@
                         kmDateInfo.innerText = `Останній покіс на КМ: ${latestMowedDate.toLocaleDateString('uk-UA')}`;
                     }
 
+                    kmBlock.appendChild(kmDateInfo);
                     kmBlock.appendChild(piketGrid);
                     container.appendChild(kmBlock);
                 }
             });
         }
 
-        // МОДАЛЬНЕ ВІКНО АДМІНІСТРАТОРА
         function openAdminPanel() {
             document.getElementById('admin-modal').style.display = 'flex';
             document.getElementById('admin-password-input').value = "";
             document.getElementById('admin-auth-block').style.display = 'block';
             document.getElementById('admin-content-block').style.display = 'none';
         }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeAdminModal();
+        });
 
         function closeAdminModal() {
             document.getElementById('admin-modal').style.display = 'none';
@@ -279,23 +268,6 @@
             }
         }
 
-        // ПРИЙМАЧ СИГНАЛУ З КАБІНЕТУ МАЙСТРА (ПЕРЕХІД В ОДИН КЛІК)
-        function checkAdminSignalFromMaster() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('openAdmin') === 'true') {
-                // Негайно чистимо адресу, щоб при оновленні сторінки адмінка не стрибала перед очима
-                window.history.replaceState({}, document.title, window.location.pathname);
-                
-                logMain("Зчитано маркер автоматичного входу в панель адміна", "success");
-                
-                // Відкриваємо вікно адміна миттєво
-                setTimeout(() => {
-                    openAdminPanel();
-                }, 200);
-            }
-        }
-
-        // ОЧИЩЕННЯ БАЗИ ДАНИХ КОСІННЯ (ДЛЯ АДМІНІСТРАТОРА)
         async function clearMowingDatabase() {
             if (!confirm("УВАГА! Ви впевнені, що хочете видалити всі записи про обкошування? Всі графіки стануть червоними.")) return;
             
@@ -307,7 +279,6 @@
             };
 
             try {
-                // Видаляємо всі рядки, де id не дорівнює 0 (тобто абсолютно всі)
                 const res = await fetch(`${baseDbUrl}/rest/v1/mowing?id=neq.0`, {
                     method: 'DELETE',
                     headers: headers
@@ -318,18 +289,16 @@
                 alert("Базу даних косіння повністю очищено!");
                 logMain("Базу даних очищено адміністратором", "success");
                 
-                // Перезавантажуємо додаток
                 globalMowing = [];
                 renderGlobalDashboard();
                 closeAdminModal();
 
             } catch (e) {
                 alert("Помилка видалення: " + e.message);
-                logMain("Критична помилка очищення бази", "error");
+                logMain("Критична擁помилка очищення бази", "error");
             }
         }
 
-        // Старт програми
         window.onload = initializeApplication;
     </script>
 </body>
