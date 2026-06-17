@@ -16,7 +16,6 @@
         .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
         
-        /* Стилі колій та кілометрів */
         .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
         .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 8px; text-align: center; }
         .track-title-mini { font-size: 11px; font-weight: bold; color: #6b7280; margin-bottom: 4px; margin-top: 4px; text-transform: uppercase; }
@@ -29,7 +28,6 @@
         .date-pop { font-size: 7px; font-weight: normal; margin-top: 1px; display: block; }
         .status-msg { text-align: center; color: #6b7280; font-size: 14px; margin-top: 10px; }
         
-        /* Бічна панель Адміна */
         .admin-sidebar { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100%; background: white; box-shadow: -5px 0 25px rgba(0,0,0,0.15); transition: right 0.3s ease; z-index: 1000; display: flex; flex-direction: column; box-sizing: border-box; }
         .admin-sidebar.open { right: 0; }
         .admin-header { background: #1e293b; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -42,6 +40,7 @@
 
         .debug-panel { margin-top: 20px; padding: 14px; background-color: #1e293b; border: 2px solid #334155; color: #38bdf8; border-radius: 12px; font-size: 11px; font-family: monospace; }
         .debug-title { font-weight: bold; color: #f43f5e; margin-bottom: 6px; border-bottom: 1px solid #334155; padding-bottom: 4px; }
+        .debug-scroll { max-height: 120px; overflow-y: auto; text-align: left; }
     </style>
 </head>
 <body>
@@ -80,7 +79,7 @@
 
             <div class="debug-panel">
                 <div class="debug-title">🖥️ МОНІТОР САМОАУДИТУ СИСТЕМИ</div>
-                <div id="debug-console"></div>
+                <div id="debug-console" class="debug-scroll"></div>
             </div>
         </div>
     </div>
@@ -135,6 +134,7 @@
             if (status === 'error') line.style.color = '#f87171';
             line.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
             consoleElem.appendChild(line);
+            consoleElem.scrollTop = consoleElem.scrollHeight;
         }
 
         window.onload = function() {
@@ -145,30 +145,38 @@
             const requestHeaders = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
             try {
                 const resTracks = await fetch(baseDbUrl + "/rest/v1/tracks?select=*", { headers: requestHeaders });
-                if (!resTracks.ok) throw new Error("Помилка tracks");
+                if (!resTracks.ok) throw new Error("Помилка завантаження tracks");
                 tracksData = await resTracks.json();
 
                 const resMowing = await fetch(baseDbUrl + "/rest/v1/mowing?select=*", { headers: requestHeaders });
-                if (!resMowing.ok) throw new Error("Помилка mowing");
+                if (!resMowing.ok) throw new Error("Помилка завантаження mowing");
                 mowingData = await resMowing.json();
 
-                document.getElementById('main-status-text').innerText = "Будь ласка, оберіть околоток та перегін.";
+                const statusTxt = document.getElementById('main-status-text');
+                if(statusTxt && !document.getElementById('select-peregon').value) {
+                    statusTxt.innerText = "Будь ласка, оберіть околоток та перегін.";
+                }
                 buildPdList();
+                printLog("Дані хмари успішно синхронізовано", "success");
             } catch (err) {
-                printLog("Критична помилка завантаження", 'error');
+                printLog("Критична помилка завантаження: " + err.message, 'error');
             }
         }
 
         function buildPdList() {
             const select = document.getElementById('select-pd');
-            const savedValue = select.value;
+            const currentSelected = select.value;
             select.innerHTML = '<option value="">-- Оберіть околоток --</option>';
+            
             const uniquePds = [...new Set(tracksData.map(item => item.pd))];
             uniquePds.forEach(pd => {
                 const opt = document.createElement('option');
                 opt.value = pd; opt.innerText = pd; select.appendChild(opt);
             });
-            if(savedValue) select.value = savedValue;
+            
+            if(currentSelected && uniquePds.includes(currentSelected)) {
+                select.value = currentSelected;
+            }
         }
 
         function runUpdatePeregon() {
@@ -187,7 +195,6 @@
             });
         }
 
-        // ПАНЕЛЬ АДМІНА: Безпека та анімація
         function openAdminPanel() {
             let savedPassword = localStorage.getItem('admin_password') || '1234';
             let enteredPassword = prompt("Введіть пароль для доступу до панелі:");
@@ -220,7 +227,6 @@
             }
         }
 
-        // АДМІН: Відправка нової ділянки в Supabase
         async function submitNewTrack() {
             const pd = document.getElementById('add-pd').value.trim();
             const peregon = document.getElementById('add-peregon').value.trim();
@@ -249,14 +255,14 @@
                 });
 
                 if(res.ok) {
+                    printLog("Запис успішно додано в tracks", "success");
                     alert("Ділянку успішно додано в базу!");
-                    printLog("Запис додано в tracks", "success");
-                    // Очищення полів
+                    
                     document.getElementById('add-pd').value = '';
                     document.getElementById('add-peregon').value = '';
                     document.getElementById('add-start').value = '';
                     document.getElementById('add-end').value = '';
-                    // Оновлюємо дані
+                    
                     await loadDataFromCloud();
                     runUpdatePeregon();
                 } else {
@@ -265,11 +271,10 @@
                 }
             } catch(e) {
                 alert("Помилка збереження: " + e.message);
-                printLog("Помилка відправки", "error");
+                printLog("Помилка відправки даних", "error");
             }
         }
 
-        // РЕНДЕРИНГ ДІАГРАМИ З ФІЛЬТРОМ КОЛІЙ
         function runRenderDiagram() {
             const selectedPd = document.getElementById('select-pd').value;
             const selectedPeregon = document.getElementById('select-peregon').value;
@@ -285,14 +290,14 @@
                 return;
             }
 
-            // Визначаємо межі кілометрів
             let minKm = Infinity; let maxKm = -Infinity;
             activeTracks.forEach(t => {
                 if(t.start_km < minKm) minKm = t.start_km;
                 if(t.end_km > maxKm) maxKm = t.end_km;
             });
 
-            // Малюємо кожен кілометр
+            printLog(`Рендеринг діаграми (КМ ${minKm} - КМ ${maxKm})...`);
+
             for (let km = minKm; km <= maxKm; km++) {
                 const kmBlock = document.createElement('div');
                 kmBlock.className = 'km-block';
@@ -302,7 +307,6 @@
                 kmTitle.innerText = `Кілометр ${km}`;
                 kmBlock.appendChild(kmTitle);
 
-                // Рендеримо лінії колій залежно від фільтра
                 if (filterTrackType === 'all' || filterTrackType === 'парна') {
                     renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'парна');
                 }
@@ -328,13 +332,12 @@
                 cell.className = 'piket-cell cell-empty';
                 cell.innerHTML = `П${pk}`;
 
-                // Шукаємо звіт про обкошування з врахуванням типу колії
                 const statusReport = mowingData.find(m => 
                     m.pd === pd && 
                     m.peregon === peregon && 
                     parseInt(m.km) === km && 
                     parseInt(m.piket) === pk &&
-                    (m.track_type === type || !m.track_type) // Сумісність зі старими записами без вказання колії
+                    (m.track_type === type || !m.track_type)
                 );
 
                 if (statusReport) {
