@@ -13,6 +13,7 @@
         .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #4b5563; text-decoration: none; border-radius: 8px; background: #f3f4f6; cursor: pointer; }
         .nav-link.active { background-color: #2563eb; color: white; }
         
+        /* Кругла кнопка адміна */
         .admin-menu-btn { width: 42px; height: 42px; background-color: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: none; flex-shrink: 0; text-decoration: none; }
         
         .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
@@ -45,12 +46,12 @@
         .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s ease; position: relative; }
         .piket-cell:active { transform: scale(0.9); }
         
-        /* Приглушена палітра "світлофора" */
+        /* Класична світлофорна палітра */
         .cell-red { background-color: #ef4444; color: white; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
         .cell-yellow { background-color: #eab308; color: #1f2937; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
         .cell-green { background-color: #22c55e; color: white; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
         
-        /* Маркер тимчасових змін на телефоні */
+        /* Маркер змін сокирою */
         .cell-changed::after { content: '🪓'; position: absolute; top: -1px; right: 1px; font-size: 8px; }
 
         .debug-panel { margin-top: 20px; padding: 14px; background-color: #1e293b; border: 2px solid #334155; color: #38bdf8; border-radius: 12px; font-size: 11px; font-family: monospace; }
@@ -237,32 +238,29 @@
             }
             updateAccordionTitle();
             document.getElementById('diagram-section').style.display = 'none';
-            // Закриваємо список після зміни фільтру для компактності
             document.getElementById('km-accordion-content').classList.remove('open');
             document.getElementById('accordion-arrow').innerText = '▼';
         }
 
-        // 🛠️ ЛОГІКА СТАРІННЯ (ВІДРОСТАННЯ) ТРАВИ ЗА ДАТАМИ
+        // ЛОГІКА СТАРІННЯ ТРАВИ ЗА ДАТАМИ
         function calculateStatusByAge(cloudRecord) {
             if (!cloudRecord || cloudRecord.status !== 'green') {
-                return 'red'; // Якщо даних немає або статус не "обкошено" — колір червоний
+                return 'red'; 
             }
-
-            if (!cloudRecord.date) return 'green'; // Захист на випадок відсутності дати
+            if (!cloudRecord.date) return 'green';
 
             const mowedDate = new Date(cloudRecord.date);
             const today = new Date();
             
-            // Рахуємо різницю в днях
             const diffTime = Math.abs(today - mowedDate);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            if (diffDays >= 45) return 'red';     // ≥ 45 днів — трава відросла (червоний)
-            if (diffDays >= 30) return 'yellow';  // 30-44 дні — в процесі відростання (жовтий)
-            return 'green';                       // 0-29 днів — чисто (зелений)
+            if (diffDays >= 45) return 'red';     
+            if (diffDays >= 30) return 'yellow';  
+            return 'green';                       
         }
 
-        // 5. ПОБУДОВА ЖИВОЇ ДІАГРАМИ З УРАХУВАННЯМ СТАРІННЯ
+        // 5. ПОБУДОВА ЖИВОЇ ДІАГРАМИ
         function generateInteractiveDiagram() {
             const checkboxes = document.querySelectorAll('#km-checkboxes-container input[type="checkbox"]:checked');
             const selectedKm = Array.from(checkboxes).map(cb => parseInt(cb.value));
@@ -278,7 +276,6 @@
             container.innerHTML = "";
             
             localChangesMap = {}; 
-            // Ховаємо список кілометрів після побудови карти, щоб звільнити місце
             document.getElementById('km-accordion-content').classList.remove('open');
             document.getElementById('accordion-arrow').innerText = '▼';
 
@@ -291,7 +288,6 @@
                 kmTitle.innerText = `Кілометр ${km}`;
                 kmBlock.appendChild(kmTitle);
 
-                // Окреме поле для виведення інформації про дату останнього косіння на КМ
                 const kmDateInfo = document.createElement('div');
                 kmDateInfo.className = 'km-date-info';
                 kmDateInfo.id = `date-info-${km}`;
@@ -315,7 +311,6 @@
                         m.peregon === peregon && m.track_type === type && parseInt(m.km) === km && parseInt(m.piket) === pk
                     );
 
-                    // Розраховуємо колір на основі дати відростання
                     let currentVisualStatus = calculateStatusByAge(cloudRecord);
                     
                     cell.className = `piket-cell cell-${currentVisualStatus}`;
@@ -328,17 +323,14 @@
                         }
                     }
 
-                    // КЛІК НА КВАДРАТИК
                     cell.onclick = function() {
                         const changeKey = `${km}-${pk}`;
                         
-                        // Якщо ми вже клікнули і зробили його зеленим, а базовий стан був іншим -> повертаємо розрахований базовий стан
                         if (cell.classList.contains('cell-green') && currentVisualStatus !== 'green') {
                             cell.className = `piket-cell cell-${currentVisualStatus}`;
                             cell.classList.remove('cell-changed');
                             delete localChangesMap[changeKey];
                         } else {
-                            // Інакше — красимо в зелений і ставимо сокиру 🪓
                             cell.className = 'piket-cell cell-green cell-changed';
                             localChangesMap[changeKey] = { km, piket: pk, status: 'green' };
                         }
@@ -356,10 +348,10 @@
             });
 
             document.getElementById('diagram-section').style.display = 'block';
-            logMaster(`Діаграму сформовано. Базовий колір за замовчуванням — червоний.`, 'info');
+            logMaster(`Діаграму сформовано.`, 'info');
         }
 
-        // 6. ПАКЕТНЕ ЗБЕРЕЖЕННЯ
+        // 6. ПАКЕТНЕ ЗБЕРЕЖЕННЯ ЗМІН
         async function saveAllChangesToCloud() {
             const changeEntries = Object.values(localChangesMap);
             if (changeEntries.length === 0) {
@@ -407,12 +399,10 @@
                 logMaster("Синхронізацію успішно завершено!", "success");
                 alert(`Дані збережено! Змінено пікетів: ${recordsToUpload.length}`);
                 
-                // Перезавантажуємо масив з хмари
                 const headersAuth = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resMow = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(sessionPd)}&select=*`, { headers: headersAuth });
                 currentCloudMowing = await resMow.json();
                 
-                // Оновлюємо карту
                 generateInteractiveDiagram();
 
             } catch(e) {
