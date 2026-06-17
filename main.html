@@ -21,7 +21,7 @@
         .track-row:last-child { margin-bottom: 0; }
         .piket-grid { display: flex; gap: 3px; width: 100%; }
         .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.05); }
-        .cell-empty { background-color: #e5e7eb; color: #9ca3af; text-shadow: none; } /* Сірий для необкошених */
+        .cell-empty { background-color: #e5e7eb; color: #9ca3af; text-shadow: none; }
         .cell-red { background-color: #ef4444; }
         .cell-green { background-color: #22c55e; }
         .cell-yellow { background-color: #eab308; color: #1f2937; }
@@ -70,11 +70,10 @@
     </div>
 
     <script>
-        // Ключ Supabase (Переконайтеся, що в RLS увімкнено читання для public)
-        const keyArray = ['s','b','_','p','u','b','l','i','s','h','a','b','l','e','_','k','1','6','F','0','M','Y','0','2','M','A','4','p','b','a','K','Q','9','A','D','u','Q','_','0','V','h','n','m','R','J','O'];
-        const fullKey = keyArray.join('');
+        // ВИПРАВЛЕНО: Встановлено ваш новий актуальний public anon-ключ
+        const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
 
-        // ВИПРАВЛЕНО: Додано ваш унікальний ID проєкту з посилання
+        // Ваш унікальний ID проєкту з посилання Supabase
         const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
 
         let tracksData = [];
@@ -84,178 +83,5 @@
             const consoleElem = document.getElementById('debug-console');
             if(!consoleElem) return;
             
-            // Обмеження логів до 15 рядків, щоб екран не розтягувався
             if (consoleElem.children.length > 15) {
-                consoleElem.removeChild(consoleElem.firstChild);
-            }
-
-            const line = document.createElement('div');
-            line.className = 'debug-line';
-            if (status === 'success') line.className += ' debug-success';
-            if (status === 'error') line.className += ' debug-error';
-            line.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
-            consoleElem.appendChild(line);
-        }
-
-        window.onload = function() {
-            printLog("Запуск системи самоаудиту. Монітор активний.");
-            loadDataFromCloud();
-        };
-
-        async function loadDataFromCloud() {
-            printLog("Збирання динамічного ключа та підготовка інтернет-запиту...");
-            
-            const requestHeaders = {
-                'apikey': fullKey,
-                'authorization': 'Bearer ' + fullKey,
-                'Content-Type': 'application/json'
-            };
-
-            try {
-                printLog("Надсилання запиту до таблиці 'tracks'...");
-                const resTracks = await fetch(baseDbUrl + "/rest/v1/tracks?select=*", { headers: requestHeaders });
-                printLog("Відповідь від tracks отримана. Статус: " + resTracks.status);
-
-                if (!resTracks.ok) {
-                    const errorText = await resTracks.text();
-                    throw new Error("Хмара відхилила tracks: " + errorText);
-                }
-                tracksData = await resTracks.json();
-                printLog("Успішно! Зчитано ділянок з бази: " + tracksData.length, 'success');
-
-                printLog("Надсилання запиту до таблиці 'mowing'...");
-                const resMowing = await fetch(baseDbUrl + "/rest/v1/mowing?select=*", { headers: requestHeaders });
-                printLog("Відповідь від mowing отримана. Статус: " + resMowing.status);
-
-                if (!resMowing.ok) {
-                    const errorText = await resMowing.text();
-                    throw new Error("Хмара відхилила mowing: " + errorText);
-                }
-                mowingData = await resMowing.json();
-                printLog("Успішно! Зчитано звітів про обкошування: " + mowingData.length, 'success');
-
-                document.getElementById('main-status-text').innerText = "Будь ласка, оберіть околоток та перегін.";
-                buildPdList();
-
-            } catch (err) {
-                printLog("КРИТИЧНА ПОМИЛКА: " + err.message, 'error');
-                document.getElementById('main-status-text').innerHTML = '<span style="color:#dc2626; font-weight:bold;">Збій підключення. Дивіться лог помилки знизу.</span>';
-                document.getElementById('select-pd').innerHTML = '<option value="">Помилка конфігурації</option>';
-            }
-        }
-
-        function buildPdList() {
-            const select = document.getElementById('select-pd');
-            select.innerHTML = '<option value="">-- Оберіть околоток --</option>';
-            const uniquePds = [...new Set(tracksData.map(item => item.pd))];
-            
-            if(uniquePds.length === 0) {
-                select.innerHTML = '<option value="">База порожня</option>';
-                printLog("Попередження: У таблиці tracks немає жодного рядка.", "error");
-                return;
-            }
-            uniquePds.forEach(pd => {
-                const opt = document.createElement('option');
-                opt.value = pd; opt.innerText = pd; select.appendChild(opt);
-            });
-            printLog("Список Околотків успішно виведений на екран.", "success");
-        }
-
-        function runUpdatePeregon() {
-            const selectedPd = document.getElementById('select-pd').value;
-            const selectPeregon = document.getElementById('select-peregon');
-            selectPeregon.innerHTML = '<option value="">-- Оберіть перегін --</option>';
-            document.getElementById('diagram-container').innerHTML = ''; // Чистимо стару діаграму
-            
-            if (!selectedPd) return;
-            const filtered = tracksData.filter(t => t.pd === selectedPd);
-            const uniquePeregons = [...new Set(filtered.map(t => t.peregon))];
-
-            uniquePeregons.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p; opt.innerText = `Перегін ${p}`; selectPeregon.appendChild(opt);
-            });
-        }
-
-        // ВИПРАВЛЕНО ТА ЗАВЕРШЕНО: Повна функція побудови сітки кілометрів та пікетів
-        function runRenderDiagram() {
-            const selectedPd = document.getElementById('select-pd').value;
-            const selectedPeregon = document.getElementById('select-peregon').value;
-            const container = document.getElementById('diagram-container');
-            container.innerHTML = '';
-
-            if (!selectedPd || !selectedPeregon) return;
-            
-            const activeTracks = tracksData.filter(t => t.pd === selectedPd && t.peregon === selectedPeregon);
-
-            if(activeTracks.length === 0) {
-                container.innerHTML = '<div class="status-msg">Немає даних для цієї ділянки.</div>';
-                return;
-            }
-
-            // Визначаємо межі кілометрів на перегоні
-            let minKm = Infinity; let maxKm = -Infinity;
-            activeTracks.forEach(t => {
-                if(t.start_km < minKm) minKm = t.start_km;
-                if(t.end_km > maxKm) maxKm = t.end_km;
-            });
-
-            printLog(`Рендеринг діаграми для перегону ${selectedPeregon} (КМ ${minKm} - КМ ${maxKm})...`);
-
-            // Цикл по кожному кілометру
-            for (let km = minKm; km <= maxKm; km++) {
-                const kmBlock = document.createElement('div');
-                kmBlock.className = 'km-block';
-
-                const kmTitle = document.createElement('div');
-                kmTitle.className = 'km-title';
-                kmTitle.innerText = `Кілометр ${km}`;
-                kmBlock.appendChild(kmTitle);
-
-                // Створюємо сітку з 10 пікетів (від 1 до 10)
-                const piketGrid = document.createElement('div');
-                piketGrid.className = 'piket-grid';
-
-                for (let pk = 1; pk <= 10; pk++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'piket-cell cell-empty'; // за замовчуванням сіра (немає даних)
-                    cell.innerHTML = `П${pk}`;
-
-                    // Шукаємо, чи є звіт про обкошування для цього КМ та ПК
-                    const statusReport = mowingData.find(m => 
-                        m.pd === selectedPd && 
-                        m.peregon === selectedPeregon && 
-                        parseInt(m.km) === km && 
-                        parseInt(m.piket) === pk
-                    );
-
-                    if (statusReport) {
-                        // Призначаємо колір залежно від статусу в БД (наприклад: 'green', 'yellow', 'red')
-                        if (statusReport.status === 'green' || statusReport.status === 'done') {
-                            cell.className = 'piket-cell cell-green';
-                        } else if (statusReport.status === 'yellow' || statusReport.status === 'process') {
-                            cell.className = 'piket-cell cell-yellow';
-                        } else if (statusReport.status === 'red' || statusReport.status === 'bad') {
-                            cell.className = 'piket-cell cell-red';
-                        }
-                        
-                        // Якщо є дата, виводимо її маленьким текстом всередині пікету
-                        if (statusReport.date) {
-                            const dateSpan = document.createElement('span');
-                            dateSpan.className = 'date-pop';
-                            dateSpan.innerText = statusReport.date;
-                            cell.appendChild(dateSpan);
-                        }
-                    }
-
-                    piketGrid.appendChild(cell);
-                }
-
-                kmBlock.appendChild(piketGrid);
-                container.appendChild(kmBlock);
-            }
-            printLog("Діаграму успішно побудовано.", "success");
-        }
-    </script>
-</body>
-</html>
+                consoleElem.removeChild(
