@@ -20,7 +20,8 @@
         .track-row { margin-bottom: 12px; }
         .track-row:last-child { margin-bottom: 0; }
         .piket-grid { display: flex; gap: 3px; width: 100%; }
-        .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+        .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.05); }
+        .cell-empty { background-color: #e5e7eb; color: #9ca3af; text-shadow: none; } /* Сірий для необкошених */
         .cell-red { background-color: #ef4444; }
         .cell-green { background-color: #22c55e; }
         .cell-yellow { background-color: #eab308; color: #1f2937; }
@@ -69,12 +70,12 @@
     </div>
 
     <script>
-        // АБСОЛЮТНИЙ ЗАХИСТ ВІД БЛОКУВАНЬ: Ключ розбитий на масив окремих літер і цифр.
-        // Роботи-сканери GitHub ніколи не зможуть розпізнати його в тексті.
+        // Ключ Supabase (Переконайтеся, що в RLS увімкнено читання для public)
         const keyArray = ['s','b','_','p','u','b','l','i','s','h','a','b','l','e','_','k','1','6','F','0','M','Y','0','2','M','A','4','p','b','a','K','Q','9','A','D','u','Q','_','0','V','h','n','m','R','J','O'];
         const fullKey = keyArray.join('');
 
-        const baseDbUrl = "https://supabase.co";
+        // ВИПРАВЛЕНО: Додано ваш унікальний ID проєкту з посилання
+        const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
 
         let tracksData = [];
         let mowingData = [];
@@ -82,6 +83,12 @@
         function printLog(text, status = 'info') {
             const consoleElem = document.getElementById('debug-console');
             if(!consoleElem) return;
+            
+            // Обмеження логів до 15 рядків, щоб екран не розтягувався
+            if (consoleElem.children.length > 15) {
+                consoleElem.removeChild(consoleElem.firstChild);
+            }
+
             const line = document.createElement('div');
             line.className = 'debug-line';
             if (status === 'success') line.className += ' debug-success';
@@ -158,6 +165,7 @@
             const selectedPd = document.getElementById('select-pd').value;
             const selectPeregon = document.getElementById('select-peregon');
             selectPeregon.innerHTML = '<option value="">-- Оберіть перегін --</option>';
+            document.getElementById('diagram-container').innerHTML = ''; // Чистимо стару діаграму
             
             if (!selectedPd) return;
             const filtered = tracksData.filter(t => t.pd === selectedPd);
@@ -169,6 +177,7 @@
             });
         }
 
+        // ВИПРАВЛЕНО ТА ЗАВЕРШЕНО: Повна функція побудови сітки кілометрів та пікетів
         function runRenderDiagram() {
             const selectedPd = document.getElementById('select-pd').value;
             const selectedPeregon = document.getElementById('select-peregon').value;
@@ -176,12 +185,77 @@
             container.innerHTML = '';
 
             if (!selectedPd || !selectedPeregon) return;
+            
             const activeTracks = tracksData.filter(t => t.pd === selectedPd && t.peregon === selectedPeregon);
 
+            if(activeTracks.length === 0) {
+                container.innerHTML = '<div class="status-msg">Немає даних для цієї ділянки.</div>';
+                return;
+            }
+
+            // Визначаємо межі кілометрів на перегоні
             let minKm = Infinity; let maxKm = -Infinity;
             activeTracks.forEach(t => {
                 if(t.start_km < minKm) minKm = t.start_km;
                 if(t.end_km > maxKm) maxKm = t.end_km;
             });
 
+            printLog(`Рендеринг діаграми для перегону ${selectedPeregon} (КМ ${minKm} - КМ ${maxKm})...`);
+
+            // Цикл по кожному кілометру
             for (let km = minKm; km <= maxKm; km++) {
+                const kmBlock = document.createElement('div');
+                kmBlock.className = 'km-block';
+
+                const kmTitle = document.createElement('div');
+                kmTitle.className = 'km-title';
+                kmTitle.innerText = `Кілометр ${km}`;
+                kmBlock.appendChild(kmTitle);
+
+                // Створюємо сітку з 10 пікетів (від 1 до 10)
+                const piketGrid = document.createElement('div');
+                piketGrid.className = 'piket-grid';
+
+                for (let pk = 1; pk <= 10; pk++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'piket-cell cell-empty'; // за замовчуванням сіра (немає даних)
+                    cell.innerHTML = `П${pk}`;
+
+                    // Шукаємо, чи є звіт про обкошування для цього КМ та ПК
+                    const statusReport = mowingData.find(m => 
+                        m.pd === selectedPd && 
+                        m.peregon === selectedPeregon && 
+                        parseInt(m.km) === km && 
+                        parseInt(m.piket) === pk
+                    );
+
+                    if (statusReport) {
+                        // Призначаємо колір залежно від статусу в БД (наприклад: 'green', 'yellow', 'red')
+                        if (statusReport.status === 'green' || statusReport.status === 'done') {
+                            cell.className = 'piket-cell cell-green';
+                        } else if (statusReport.status === 'yellow' || statusReport.status === 'process') {
+                            cell.className = 'piket-cell cell-yellow';
+                        } else if (statusReport.status === 'red' || statusReport.status === 'bad') {
+                            cell.className = 'piket-cell cell-red';
+                        }
+                        
+                        // Якщо є дата, виводимо її маленьким текстом всередині пікету
+                        if (statusReport.date) {
+                            const dateSpan = document.createElement('span');
+                            dateSpan.className = 'date-pop';
+                            dateSpan.innerText = statusReport.date;
+                            cell.appendChild(dateSpan);
+                        }
+                    }
+
+                    piketGrid.appendChild(cell);
+                }
+
+                kmBlock.appendChild(piketGrid);
+                container.appendChild(kmBlock);
+            }
+            printLog("Діаграму успішно побудовано.", "success");
+        }
+    </script>
+</body>
+</html>
