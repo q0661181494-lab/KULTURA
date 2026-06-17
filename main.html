@@ -16,18 +16,23 @@
         .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
         
+        /* Компактні стилі кілометрів та колій для мобільних */
         .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
         .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 8px; text-align: center; }
-        .track-title-mini { font-size: 11px; font-weight: bold; color: #6b7280; margin-bottom: 4px; margin-top: 4px; text-transform: uppercase; }
-        .piket-grid { display: flex; gap: 3px; width: 100%; overflow-x: auto; padding-bottom: 6px; }
-        .piket-cell { flex: 1; min-width: 36px; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.05); }
-        .cell-empty { background-color: #e5e7eb; color: #9ca3af; text-shadow: none; }
-        .cell-green { background-color: #22c55e; }
-        .cell-yellow { background-color: #eab308; color: #1f2937; }
-        .cell-red { background-color: #ef4444; }
-        .date-pop { font-size: 7px; font-weight: normal; margin-top: 1px; display: block; }
+        .track-title-mini { font-size: 11px; font-weight: bold; color: #6b7280; margin-bottom: 6px; margin-top: 8px; text-transform: uppercase; display: flex; justify-content: space-between; }
+        
+        /* Оптимізована компактна сітка пікетів */
+        .piket-grid { display: flex; gap: 4px; width: 100%; justify-content: space-between; margin-bottom: 4px; }
+        .piket-cell { flex: 1; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s ease, opacity 0.1s ease; }
+        .piket-cell:active { transform: scale(0.92); }
+        .cell-empty { background-color: #e5e7eb; color: #9ca3af; cursor: default; }
+        .cell-green { background-color: #22c55e; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
+        .cell-yellow { background-color: #eab308; color: #1f2937; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
+        .cell-red { background-color: #ef4444; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
+        
         .status-msg { text-align: center; color: #6b7280; font-size: 14px; margin-top: 10px; }
         
+        /* Адмін панель */
         .admin-sidebar { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100%; background: white; box-shadow: -5px 0 25px rgba(0,0,0,0.15); transition: right 0.3s ease; z-index: 1000; display: flex; flex-direction: column; box-sizing: border-box; }
         .admin-sidebar.open { right: 0; }
         .admin-header { background: #1e293b; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -194,14 +199,13 @@
             updateTrackTypeOptions();
         }
 
-        // ЗМІНА 1: Динамічне налаштування доступних колій для обраного перегону
         function updateTrackTypeOptions() {
             const selectedPd = document.getElementById('select-pd').value;
             const selectedPeregon = document.getElementById('select-peregon').value;
             const selectType = document.getElementById('select-track-type');
             
             if (!selectedPd || !selectedPeregon) {
-                selectType.innerHTML = '<option value="all">Обидві колії (Парна та Непарна)</option>';
+                selectType.innerHTML = '<option value="all">Обидві колії (Непарна та Парна)</option>';
                 return;
             }
 
@@ -217,12 +221,9 @@
                 selectType.innerHTML += '<option value="парна">Тільки Парна колія</option>';
             } else if (hasOdd) {
                 selectType.innerHTML += '<option value="непарна">Тільки Непарна колія</option>';
-                printLog(`Для ${selectedPd} знайдено лише непарну колію.`);
             } else if (hasEven) {
                 selectType.innerHTML += '<option value="парна">Тільки Парна колія</option>';
-                printLog(`Для ${selectedPd} знайдено лише парну колію.`);
             } else {
-                // Якщо тип колії не вказано в базі взагалі, показуємо стандартний набір
                 selectType.innerHTML += '<option value="all">Обидві колії (Непарна та Парна)</option>';
                 selectType.innerHTML += '<option value="непарна">Тільки Непарна колія</option>';
                 selectType.innerHTML += '<option value="парна">Тільки Парна колія</option>';
@@ -256,7 +257,7 @@
             let newPass = prompt("Введіть НОВИЙ пароль:");
             if (newPass) {
                 localStorage.setItem('admin_password', newPass);
-                alert("Пароль успешно змінено!");
+                alert("Пароль успішно змінено!");
                 printLog("Пароль адміністратора оновлено", "success");
             }
         }
@@ -279,24 +280,17 @@
             try {
                 const res = await fetch(baseDbUrl + "/rest/v1/tracks", {
                     method: 'POST',
-                    headers: {
-                        'apikey': fullKey,
-                        'authorization': 'Bearer ' + fullKey,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=representation'
-                    },
+                    headers: { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
                     body: JSON.stringify(bodyData)
                 });
 
                 if(res.ok) {
                     printLog("Запис успішно додано в tracks", "success");
                     alert("Ділянку успішно додано в базу!");
-                    
                     document.getElementById('add-pd').value = '';
                     document.getElementById('add-peregon').value = '';
                     document.getElementById('add-start').value = '';
                     document.getElementById('add-end').value = '';
-                    
                     await loadDataFromCloud();
                     runUpdatePeregon();
                 } else {
@@ -313,7 +307,6 @@
             const selectedPd = document.getElementById('select-pd').value;
             const selectedPeregon = document.getElementById('select-peregon').value;
             
-            // Викликаємо оновлення опцій фільтрації перед рендером, якщо користувач змінив перегін
             if(document.activeElement && document.activeElement.id === 'select-peregon') {
                 updateTrackTypeOptions();
             }
@@ -347,7 +340,7 @@
                 kmTitle.innerText = `Кілометр ${km}`;
                 kmBlock.appendChild(kmTitle);
 
-                // ЗМІНА 2: Зміна місць відображення — непарна колія тепер рендериться першою (зверху)
+                // Збережено порядок: непарна зверху, парна знизу
                 if (filterTrackType === 'all' || filterTrackType === 'непарна') {
                     renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'непарна');
                 }
@@ -359,14 +352,24 @@
             }
         }
 
+        // НОВА ФУНКЦІЯ: Обробка кліку на пікет та показ інформації про дату
+        function handlePiketClick(pd, peregon, km, pk, type, date, hasReport) {
+            if (!hasReport) {
+                alert(`📌 Ділянка порожня\nОколоток: ${pd}\nПерегін: ${peregon}\nКМ: ${km}, ПК: ${pk}\nКолія: ${type}\n\nСтатус робіт: Не обкошено.`);
+                return;
+            }
+            
+            let statusText = "Виконано";
+            alert(`📅 Інформація про виконання робіт:\n\n• Околоток: ${pd}\n• Перегін: ${peregon}\n• Колія: ${type}\n• Місце: КМ ${km}, Пікет ${pk}\n• Дата обкошування: ${date || 'не вказана'}\n• Стан: ${statusText} ✅`);
+        }
+
         function renderTrackLine(parentBlock, pd, peregon, km, type) {
-            // Перевіряємо, чи взагалі існує така колія в конфігурації цього КМ, щоб уникнути зайвих порожніх ліній
             const trackExists = tracksData.some(t => t.pd === pd && t.peregon === peregon && t.track_type === type);
             if(!trackExists) return;
 
             const miniTitle = document.createElement('div');
             miniTitle.className = 'track-title-mini';
-            miniTitle.innerText = `Колія: ${type}`;
+            miniTitle.innerHTML = `<span>Колія: ${type}</span><span style="color:#9ca3af; font-weight:normal;">пікети 1-10</span>`;
             parentBlock.appendChild(miniTitle);
 
             const piketGrid = document.createElement('div');
@@ -376,8 +379,8 @@
                 const cell = document.createElement('div');
                 cell.className = 'piket-cell cell-empty';
                 
-                // ЗМІНА 3: Підписи клітинок змінено з П на ПК
-                cell.innerHTML = `ПК${pk}`;
+                // Впроваджено компактний напис (просто цифра)
+                cell.innerHTML = pk;
 
                 const statusReport = mowingData.find(m => 
                     m.pd === pd && 
@@ -387,18 +390,23 @@
                     (m.track_type === type || !m.track_type)
                 );
 
+                let hasReport = false;
+                let reportDate = "";
+
                 if (statusReport) {
+                    hasReport = true;
+                    reportDate = statusReport.date;
+                    
                     if (statusReport.status === 'green' || statusReport.status === 'done') cell.className = 'piket-cell cell-green';
                     else if (statusReport.status === 'yellow' || statusReport.status === 'process') cell.className = 'piket-cell cell-yellow';
                     else if (statusReport.status === 'red' || statusReport.status === 'bad') cell.className = 'piket-cell cell-red';
-                    
-                    if (statusReport.date) {
-                        const dateSpan = document.createElement('span');
-                        dateSpan.className = 'date-pop';
-                        dateSpan.innerText = statusReport.date;
-                        cell.appendChild(dateSpan);
-                    }
                 }
+                
+                // Додано обробник кліку для показу дати
+                cell.onclick = function() {
+                    handlePiketClick(pd, peregon, km, pk, type, reportDate, hasReport);
+                };
+
                 piketGrid.appendChild(cell);
             }
             parentBlock.appendChild(piketGrid);
