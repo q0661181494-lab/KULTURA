@@ -16,12 +16,10 @@
         .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
         
-        /* Компактні стилі кілометрів та колій для мобільних */
         .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
         .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 8px; text-align: center; }
         .track-title-mini { font-size: 11px; font-weight: bold; color: #6b7280; margin-bottom: 6px; margin-top: 8px; text-transform: uppercase; display: flex; justify-content: space-between; }
         
-        /* Оптимізована компактна сітка пікетів */
         .piket-grid { display: flex; gap: 4px; width: 100%; justify-content: space-between; margin-bottom: 4px; }
         .piket-cell { flex: 1; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s ease, opacity 0.1s ease; }
         .piket-cell:active { transform: scale(0.92); }
@@ -31,6 +29,10 @@
         .cell-red { background-color: #ef4444; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
         
         .status-msg { text-align: center; color: #6b7280; font-size: 14px; margin-top: 10px; }
+        
+        /* Власне красиве вспливаюче вікно для дати (замість alert) */
+        .custom-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2000; opacity: 0; display: flex; align-items: center; gap: 8px; }
+        .custom-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         
         /* Адмін панель */
         .admin-sidebar { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100%; background: white; box-shadow: -5px 0 25px rgba(0,0,0,0.15); transition: right 0.3s ease; z-index: 1000; display: flex; flex-direction: column; box-sizing: border-box; }
@@ -67,7 +69,7 @@
             </select>
 
             <label class="track-label">Перегін:</label>
-            <select id="select-peregon" class="input-field" onchange="runRenderDiagram()">
+            <select id="select-peregon" class="input-field" onchange="runUpdatePeregonAndRender()">
                 <option value="">-- Спочатку оберіть околоток --</option>
             </select>
 
@@ -85,6 +87,8 @@
             </div>
         </div>
     </div>
+
+    <div id="custom-toast" class="custom-toast"></div>
 
     <div id="admin-sidebar" class="admin-sidebar">
         <div class="admin-header">
@@ -127,6 +131,7 @@
 
         let tracksData = [];
         let mowingData = [];
+        let toastTimeout;
 
         function printLog(text, status = 'info') {
             const consoleElem = document.getElementById('debug-console');
@@ -195,8 +200,11 @@
                 const opt = document.createElement('option');
                 opt.value = p; opt.innerText = `Перегін ${p}`; selectPeregon.appendChild(opt);
             });
-            
+        }
+
+        function runUpdatePeregonAndRender() {
             updateTrackTypeOptions();
+            runRenderDiagram();
         }
 
         function updateTrackTypeOptions() {
@@ -306,11 +314,6 @@
         function runRenderDiagram() {
             const selectedPd = document.getElementById('select-pd').value;
             const selectedPeregon = document.getElementById('select-peregon').value;
-            
-            if(document.activeElement && document.activeElement.id === 'select-peregon') {
-                updateTrackTypeOptions();
-            }
-            
             const filterTrackType = document.getElementById('select-track-type').value;
             const container = document.getElementById('diagram-container');
             container.innerHTML = '';
@@ -340,7 +343,6 @@
                 kmTitle.innerText = `Кілометр ${km}`;
                 kmBlock.appendChild(kmTitle);
 
-                // Збережено порядок: непарна зверху, парна знизу
                 if (filterTrackType === 'all' || filterTrackType === 'непарна') {
                     renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'непарна');
                 }
@@ -352,15 +354,18 @@
             }
         }
 
-        // НОВА ФУНКЦІЯ: Обробка кліку на пікет та показ інформації про дату
-        function handlePiketClick(pd, peregon, km, pk, type, date, hasReport) {
-            if (!hasReport) {
-                alert(`📌 Ділянка порожня\nОколоток: ${pd}\nПерегін: ${peregon}\nКМ: ${km}, ПК: ${pk}\nКолія: ${type}\n\nСтатус робіт: Не обкошено.`);
-                return;
-            }
+        // ЗМІНА 1 та 2: Показ лаконічного красивого HTML-віконця БЕЗ тексту від браузера
+        function showCustomToast(date) {
+            const toast = document.getElementById('custom-toast');
+            clearTimeout(toastTimeout);
             
-            let statusText = "Виконано";
-            alert(`📅 Інформація про виконання робіт:\n\n• Околоток: ${pd}\n• Перегін: ${peregon}\n• Колія: ${type}\n• Місце: КМ ${km}, Пікет ${pk}\n• Дата обкошування: ${date || 'не вказана'}\n• Стан: ${statusText} ✅`);
+            toast.innerHTML = `🌱 Обкошено: <span style="color: #4ade80; margin-left: 4px;">${date || 'дата не вказана'}</span>`;
+            toast.classList.add('show');
+            
+            // Ховаємо автоматично через 3 секунди
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
         function renderTrackLine(parentBlock, pd, peregon, km, type) {
@@ -378,8 +383,6 @@
             for (let pk = 1; pk <= 10; pk++) {
                 const cell = document.createElement('div');
                 cell.className = 'piket-cell cell-empty';
-                
-                // Впроваджено компактний напис (просто цифра)
                 cell.innerHTML = pk;
 
                 const statusReport = mowingData.find(m => 
@@ -390,23 +393,16 @@
                     (m.track_type === type || !m.track_type)
                 );
 
-                let hasReport = false;
-                let reportDate = "";
-
                 if (statusReport) {
-                    hasReport = true;
-                    reportDate = statusReport.date;
-                    
                     if (statusReport.status === 'green' || statusReport.status === 'done') cell.className = 'piket-cell cell-green';
                     else if (statusReport.status === 'yellow' || statusReport.status === 'process') cell.className = 'piket-cell cell-yellow';
                     else if (statusReport.status === 'red' || statusReport.status === 'bad') cell.className = 'piket-cell cell-red';
+                    
+                    // Клік працює тільки якщо пікет має статус в базі
+                    cell.onclick = function() {
+                        showCustomToast(statusReport.date);
+                    };
                 }
-                
-                // Додано обробник кліку для показу дати
-                cell.onclick = function() {
-                    handlePiketClick(pd, peregon, km, pk, type, reportDate, hasReport);
-                };
-
                 piketGrid.appendChild(cell);
             }
             parentBlock.appendChild(piketGrid);
