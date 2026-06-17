@@ -8,12 +8,12 @@
         body { font-family: -apple-system, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; box-sizing: border-box; }
         
-        /* Оновлене меню з круглою кнопкою адміна збоку */
+        /* Меню з інтегрованою круглою кнопкою */
         .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 16px; display: flex; gap: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; align-items: center; }
         .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #4b5563; text-decoration: none; border-radius: 8px; background: #f3f4f6; cursor: pointer; }
         .nav-link.active { background-color: #2563eb; color: white; }
         
-        /* Стиль круглої кнопки адміна, інтегрованої в меню */
+        /* Кругла кнопка адміна */
         .admin-menu-btn { width: 42px; height: 42px; background-color: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: none; flex-shrink: 0; transition: transform 0.1s ease; }
         .admin-menu-btn:active { transform: scale(0.9); }
         
@@ -37,7 +37,6 @@
         
         .status-msg { text-align: center; color: #6b7280; font-size: 14px; margin-top: 10px; }
         
-        /* Зсунуто трохи нижче, бо кнопка більше не заважає знизу */
         .custom-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2000; opacity: 0; display: flex; align-items: center; gap: 8px; pointer-events: none; }
         .custom-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         
@@ -61,14 +60,14 @@
 
     <div class="container">
         <div class="nav-menu">
-            <a href="main.html" class="nav-link active">📊 Графіки</a>
+            <a href="#" class="nav-link active" onclick="return false;">📊 Графіки</a>
             <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
             <button class="admin-menu-btn" onclick="openAdminSidebar()">⚙️</button>
         </div>
 
         <div class="screen">
             <h2>📊 Лінійна діаграма</h2>
-            <p>Система автоматичногольного контролю стану обкошування робіт.</p>
+            <p>Система автоматичного контролю стану обкошування робіт.</p>
             
             <label class="track-label">Околоток (ПД):</label>
             <select id="select-pd" class="input-field" onchange="runUpdatePeregon()">
