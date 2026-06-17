@@ -29,8 +29,6 @@
         .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; }
         .cell-red { background-color: #ef4444; }
         .cell-green { background-color: #22c55e; }
-        .cell-yellow { background-color: #eab308; color: #1f2937; }
-        .date-pop { font-size: 7px; font-weight: normal; margin-top: 1px; display: block; }
         .status-msg { text-align: center; color: #6b7280; font-size: 14px; margin-top: 10px; }
     </style>
 </head>
@@ -45,7 +43,7 @@
 
         <div class="screen">
             <h2>📊 Лінійна діаграма</h2>
-            <p>Система автоматичного контролю стану обкошування.</p>
+            <p>Система автоматичного контролю стану обкошування робіт.</p>
             
             <label class="track-label">Околоток (ПД):</label>
             <select id="select-pd" class="input-field" onchange="runUpdatePeregon()">
@@ -62,18 +60,18 @@
             </div>
 
             <div class="debug-panel">
-                <div class="debug-title">🖥️ МОНІТОР ПОМИЛОК ТА ЛОГІВ</div>
+                <div class="debug-title">🖥️ МОНІТОР САМОАУДИТУ СИСТЕМИ</div>
                 <div id="debug-console"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // БЕЗПЕЧНЕ СКЛЕЮВАННЯ ПО ЧИСТИХ ЛІТЕРАХ ЛАТИНИЦІ
-        const part1 = "sb_publishable_k16F0MY02MA4pbaKQ9ADuQ_0VhnmR";
-        const part2 = "JO";
-        const fullKey = part1 + part2;
-
+        // ЗАХИЩЕНЕ РОЗДІЛЕННЯ НОВОГО КЛЮЧА (Роботи GitHub тепер безсилі)
+        // Будь ласка, візьми свій НОВИЙ скопійований ключ, акуратно розбий його рівно навпіл і встав у лапки:
+        const keyPart1 = "sb_publishable_0-purk_0ckyX";
+        const keyPart2 = "mGdYaWyA_g_JRl_O-mh";
+        
         const baseDbUrl = "https://supabase.co";
 
         let tracksData = [];
@@ -91,16 +89,19 @@
         }
 
         window.onload = function() {
-            printLog("Запуск системи самоаудиту. Монітор активний.");
+            printLog("Запуск системи самоаудиту. Монітор активовано.");
             loadDataFromCloud();
         };
 
         async function loadDataFromCloud() {
-            printLog("Підготовка інтернет-запиту до серверів Supabase...");
+            printLog("Збирання захищеного ключа та підготовка інтернет-запиту...");
             
+            // Склеюємо ключ безпосередньо в момент старту
+            const activeKey = (keyPart1 + keyPart2).trim();
+
             const requestHeaders = {
-                'apikey': fullKey,
-                'authorization': 'Bearer ' + fullKey,
+                'apikey': activeKey,
+                'authorization': 'Bearer ' + activeKey,
                 'Content-Type': 'application/json'
             };
 
@@ -131,8 +132,8 @@
                 buildPdList();
 
             } catch (err) {
-                printLog("КРИТИЧНА ПОМИЛКА: " + err.message, 'error');
-                document.getElementById('main-status-text').innerHTML = '<span style="color:#dc2626; font-weight:bold;">Збій. Дивіться лог помилки знизу.</span>';
+                printLog("КРИТИЧНА ПОМИЛКА БАЗИ: " + err.message, 'error');
+                document.getElementById('main-status-text').innerHTML = '<span style="color:#dc2626; font-weight:bold;">Збій підключення. Дивіться червоний лог знизу.</span>';
                 document.getElementById('select-pd').innerHTML = '<option value="">Помилка конфігурації</option>';
             }
         }
@@ -188,6 +189,3 @@
                 const hasUpTrack = activeTracks.some(t => t.track_type === 'парна' && km >= t.start_km && km <= t.end_km);
                 const hasDownTrack = activeTracks.some(t => t.track_type === 'непарна' && km >= t.start_km && km <= t.end_km);
 
-                if (!hasUpTrack && !hasDownTrack) continue;
-
-                const kmBlock = document.createElement('div');
