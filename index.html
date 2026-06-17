@@ -23,6 +23,11 @@
         .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
         .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
         
+        /* Рядок для групування КМ та ПК */
+        .geo-row { display: flex; gap: 10px; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
+        .geo-col { flex: 1; }
+        .geo-col .input-field { margin-bottom: 0; }
+
         .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
         .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 8px; text-align: center; }
         .track-title-mini { font-size: 11px; font-weight: bold; color: #6b7280; margin-bottom: 6px; margin-top: 8px; text-transform: uppercase; display: flex; justify-content: space-between; }
@@ -67,7 +72,7 @@
 
         <div class="screen">
             <h2>📊 Лінійна діаграма</h2>
-            <p>Система автоматичногольного контролю стану обкошування робіт.</p>
+            <p>Система автоматичного контролю стану обкошування робіт.</p>
             
             <label class="track-label">Околоток (ПД):</label>
             <select id="select-pd" class="input-field" onchange="runUpdatePeregon()">
@@ -81,7 +86,7 @@
 
             <label class="track-label">Колія:</label>
             <select id="select-track-type" class="input-field" onchange="runRenderDiagram()">
-                </select>
+            </select>
 
             <div id="diagram-container">
                 <div class="status-msg" id="main-status-text">Завантаження конфігурації...</div>
@@ -118,11 +123,37 @@
                 <label class="track-label">Назва перегону:</label>
                 <input type="text" id="add-peregon" class="input-field" placeholder="Путивль - Кошари">
 
-                <label class="track-label">Початок ділянки (КМ):</label>
-                <input type="number" id="add-start" class="input-field" placeholder="52">
+                <div class="geo-row">
+                    <div class="geo-col">
+                        <label class="track-label">Початок (КМ):</label>
+                        <input type="number" id="add-start" class="input-field" placeholder="52">
+                    </div>
+                    <div class="geo-col">
+                        <label class="track-label">Пікет (ПК):</label>
+                        <select id="add-start-pk" class="input-field">
+                            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                            <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                </div>
 
-                <label class="track-label">Кінець ділянки (КМ):</label>
-                <input type="number" id="add-end" class="input-field" placeholder="64">
+                <div class="geo-row">
+                    <div class="geo-col">
+                        <label class="track-label">Кінець (КМ):</label>
+                        <input type="number" id="add-end" class="input-field" placeholder="64">
+                    </div>
+                    <div class="geo-col">
+                        <label class="track-label">Пікет (ПК):</label>
+                        <select id="add-end-pk" class="input-field">
+                            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                            <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                            <option value="10" selected>10</option>
+                        </select>
+                    </div>
+                </div>
 
                 <label class="track-label">Тип колії:</label>
                 <select id="add-type" class="input-field">
@@ -161,6 +192,11 @@
 
         window.onload = function() {
             loadDataFromCloud();
+            // Перевірка редіректу з master.html
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('openAdmin') === 'true') {
+                openAdminSidebar();
+            }
         };
 
         async function loadDataFromCloud() {
@@ -298,15 +334,28 @@
             const pd = document.getElementById('add-pd').value.trim();
             const peregon = document.getElementById('add-peregon').value.trim();
             const start = parseInt(document.getElementById('add-start').value);
+            const startPk = parseInt(document.getElementById('add-start-pk').value);
             const end = parseInt(document.getElementById('add-end').value);
+            const endPk = parseInt(document.getElementById('add-end-pk').value);
             const type = document.getElementById('add-type').value;
 
-            if(!pd || !peregon || isNaN(start) || isNaN(end)) {
+            if(!pd || !peregon || isNaN(start) || isNaN(end) || isNaN(startPk) || isNaN(endPk)) {
                 alert("Заповніть всі поля коректно!");
                 return;
             }
 
-            const bodyData = { pd: pd, peregon: peregon, start_km: start, end_km: end, track_type: type };
+            // Для зворотної сумісності з таблицею розширюємо поля, якщо ви додали їх до БД.
+            // Якщо у вашій таблиці tracks ще немає колонок start_pk та end_pk, Supabase запише дефолтні дані КМ.
+            const bodyData = { 
+                pd: pd, 
+                peregon: peregon, 
+                start_km: start, 
+                start_pk: startPk, 
+                end_km: end, 
+                end_pk: endPk, 
+                track_type: type 
+            };
+            
             printLog("Надсилання нової ділянки в хмару...");
 
             try {
@@ -323,6 +372,8 @@
                     document.getElementById('add-peregon').value = '';
                     document.getElementById('add-start').value = '';
                     document.getElementById('add-end').value = '';
+                    document.getElementById('add-start-pk').value = '1';
+                    document.getElementById('add-end-pk').value = '10';
                     await loadDataFromCloud();
                     runUpdatePeregon();
                 } else {
@@ -391,8 +442,9 @@
         }
 
         function renderTrackLine(parentBlock, pd, peregon, km, type) {
-            const trackExists = tracksData.some(t => t.pd === pd && t.peregon === peregon && t.track_type === type);
-            if(!trackExists) return;
+            // Фільтруємо конфігурацію саме для цієї колії
+            const specificTrack = tracksData.find(t => t.pd === pd && t.peregon === peregon && t.track_type === type);
+            if(!specificTrack) return;
 
             const miniTitle = document.createElement('div');
             miniTitle.className = 'track-title-mini';
@@ -402,8 +454,27 @@
             const piketGrid = document.createElement('div');
             piketGrid.className = 'piket-grid';
 
+            // Отримуємо межі пікетів з бази (за замовчуванням 1 і 10, якщо полів немає)
+            const trackStartKm = specificTrack.start_km;
+            const trackEndKm = specificTrack.end_km;
+            const limitStartPk = (specificTrack.start_pk !== undefined && km === trackStartKm) ? specificTrack.start_pk : 1;
+            const limitEndPk = (specificTrack.end_pk !== undefined && km === trackEndKm) ? specificTrack.end_pk : 10;
+
             for (let pk = 1; pk <= 10; pk++) {
                 const cell = document.createElement('div');
+                
+                // Перевірка, чи входить цей пікет в зону відповідальності даної ділянки колії
+                let isInsideTrackBoundaries = true;
+                if (km === trackStartKm && pk < limitStartPk) isInsideTrackBoundaries = false;
+                if (km === trackEndKm && pk > limitEndPk) isInsideTrackBoundaries = false;
+
+                if (!isInsideTrackBoundaries) {
+                    cell.className = 'piket-cell cell-empty';
+                    cell.innerHTML = '•';
+                    piketGrid.appendChild(cell);
+                    continue;
+                }
+
                 cell.className = 'piket-cell cell-empty';
                 cell.innerHTML = pk;
 
