@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧑‍🔧 Кабінет ПД</title>
+    <title>🧑‍🔧 Кабінет Шляхового Майстра</title>
     <style>
         body { font-family: -apple-system, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; box-sizing: border-box; }
@@ -31,7 +31,7 @@
         .km-item { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #374151; padding: 4px; cursor: pointer; }
         .km-item input { width: 16px; height: 16px; cursor: pointer; }
 
-        /* Стилі інтерактивної лінійної діаграми */
+        /* Стилі класичного світлофора для діаграми */
         .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
         .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 8px; text-align: center; }
         .track-title-mini { font-size: 11px; font-weight: bold; color: #6b7280; margin-bottom: 6px; margin-top: 8px; text-transform: uppercase; display: flex; justify-content: space-between; }
@@ -40,14 +40,14 @@
         .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s ease; position: relative; }
         .piket-cell:active { transform: scale(0.9); }
         
-        /* Статуси кольорів */
+        /* Приглушена палітра класичного світлофора */
         .cell-empty { background-color: #e5e7eb; color: #9ca3af; }
-        .cell-green { background-color: #22c55e; color: white; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
-        .cell-yellow { background-color: #eab308; color: #1f2937; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
-        .cell-red { background-color: #ef4444; color: white; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
+        .cell-green { background-color: #22c55e; color: white; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
+        .cell-yellow { background-color: #eab308; color: #1f2937; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
+        .cell-red { background-color: #ef4444; color: white; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
         
         /* Маркер змін на пікеті (крапка зверху) */
-        .cell-changed::after { content: ''; position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; background-color: white; border-radius: 50%; }
+        .cell-changed::after { content: '🪓'; position: absolute; top: -1px; right: 1px; font-size: 8px; }
 
         .debug-panel { margin-top: 20px; padding: 14px; background-color: #1e293b; border: 2px solid #334155; color: #38bdf8; border-radius: 12px; font-size: 11px; font-family: monospace; }
         .debug-title { font-weight: bold; color: #f43f5e; margin-bottom: 6px; border-bottom: 1px solid #334155; padding-bottom: 4px; }
@@ -96,7 +96,7 @@
 
             <div id="diagram-section" style="display: none; margin-top: 20px; border-top: 2px dashed #e5e7eb; padding-top: 15px;">
                 <h2>✏️ Позначення обкошування</h2>
-                <p style="margin-bottom: 8px;">Натисніть на пікет, щоб зробити його <span style="color:#22c55e;font-weight:bold;">зеленим</span>. Повторне натискання скасує зміну.</p>
+                <p style="margin-bottom: 8px;">Натисніть на пікет, щоб зафіксувати <b>🪓 Обкошено</b>. Повторний клік скасує зміну.</p>
                 
                 <div id="interactive-diagram-container">
                     </div>
@@ -105,7 +105,7 @@
             </div>
 
             <div class="debug-panel">
-                <div class="debug-title">🖥️ МОНІТОР САМОАУДИТУ МАЙСТРА</div>
+                <div class="debug-title">🖥️ МОНІТОР САМОАУДИТУ СИСТЕМИ</div>
                 <div id="master-console" class="debug-scroll"></div>
             </div>
         </div>
@@ -118,7 +118,7 @@
         let sessionPd = "";
         let globalTracks = [];
         let currentCloudMowing = [];
-        let localChangesMap = {}; // Сховище для змінених майстром пікетів
+        let localChangesMap = {};
 
         function logMaster(text, status = 'info') {
             const con = document.getElementById('master-console');
@@ -133,7 +133,7 @@
 
         document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
 
-        // 1. АВТОРИЗАЦІЯ ЗА ВАШОЮ СИСТЕМОЮ ПАРОЛІВ
+        // 1. ПЕРЕВІРКА ДИНАМІЧНИХ ПАРОЛІВ (1313 -> ПД-13)
         async function loginWithDynamicPassword() {
             const inputPass = document.getElementById('master-password-input').value.trim();
             if (!inputPass) { alert("Будь ласка, введіть пароль!"); return; }
@@ -150,16 +150,14 @@
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             
             try {
-                // Завантажуємо конфігурацію ділянок
                 const resTracks = await fetch(`${baseDbUrl}/rest/v1/tracks?pd=eq.${encodeURIComponent(sessionPd)}&select=*`, { headers });
                 globalTracks = await resTracks.json();
 
                 if(globalTracks.length === 0) {
-                    alert(`Для ${sessionPd} не знайдено налаштованих ділянок!`);
+                    alert(`Для ${sessionPd} не знайдено налаштованих ділянок у базі!`);
                     return;
                 }
 
-                // Завантажуємо поточні кольори обкошування з бази
                 const resMow = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(sessionPd)}&select=*`, { headers });
                 currentCloudMowing = await resMow.json();
 
@@ -174,7 +172,7 @@
             }
         }
 
-        // 2. ДИНАМІЧНІ ПЕРЕГОНИ
+        // 2. ЗАПОВНЕННЯ ПЕРЕГОНІВ
         function populatePeregonDropdown() {
             const select = document.getElementById('form-peregon');
             select.innerHTML = "";
@@ -186,7 +184,7 @@
             handlePeregonChange();
         }
 
-        // 3. РОЗУМНЕ ФІЛЬТРУВАННЯ КОЛІЙ (Парна / Непарна)
+        // 3. РОЗУМНИЙ ФІЛЬТР КОЛІЙ (Парна/Непарна)
         function handlePeregonChange() {
             const peregon = document.getElementById('form-peregon').value;
             const typeSelect = document.getElementById('form-track-type');
@@ -218,11 +216,10 @@
                 label.innerHTML = `<input type="checkbox" value="${km}"> КM ${km}`;
                 container.appendChild(label);
             }
-            // Ховаємо попередню діаграму, якщо змінилися фільтри
             document.getElementById('diagram-section').style.display = 'none';
         }
 
-        // 5. ПОБУДОВА ЛОКАЛЬНОЇ ІНТЕРАКТИВНОЇ ДІАГРАМИ
+        // 5. ПОБУДОВА ЖИВОЇ ДІАГРАМИ
         function generateInteractiveDiagram() {
             const checkboxes = document.querySelectorAll('#km-checkboxes-container input[type="checkbox"]:checked');
             const selectedKm = Array.from(checkboxes).map(cb => parseInt(cb.value));
@@ -237,7 +234,7 @@
             const container = document.getElementById('interactive-diagram-container');
             container.innerHTML = "";
             
-            localChangesMap = {}; // Скидаємо старі незаписані зміни
+            localChangesMap = {}; 
 
             selectedKm.sort((a,b) => a - b).forEach(km => {
                 const kmBlock = document.createElement('div');
@@ -259,7 +256,6 @@
                 for (let pk = 1; pk <= 10; pk++) {
                     const cell = document.createElement('div');
                     
-                    // Шукаємо поточний статус в базі
                     const cloudRecord = currentCloudMowing.find(m => 
                         m.peregon === peregon && m.track_type === type && parseInt(m.km) === km && parseInt(m.piket) === pk
                     );
@@ -268,16 +264,15 @@
                     cell.className = `piket-cell cell-${baseStatus}`;
                     cell.innerText = pk;
 
-                    // КЛІК НА ПІКЕТ (ЛОГІКА ТУГГЛУ НА ЗЕЛЕНИЙ)
+                    // КЛІК-ТУГГЛ НА ЗЕЛЕНИЙ З ЗНАЧКОМ СОКИРИ 🪓
                     cell.onclick = function() {
                         const changeKey = `${km}-${pk}`;
                         
                         if (cell.classList.contains('cell-green') && baseStatus !== 'green') {
-                            // Якщо став зеленим, але в базі був іншим -> повертаємо назад рідний колір
                             cell.className = `piket-cell cell-${baseStatus}`;
+                            cell.classList.remove('cell-changed');
                             delete localChangesMap[changeKey];
                         } else {
-                            // Робимо тимчасово зеленим і маркуємо
                             cell.className = 'piket-cell cell-green cell-changed';
                             localChangesMap[changeKey] = { km, piket: pk, status: 'green' };
                         }
@@ -291,10 +286,10 @@
             });
 
             document.getElementById('diagram-section').style.display = 'block';
-            logMaster(`Побудовано локальну карту для ${selectedKm.length} КМ`, 'info');
+            logMaster(`Карту сформовано для ${selectedKm.length} КМ`, 'info');
         }
 
-        // 6. ПАКЕТНЕ ЗБЕРЕЖЕННЯ В SUPABASE
+        // 6. ПАКЕТНЕ ЗБЕРЕЖЕННЯ В БАЗУ ДАНИХ
         async function saveAllChangesToCloud() {
             const changeEntries = Object.values(localChangesMap);
             if (changeEntries.length === 0) {
@@ -306,9 +301,8 @@
             const type = document.getElementById('form-track-type').value;
             const date = document.getElementById('form-date').value;
 
-            if(!date) { alert("Будь ласка, оберіть дату!"); return; }
+            if(!date) { alert("Будь ласка, оберіть дату робіт!"); return; }
 
-            // Готуємо масив об'єктів під UPSERT
             const recordsToUpload = changeEntries.map(ch => ({
                 pd: sessionPd,
                 peregon: peregon,
@@ -319,7 +313,7 @@
                 date: date
             }));
 
-            logMaster(`Збереження ${recordsToUpload.length} змін у Supabase...`);
+            logMaster(`Збереження ${recordsToUpload.length} записів у Supabase...`);
 
             const headers = { 
                 'apikey': fullKey, 
@@ -340,20 +334,20 @@
                     throw new Error(errText);
                 }
 
-                logMaster("Всі дані успішно синхронізовано з базою!", "success");
-                alert(`Успішно збережено змін: ${recordsToUpload.length}!`);
+                logMaster("Дані успішно синхронізовано з сервером!", "success");
+                alert(`Успішно збережено пікетів: ${recordsToUpload.length}!`);
                 
-                // Перезавантажуємо поточний стан, щоб оновити базові кольори
+                // Оновлюємо внутрішню пам'ять свіжими даними з бази
                 const headersAuth = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resMow = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(sessionPd)}&select=*`, { headers: headersAuth });
                 currentCloudMowing = await resMow.json();
                 
-                // Перемальовуємо діаграму вже з новими закріпленими кольорами
+                // Перемальовуємо, закріплюючи зелені кольори як постійні базові
                 generateInteractiveDiagram();
 
             } catch(e) {
-                alert("Сталася помилка при збереженні:\n" + e.message);
-                logMaster("Помилка пакетного збереження", "error");
+                alert("Помилка при збереженні:\n" + e.message);
+                logMaster("Помилка збереження даних", "error");
             }
         }
     </script>
