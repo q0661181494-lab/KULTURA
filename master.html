@@ -26,27 +26,31 @@
         .btn-green { background: #16a34a; margin-top: 20px; }
         .btn-green:hover { background: #15803d; }
         
-        /* Чекбокси для кілометрів */
-        .km-checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 150px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; margin-bottom: 16px; background: #f9fafb; }
+        /* Розгортаний список кілометрів (Акордеон) */
+        .accordion-header { background: #e2e8f0; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: bold; color: #334155; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border: 1px solid #cbd5e1; user-select: none; }
+        .accordion-content { display: none; }
+        .accordion-content.open { display: block; }
+        
+        .km-checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 180px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; margin-bottom: 16px; background: #f9fafb; }
         .km-item { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #374151; padding: 4px; cursor: pointer; }
         .km-item input { width: 16px; height: 16px; cursor: pointer; }
 
-        /* Стилі класичного світлофора для діаграми */
+        /* Стилі лінійної діаграми */
         .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
-        .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 8px; text-align: center; }
+        .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 2px; text-align: center; }
+        .km-date-info { font-size: 11px; color: #9ca3af; text-align: center; margin-bottom: 8px; font-style: italic; }
         .track-title-mini { font-size: 11px; font-weight: bold; color: #6b7280; margin-bottom: 6px; margin-top: 8px; text-transform: uppercase; display: flex; justify-content: space-between; }
         
         .piket-grid { display: flex; gap: 4px; width: 100%; justify-content: space-between; margin-bottom: 4px; }
         .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s ease; position: relative; }
         .piket-cell:active { transform: scale(0.9); }
         
-        /* Приглушена палітра класичного світлофора */
-        .cell-empty { background-color: #e5e7eb; color: #9ca3af; }
-        .cell-green { background-color: #22c55e; color: white; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
-        .cell-yellow { background-color: #eab308; color: #1f2937; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
+        /* Приглушена палітра "світлофора" */
         .cell-red { background-color: #ef4444; color: white; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
+        .cell-yellow { background-color: #eab308; color: #1f2937; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
+        .cell-green { background-color: #22c55e; color: white; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
         
-        /* Маркер змін на пікеті (крапка зверху) */
+        /* Маркер тимчасових змін на телефоні */
         .cell-changed::after { content: '🪓'; position: absolute; top: -1px; right: 1px; font-size: 8px; }
 
         .debug-panel { margin-top: 20px; padding: 14px; background-color: #1e293b; border: 2px solid #334155; color: #38bdf8; border-radius: 12px; font-size: 11px; font-family: monospace; }
@@ -74,7 +78,7 @@
 
             <div id="filter-section" style="display: none;">
                 <h2 id="form-title">🧑‍🔧 Кабінет</h2>
-                <p>Крок 1: Оберіть ділянку, дату та відмітьте потрібні кілометри.</p>
+                <p>Оберіть ділянку, дату та відмітьте потрібні кілометри.</p>
                 
                 <label class="track-label">Перегін:</label>
                 <select id="form-peregon" class="input-field" onchange="handlePeregonChange()">
@@ -87,9 +91,15 @@
                 <label class="track-label">Дата виконання робіт:</label>
                 <input type="date" id="form-date" class="input-field">
 
-                <label class="track-label">Оберіть кілометри (можна кілька):</label>
-                <div id="km-checkboxes-container" class="km-checkbox-grid">
-                    </div>
+                <label class="track-label">Вибір кілометрів:</label>
+                <div class="accordion-header" onclick="toggleKmAccordion()">
+                    <span id="accordion-title-text">📂 Показати список кілометрів (обрано: 0)</span>
+                    <span id="accordion-arrow">▼</span>
+                </div>
+                <div id="km-accordion-content" class="accordion-content">
+                    <div id="km-checkboxes-container" class="km-checkbox-grid">
+                        </div>
+                </div>
 
                 <button class="btn-submit" onclick="generateInteractiveDiagram()">Внести дані (відкрити діаграму)</button>
             </div>
@@ -133,7 +143,20 @@
 
         document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
 
-        // 1. ПЕРЕВІРКА ДИНАМІЧНИХ ПАРОЛІВ (1313 -> ПД-13)
+        // КЕРУВАННЯ РОЗГОРТАННЯМ РЯДКА КІЛОМЕТРІВ
+        function toggleKmAccordion() {
+            const content = document.getElementById('km-accordion-content');
+            const arrow = document.getElementById('accordion-arrow');
+            content.classList.toggle('open');
+            arrow.innerText = content.classList.contains('open') ? '▲' : '▼';
+        }
+
+        function updateAccordionTitle() {
+            const checkboxes = document.querySelectorAll('#km-checkboxes-container input[type="checkbox"]:checked');
+            document.getElementById('accordion-title-text').innerText = `📂 Список кілометрів (обрано: ${checkboxes.length})`;
+        }
+
+        // 1. АВТОРИЗАЦІЯ
         async function loginWithDynamicPassword() {
             const inputPass = document.getElementById('master-password-input').value.trim();
             if (!inputPass) { alert("Будь ласка, введіть пароль!"); return; }
@@ -154,8 +177,7 @@
                 globalTracks = await resTracks.json();
 
                 if(globalTracks.length === 0) {
-                    alert(`Для ${sessionPd} не знайдено налаштованих ділянок у базі!`);
-                    return;
+                    alert(`Для ${sessionPd} не знайдено ділянок у базі!`); return;
                 }
 
                 const resMow = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(sessionPd)}&select=*`, { headers });
@@ -172,7 +194,6 @@
             }
         }
 
-        // 2. ЗАПОВНЕННЯ ПЕРЕГОНІВ
         function populatePeregonDropdown() {
             const select = document.getElementById('form-peregon');
             select.innerHTML = "";
@@ -184,7 +205,6 @@
             handlePeregonChange();
         }
 
-        // 3. РОЗУМНИЙ ФІЛЬТР КОЛІЙ (Парна/Непарна)
         function handlePeregonChange() {
             const peregon = document.getElementById('form-peregon').value;
             const typeSelect = document.getElementById('form-track-type');
@@ -200,7 +220,6 @@
             renderKmCheckboxes();
         }
 
-        // 4. ГЕНЕРАЦІЯ КІЛОМЕТРІВ ГАЛОЧКАМИ
         function renderKmCheckboxes() {
             const peregon = document.getElementById('form-peregon').value;
             const type = document.getElementById('form-track-type').value;
@@ -213,19 +232,43 @@
             for (let km = match.start_km; km <= match.end_km; km++) {
                 const label = document.createElement('label');
                 label.className = 'km-item';
-                label.innerHTML = `<input type="checkbox" value="${km}"> КM ${km}`;
+                label.innerHTML = `<input type="checkbox" value="${km}" onchange="updateAccordionTitle()"> КM ${km}`;
                 container.appendChild(label);
             }
+            updateAccordionTitle();
             document.getElementById('diagram-section').style.display = 'none';
+            // Закриваємо список після зміни фільтру для компактності
+            document.getElementById('km-accordion-content').classList.remove('open');
+            document.getElementById('accordion-arrow').innerText = '▼';
         }
 
-        // 5. ПОБУДОВА ЖИВОЇ ДІАГРАМИ
+        // 🛠️ ЛОГІКА СТАРІННЯ (ВІДРОСТАННЯ) ТРАВИ ЗА ДАТАМИ
+        function calculateStatusByAge(cloudRecord) {
+            if (!cloudRecord || cloudRecord.status !== 'green') {
+                return 'red'; // Якщо даних немає або статус не "обкошено" — колір червоний
+            }
+
+            if (!cloudRecord.date) return 'green'; // Захист на випадок відсутності дати
+
+            const mowedDate = new Date(cloudRecord.date);
+            const today = new Date();
+            
+            // Рахуємо різницю в днях
+            const diffTime = Math.abs(today - mowedDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays >= 45) return 'red';     // ≥ 45 днів — трава відросла (червоний)
+            if (diffDays >= 30) return 'yellow';  // 30-44 дні — в процесі відростання (жовтий)
+            return 'green';                       // 0-29 днів — чисто (зелений)
+        }
+
+        // 5. ПОБУДОВА ЖИВОЇ ДІАГРАМИ З УРАХУВАННЯМ СТАРІННЯ
         function generateInteractiveDiagram() {
             const checkboxes = document.querySelectorAll('#km-checkboxes-container input[type="checkbox"]:checked');
             const selectedKm = Array.from(checkboxes).map(cb => parseInt(cb.value));
             
             if (selectedKm.length === 0) {
-                alert("Будь ласка, оберіть хоча б один кілометр галочкою!");
+                alert("Будь ласка, розгорніть список та оберіть кілометри галочками!");
                 return;
             }
 
@@ -235,6 +278,9 @@
             container.innerHTML = "";
             
             localChangesMap = {}; 
+            // Ховаємо список кілометрів після побудови карти, щоб звільнити місце
+            document.getElementById('km-accordion-content').classList.remove('open');
+            document.getElementById('accordion-arrow').innerText = '▼';
 
             selectedKm.sort((a,b) => a - b).forEach(km => {
                 const kmBlock = document.createElement('div');
@@ -245,6 +291,13 @@
                 kmTitle.innerText = `Кілометр ${km}`;
                 kmBlock.appendChild(kmTitle);
 
+                // Окреме поле для виведення інформації про дату останнього косіння на КМ
+                const kmDateInfo = document.createElement('div');
+                kmDateInfo.className = 'km-date-info';
+                kmDateInfo.id = `date-info-${km}`;
+                kmDateInfo.innerText = "Нова ділянка (немає даних про косіння)";
+                kmBlock.appendChild(kmDateInfo);
+
                 const miniTitle = document.createElement('div');
                 miniTitle.className = 'track-title-mini';
                 miniTitle.innerHTML = `<span>Колія: ${type}</span><span>пікети 1-10</span>`;
@@ -253,6 +306,8 @@
                 const piketGrid = document.createElement('div');
                 piketGrid.className = 'piket-grid';
 
+                let latestDateOnKm = null;
+
                 for (let pk = 1; pk <= 10; pk++) {
                     const cell = document.createElement('div');
                     
@@ -260,19 +315,30 @@
                         m.peregon === peregon && m.track_type === type && parseInt(m.km) === km && parseInt(m.piket) === pk
                     );
 
-                    let baseStatus = cloudRecord ? cloudRecord.status : 'empty';
-                    cell.className = `piket-cell cell-${baseStatus}`;
+                    // Розраховуємо колір на основі дати відростання
+                    let currentVisualStatus = calculateStatusByAge(cloudRecord);
+                    
+                    cell.className = `piket-cell cell-${currentVisualStatus}`;
                     cell.innerText = pk;
 
-                    // КЛІК-ТУГГЛ НА ЗЕЛЕНИЙ З ЗНАЧКОМ СОКИРИ 🪓
+                    if (cloudRecord && cloudRecord.date) {
+                        const recDate = new Date(cloudRecord.date);
+                        if (!latestDateOnKm || recDate > latestDateOnKm) {
+                            latestDateOnKm = recDate;
+                        }
+                    }
+
+                    // КЛІК НА КВАДРАТИК
                     cell.onclick = function() {
                         const changeKey = `${km}-${pk}`;
                         
-                        if (cell.classList.contains('cell-green') && baseStatus !== 'green') {
-                            cell.className = `piket-cell cell-${baseStatus}`;
+                        // Якщо ми вже клікнули і зробили його зеленим, а базовий стан був іншим -> повертаємо розрахований базовий стан
+                        if (cell.classList.contains('cell-green') && currentVisualStatus !== 'green') {
+                            cell.className = `piket-cell cell-${currentVisualStatus}`;
                             cell.classList.remove('cell-changed');
                             delete localChangesMap[changeKey];
                         } else {
+                            // Інакше — красимо в зелений і ставимо сокиру 🪓
                             cell.className = 'piket-cell cell-green cell-changed';
                             localChangesMap[changeKey] = { km, piket: pk, status: 'green' };
                         }
@@ -281,15 +347,19 @@
                     piketGrid.appendChild(cell);
                 }
 
+                if (latestDateOnKm) {
+                    kmDateInfo.innerText = `Останнє обкошування: ${latestDateOnKm.toLocaleDateString('uk-UA')}`;
+                }
+
                 kmBlock.appendChild(piketGrid);
                 container.appendChild(kmBlock);
             });
 
             document.getElementById('diagram-section').style.display = 'block';
-            logMaster(`Карту сформовано для ${selectedKm.length} КМ`, 'info');
+            logMaster(`Діаграму сформовано. Базовий колір за замовчуванням — червоний.`, 'info');
         }
 
-        // 6. ПАКЕТНЕ ЗБЕРЕЖЕННЯ В БАЗУ ДАНИХ
+        // 6. ПАКЕТНЕ ЗБЕРЕЖЕННЯ
         async function saveAllChangesToCloud() {
             const changeEntries = Object.values(localChangesMap);
             if (changeEntries.length === 0) {
@@ -313,7 +383,7 @@
                 date: date
             }));
 
-            logMaster(`Збереження ${recordsToUpload.length} записів у Supabase...`);
+            logMaster(`Оновлення бази даних Supabase...`);
 
             const headers = { 
                 'apikey': fullKey, 
@@ -334,20 +404,20 @@
                     throw new Error(errText);
                 }
 
-                logMaster("Дані успішно синхронізовано з сервером!", "success");
-                alert(`Успішно збережено пікетів: ${recordsToUpload.length}!`);
+                logMaster("Синхронізацію успішно завершено!", "success");
+                alert(`Дані збережено! Змінено пікетів: ${recordsToUpload.length}`);
                 
-                // Оновлюємо внутрішню пам'ять свіжими даними з бази
+                // Перезавантажуємо масив з хмари
                 const headersAuth = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resMow = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(sessionPd)}&select=*`, { headers: headersAuth });
                 currentCloudMowing = await resMow.json();
                 
-                // Перемальовуємо, закріплюючи зелені кольори як постійні базові
+                // Оновлюємо карту
                 generateInteractiveDiagram();
 
             } catch(e) {
-                alert("Помилка при збереженні:\n" + e.message);
-                logMaster("Помилка збереження даних", "error");
+                alert("Помилка:\n" + e.message);
+                logMaster("Помилка збереження", "error");
             }
         }
     </script>
