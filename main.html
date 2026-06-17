@@ -113,4 +113,246 @@
 
             <button class="btn-submit" onclick="submitNewTrack()">Зберегти в Supabase</button>
             
-            <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 2
+            <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+            
+            <h4>🔑 Безпека</h4>
+            <button class="btn-submit btn-secondary" onclick="changeAdminPassword()">Змінити пароль адміна</button>
+        </div>
+    </div>
+
+    <script>
+        const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
+        const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
+
+        let tracksData = [];
+        let mowingData = [];
+
+        function printLog(text, status = 'info') {
+            const consoleElem = document.getElementById('debug-console');
+            if(!consoleElem) return;
+            const line = document.createElement('div');
+            if (status === 'success') line.style.color = '#4ade80';
+            if (status === 'error') line.style.color = '#f87171';
+            line.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
+            consoleElem.appendChild(line);
+        }
+
+        window.onload = function() {
+            loadDataFromCloud();
+        };
+
+        async function loadDataFromCloud() {
+            const requestHeaders = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
+            try {
+                const resTracks = await fetch(baseDbUrl + "/rest/v1/tracks?select=*", { headers: requestHeaders });
+                if (!resTracks.ok) throw new Error("Помилка tracks");
+                tracksData = await resTracks.json();
+
+                const resMowing = await fetch(baseDbUrl + "/rest/v1/mowing?select=*", { headers: requestHeaders });
+                if (!resMowing.ok) throw new Error("Помилка mowing");
+                mowingData = await resMowing.json();
+
+                document.getElementById('main-status-text').innerText = "Будь ласка, оберіть околоток та перегін.";
+                buildPdList();
+            } catch (err) {
+                printLog("Критична помилка завантаження", 'error');
+            }
+        }
+
+        function buildPdList() {
+            const select = document.getElementById('select-pd');
+            const savedValue = select.value;
+            select.innerHTML = '<option value="">-- Оберіть околоток --</option>';
+            const uniquePds = [...new Set(tracksData.map(item => item.pd))];
+            uniquePds.forEach(pd => {
+                const opt = document.createElement('option');
+                opt.value = pd; opt.innerText = pd; select.appendChild(opt);
+            });
+            if(savedValue) select.value = savedValue;
+        }
+
+        function runUpdatePeregon() {
+            const selectedPd = document.getElementById('select-pd').value;
+            const selectPeregon = document.getElementById('select-peregon');
+            selectPeregon.innerHTML = '<option value="">-- Оберіть перегін --</option>';
+            document.getElementById('diagram-container').innerHTML = '';
+            
+            if (!selectedPd) return;
+            const filtered = tracksData.filter(t => t.pd === selectedPd);
+            const uniquePeregons = [...new Set(filtered.map(t => t.peregon))];
+
+            uniquePeregons.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p; opt.innerText = `Перегін ${p}`; selectPeregon.appendChild(opt);
+            });
+        }
+
+        // ПАНЕЛЬ АДМІНА: Безпека та анімація
+        function openAdminPanel() {
+            let savedPassword = localStorage.getItem('admin_password') || '1234';
+            let enteredPassword = prompt("Введіть пароль для доступу до панелі:");
+            
+            if (enteredPassword === savedPassword) {
+                document.getElementById('admin-sidebar').classList.add('open');
+                printLog("Адмін успішно авторизований", "success");
+            } else if (enteredPassword !== null) {
+                alert("Невірний пароль! Доступ заблоковано.");
+                printLog("Спроба несанкціонованого доступу", "error");
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-sidebar').classList.remove('open');
+        }
+
+        function changeAdminPassword() {
+            let savedPassword = localStorage.getItem('admin_password') || '1234';
+            let oldPass = prompt("Введіть поточний пароль:");
+            if (oldPass !== savedPassword) {
+                alert("Поточний пароль невірний!");
+                return;
+            }
+            let newPass = prompt("Введіть НОВИЙ пароль:");
+            if (newPass) {
+                localStorage.setItem('admin_password', newPass);
+                alert("Пароль успішно змінено!");
+                printLog("Пароль адміністратора оновлено", "success");
+            }
+        }
+
+        // АДМІН: Відправка нової ділянки в Supabase
+        async function submitNewTrack() {
+            const pd = document.getElementById('add-pd').value.trim();
+            const peregon = document.getElementById('add-peregon').value.trim();
+            const start = parseInt(document.getElementById('add-start').value);
+            const end = parseInt(document.getElementById('add-end').value);
+            const type = document.getElementById('add-type').value;
+
+            if(!pd || !peregon || isNaN(start) || isNaN(end)) {
+                alert("Заповніть всі поля коректно!");
+                return;
+            }
+
+            const bodyData = { pd: pd, peregon: peregon, start_km: start, end_km: end, track_type: type };
+            printLog("Надсилання нової ділянки в хмару...");
+
+            try {
+                const res = await fetch(baseDbUrl + "/rest/v1/tracks", {
+                    method: 'POST',
+                    headers: {
+                        'apikey': fullKey,
+                        'authorization': 'Bearer ' + fullKey,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(bodyData)
+                });
+
+                if(res.ok) {
+                    alert("Ділянку успішно додано в базу!");
+                    printLog("Запис додано в tracks", "success");
+                    // Очищення полів
+                    document.getElementById('add-pd').value = '';
+                    document.getElementById('add-peregon').value = '';
+                    document.getElementById('add-start').value = '';
+                    document.getElementById('add-end').value = '';
+                    // Оновлюємо дані
+                    await loadDataFromCloud();
+                    runUpdatePeregon();
+                } else {
+                    const txt = await res.text();
+                    throw new Error(txt);
+                }
+            } catch(e) {
+                alert("Помилка збереження: " + e.message);
+                printLog("Помилка відправки", "error");
+            }
+        }
+
+        // РЕНДЕРИНГ ДІАГРАМИ З ФІЛЬТРОМ КОЛІЙ
+        function runRenderDiagram() {
+            const selectedPd = document.getElementById('select-pd').value;
+            const selectedPeregon = document.getElementById('select-peregon').value;
+            const filterTrackType = document.getElementById('select-track-type').value;
+            const container = document.getElementById('diagram-container');
+            container.innerHTML = '';
+
+            if (!selectedPd || !selectedPeregon) return;
+            
+            const activeTracks = tracksData.filter(t => t.pd === selectedPd && t.peregon === selectedPeregon);
+            if(activeTracks.length === 0) {
+                container.innerHTML = '<div class="status-msg">Немає конфігурації для цієї ділянки.</div>';
+                return;
+            }
+
+            // Визначаємо межі кілометрів
+            let minKm = Infinity; let maxKm = -Infinity;
+            activeTracks.forEach(t => {
+                if(t.start_km < minKm) minKm = t.start_km;
+                if(t.end_km > maxKm) maxKm = t.end_km;
+            });
+
+            // Малюємо кожен кілометр
+            for (let km = minKm; km <= maxKm; km++) {
+                const kmBlock = document.createElement('div');
+                kmBlock.className = 'km-block';
+
+                const kmTitle = document.createElement('div');
+                kmTitle.className = 'km-title';
+                kmTitle.innerText = `Кілометр ${km}`;
+                kmBlock.appendChild(kmTitle);
+
+                // Рендеримо лінії колій залежно від фільтра
+                if (filterTrackType === 'all' || filterTrackType === 'парна') {
+                    renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'парна');
+                }
+                if (filterTrackType === 'all' || filterTrackType === 'непарна') {
+                    renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'непарна');
+                }
+
+                container.appendChild(kmBlock);
+            }
+        }
+
+        function renderTrackLine(parentBlock, pd, peregon, km, type) {
+            const miniTitle = document.createElement('div');
+            miniTitle.className = 'track-title-mini';
+            miniTitle.innerText = `Колія: ${type}`;
+            parentBlock.appendChild(miniTitle);
+
+            const piketGrid = document.createElement('div');
+            piketGrid.className = 'piket-grid';
+
+            for (let pk = 1; pk <= 10; pk++) {
+                const cell = document.createElement('div');
+                cell.className = 'piket-cell cell-empty';
+                cell.innerHTML = `П${pk}`;
+
+                // Шукаємо звіт про обкошування з врахуванням типу колії
+                const statusReport = mowingData.find(m => 
+                    m.pd === pd && 
+                    m.peregon === peregon && 
+                    parseInt(m.km) === km && 
+                    parseInt(m.piket) === pk &&
+                    (m.track_type === type || !m.track_type) // Сумісність зі старими записами без вказання колії
+                );
+
+                if (statusReport) {
+                    if (statusReport.status === 'green' || statusReport.status === 'done') cell.className = 'piket-cell cell-green';
+                    else if (statusReport.status === 'yellow' || statusReport.status === 'process') cell.className = 'piket-cell cell-yellow';
+                    else if (statusReport.status === 'red' || statusReport.status === 'bad') cell.className = 'piket-cell cell-red';
+                    
+                    if (statusReport.date) {
+                        const dateSpan = document.createElement('span');
+                        dateSpan.className = 'date-pop';
+                        dateSpan.innerText = statusReport.date;
+                        cell.appendChild(dateSpan);
+                    }
+                }
+                piketGrid.appendChild(cell);
+            }
+            parentBlock.appendChild(piketGrid);
+        }
+    </script>
+</body>
+</html>
