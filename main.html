@@ -20,7 +20,7 @@
         .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 8px; text-align: center; }
         .track-title-mini { font-size: 11px; font-weight: bold; color: #6b7280; margin-bottom: 4px; margin-top: 4px; text-transform: uppercase; }
         .piket-grid { display: flex; gap: 3px; width: 100%; overflow-x: auto; padding-bottom: 6px; }
-        .piket-cell { flex: 1; min-width: 30px; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.05); }
+        .piket-cell { flex: 1; min-width: 36px; height: 35px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.05); }
         .cell-empty { background-color: #e5e7eb; color: #9ca3af; text-shadow: none; }
         .cell-green { background-color: #22c55e; }
         .cell-yellow { background-color: #eab308; color: #1f2937; }
@@ -68,10 +68,7 @@
 
             <label class="track-label">Колія:</label>
             <select id="select-track-type" class="input-field" onchange="runRenderDiagram()">
-                <option value="all">Обидві колії (Парна та Непарна)</option>
-                <option value="парна">Тільки Парна колія</option>
-                <option value="непарна">Тільки Непарна колія</option>
-            </select>
+                </select>
 
             <div id="diagram-container">
                 <div class="status-msg" id="main-status-text">Завантаження конфігурації...</div>
@@ -193,6 +190,43 @@
                 const opt = document.createElement('option');
                 opt.value = p; opt.innerText = `Перегін ${p}`; selectPeregon.appendChild(opt);
             });
+            
+            updateTrackTypeOptions();
+        }
+
+        // ЗМІНА 1: Динамічне налаштування доступних колій для обраного перегону
+        function updateTrackTypeOptions() {
+            const selectedPd = document.getElementById('select-pd').value;
+            const selectedPeregon = document.getElementById('select-peregon').value;
+            const selectType = document.getElementById('select-track-type');
+            
+            if (!selectedPd || !selectedPeregon) {
+                selectType.innerHTML = '<option value="all">Обидві колії (Парна та Непарна)</option>';
+                return;
+            }
+
+            const activeTracks = tracksData.filter(t => t.pd === selectedPd && t.peregon === selectedPeregon);
+            const hasEven = activeTracks.some(t => t.track_type === 'парна');
+            const hasOdd = activeTracks.some(t => t.track_type === 'непарна');
+
+            selectType.innerHTML = '';
+
+            if (hasEven && hasOdd) {
+                selectType.innerHTML += '<option value="all">Обидві колії (Непарна та Парна)</option>';
+                selectType.innerHTML += '<option value="непарна">Тільки Непарна колія</option>';
+                selectType.innerHTML += '<option value="парна">Тільки Парна колія</option>';
+            } else if (hasOdd) {
+                selectType.innerHTML += '<option value="непарна">Тільки Непарна колія</option>';
+                printLog(`Для ${selectedPd} знайдено лише непарну колію.`);
+            } else if (hasEven) {
+                selectType.innerHTML += '<option value="парна">Тільки Парна колія</option>';
+                printLog(`Для ${selectedPd} знайдено лише парну колію.`);
+            } else {
+                // Якщо тип колії не вказано в базі взагалі, показуємо стандартний набір
+                selectType.innerHTML += '<option value="all">Обидві колії (Непарна та Парна)</option>';
+                selectType.innerHTML += '<option value="непарна">Тільки Непарна колія</option>';
+                selectType.innerHTML += '<option value="парна">Тільки Парна колія</option>';
+            }
         }
 
         function openAdminPanel() {
@@ -222,7 +256,7 @@
             let newPass = prompt("Введіть НОВИЙ пароль:");
             if (newPass) {
                 localStorage.setItem('admin_password', newPass);
-                alert("Пароль успішно змінено!");
+                alert("Пароль успешно змінено!");
                 printLog("Пароль адміністратора оновлено", "success");
             }
         }
@@ -278,6 +312,12 @@
         function runRenderDiagram() {
             const selectedPd = document.getElementById('select-pd').value;
             const selectedPeregon = document.getElementById('select-peregon').value;
+            
+            // Викликаємо оновлення опцій фільтрації перед рендером, якщо користувач змінив перегін
+            if(document.activeElement && document.activeElement.id === 'select-peregon') {
+                updateTrackTypeOptions();
+            }
+            
             const filterTrackType = document.getElementById('select-track-type').value;
             const container = document.getElementById('diagram-container');
             container.innerHTML = '';
@@ -307,11 +347,12 @@
                 kmTitle.innerText = `Кілометр ${km}`;
                 kmBlock.appendChild(kmTitle);
 
-                if (filterTrackType === 'all' || filterTrackType === 'парна') {
-                    renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'парна');
-                }
+                // ЗМІНА 2: Зміна місць відображення — непарна колія тепер рендериться першою (зверху)
                 if (filterTrackType === 'all' || filterTrackType === 'непарна') {
                     renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'непарна');
+                }
+                if (filterTrackType === 'all' || filterTrackType === 'парна') {
+                    renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'парна');
                 }
 
                 container.appendChild(kmBlock);
@@ -319,6 +360,10 @@
         }
 
         function renderTrackLine(parentBlock, pd, peregon, km, type) {
+            // Перевіряємо, чи взагалі існує така колія в конфігурації цього КМ, щоб уникнути зайвих порожніх ліній
+            const trackExists = tracksData.some(t => t.pd === pd && t.peregon === peregon && t.track_type === type);
+            if(!trackExists) return;
+
             const miniTitle = document.createElement('div');
             miniTitle.className = 'track-title-mini';
             miniTitle.innerText = `Колія: ${type}`;
@@ -330,7 +375,9 @@
             for (let pk = 1; pk <= 10; pk++) {
                 const cell = document.createElement('div');
                 cell.className = 'piket-cell cell-empty';
-                cell.innerHTML = `П${pk}`;
+                
+                // ЗМІНА 3: Підписи клітинок змінено з П на ПК
+                cell.innerHTML = `ПК${pk}`;
 
                 const statusReport = mowingData.find(m => 
                     m.pd === pd && 
