@@ -54,7 +54,6 @@
         .admin-content { padding: 20px; flex: 1; overflow-y: auto; }
         .btn-submit { width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; }
         .btn-submit:hover { background: #1d4ed8; }
-        .btn-secondary { background: #4b5563; margin-top: 5px; }
 
         .debug-panel { margin-top: 20px; padding: 14px; background-color: #1e293b; border: 2px solid #334155; color: #38bdf8; border-radius: 12px; font-size: 11px; font-family: monospace; }
         .debug-title { font-weight: bold; color: #f43f5e; margin-bottom: 6px; border-bottom: 1px solid #334155; padding-bottom: 4px; }
@@ -162,11 +161,6 @@
                 </select>
 
                 <button class="btn-submit" onclick="submitNewTrack()">Зберегти в Supabase</button>
-                
-                <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-                
-                <h4>🔑 Безпека</h4>
-                <button class="btn-submit btn-secondary" onclick="changeAdminPassword()">Змінити пароль адміна</button>
             </div>
         </div>
     </div>
@@ -314,22 +308,6 @@
             }
         }
 
-        function changeAdminPassword() {
-            let savedPassword = localStorage.getItem('admin_password') || '1234';
-            let oldPass = prompt("Введіть поточний пароль:");
-            if (oldPass !== savedPassword) {
-                alert("Поточний пароль невірний!");
-                return;
-            }
-            let newPass = prompt("Введіть НОВИЙ пароль:");
-            if (newPass) {
-                localStorage.setItem('admin_password', newPass);
-                alert("Пароль успішно змінено!");
-                printLog("Пароль адміністратора оновлено", "success");
-                openAdminSidebar();
-            }
-        }
-
         async function submitNewTrack() {
             const pd = document.getElementById('add-pd').value.trim();
             const peregon = document.getElementById('add-peregon').value.trim();
@@ -388,150 +366,4 @@
             const selectedPd = document.getElementById('select-pd').value;
             const selectedPeregon = document.getElementById('select-peregon').value;
             const filterTrackType = document.getElementById('select-track-type').value;
-            const container = document.getElementById('diagram-container');
-            container.innerHTML = '';
-
-            if (!selectedPd || !selectedPeregon) return;
-            
-            const activeTracks = tracksData.filter(t => t.pd === selectedPd && t.peregon === selectedPeregon);
-            if(activeTracks.length === 0) {
-                container.innerHTML = '<div class="status-msg">Немає конфігурації для цієї ділянки.</div>';
-                return;
-            }
-
-            let minKm = Infinity; let maxKm = -Infinity;
-            activeTracks.forEach(t => {
-                if(t.start_km < minKm) minKm = t.start_km;
-                if(t.end_km > maxKm) maxKm = t.end_km;
-            });
-
-            printLog(`Рендеринг діаграми (КМ ${minKm} - КМ ${maxKm})...`);
-
-            for (let km = minKm; km <= maxKm; km++) {
-                const kmBlock = document.createElement('div');
-                kmBlock.className = 'km-block';
-
-                const kmTitle = document.createElement('div');
-                kmTitle.className = 'km-title';
-                kmTitle.innerText = `Кілометр ${km}`;
-                kmBlock.appendChild(kmTitle);
-
-                if (filterTrackType === 'all' || filterTrackType === 'непарна') {
-                    renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'непарна');
-                }
-                if (filterTrackType === 'all' || filterTrackType === 'парна') {
-                    renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'парна');
-                }
-
-                container.appendChild(kmBlock);
-            }
-        }
-
-        function showCustomToast(text, isAlert = false) {
-            const toast = document.getElementById('custom-toast');
-            clearTimeout(toastTimeout);
-            
-            if (isAlert) {
-                toast.innerHTML = `⚠️ <span style="color: #f87171; margin-left: 4px;">${text}</span>`;
-            } else {
-                toast.innerHTML = `🌱 Обкошено: <span style="color: #4ade80; margin-left: 4px;">${text}</span>`;
-            }
-            
-            toast.classList.add('show');
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        function renderTrackLine(parentBlock, pd, peregon, km, type) {
-            const specificTrack = tracksData.find(t => t.pd === pd && t.peregon === peregon && t.track_type === type);
-            if(!specificTrack) return;
-
-            const miniTitle = document.createElement('div');
-            miniTitle.className = 'track-title-mini';
-            miniTitle.innerHTML = `<span>Колія: ${type}</span><span style="color:#9ca3af; font-weight:normal;">пікети 1-10</span>`;
-            parentBlock.appendChild(miniTitle);
-
-            const piketGrid = document.createElement('div');
-            piketGrid.className = 'piket-grid';
-
-            const trackStartKm = specificTrack.start_km;
-            const trackEndKm = specificTrack.end_km;
-            const limitStartPk = (specificTrack.start_pk !== undefined && km === trackStartKm) ? specificTrack.start_pk : 1;
-            const limitEndPk = (specificTrack.end_pk !== undefined && km === trackEndKm) ? specificTrack.end_pk : 10;
-
-            for (let pk = 1; pk <= 10; pk++) {
-                const cell = document.createElement('div');
-                
-                let isInsideTrackBoundaries = true;
-                if (km === trackStartKm && pk < limitStartPk) isInsideTrackBoundaries = false;
-                if (km === trackEndKm && pk > limitEndPk) isInsideTrackBoundaries = false;
-
-                if (!isInsideTrackBoundaries) {
-                    cell.className = 'piket-cell cell-empty';
-                    cell.innerHTML = '•';
-                    piketGrid.appendChild(cell);
-                    continue;
-                }
-
-                // Шукаємо запис в базі даних (забезпечуємо сумісність назв полів 'piket' та 'pikets')
-                const statusReport = mowingData.find(m => 
-                    m.pd === pd && 
-                    m.peregon === peregon && 
-                    parseInt(m.km) === km && 
-                    (parseInt(m.piket) === pk || parseInt(m.pikets) === pk) &&
-                    (m.track_type === type || !m.track_type)
-                );
-
-                // За замовчуванням пікет вважається непокошеним (червоним)
-                cell.className = 'piket-cell cell-red';
-                cell.innerHTML = pk;
-                
-                cell.onclick = function() {
-                    showCustomToast("Немає даних про обкошування / Потрібно обкосити", true);
-                };
-
-                if (statusReport) {
-                    // Визначаємо наявну дату (перевіряємо і date, і mow_date)
-                    const stringDate = statusReport.date || statusReport.mow_date;
-                    
-                    if (stringDate) {
-                        const today = new Date();
-                        const mowDate = new Date(stringDate);
-                        
-                        // Розрахунок різниці в днях між датами
-                        const diffTime = Math.abs(today - mowDate);
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                        if (diffDays <= 30) {
-                            cell.className = 'piket-cell cell-green';
-                        } else if (diffDays > 30 && diffDays <= 45) {
-                            cell.className = 'piket-cell cell-yellow';
-                        } else {
-                            cell.className = 'piket-cell cell-red'; // Понад 45 днів — знову заросло
-                        }
-
-                        // Конвертуємо ISO-дату (РРРР-ММ-ДД) у правильний формат (ДД/ММ/РРРР)
-                        const formattedDate = mowDate.toLocaleDateString('uk-UA').replace(/\./g, '/');
-
-                        cell.onclick = function() {
-                            showCustomToast(`${formattedDate} (${diffDays} дн. тому)`);
-                        };
-                    } else {
-                        // Резервний варіант: якщо запис існує, але дата порожня, орієнтуємося на текстовий статус
-                        if (statusReport.status === 'green' || statusReport.status === 'done') cell.className = 'piket-cell cell-green';
-                        else if (statusReport.status === 'yellow' || statusReport.status === 'process') cell.className = 'piket-cell cell-yellow';
-                        else cell.className = 'piket-cell cell-red';
-
-                        cell.onclick = function() {
-                            showCustomToast(stringDate || "дата не вказана");
-                        };
-                    }
-                }
-                piketGrid.appendChild(cell);
-            }
-            parentBlock.appendChild(piketGrid);
-        }
-    </script>
-</body>
-</html>
+            const container
