@@ -5,46 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🧑‍🔧 Кабінет Шляхового Майстра</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
+        /* ОНОВЛЕНО: Загальне тло під стиль адмінки */
+        body { font-family: -apple-system, sans-serif; background-color: #f0fdf4; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        /* Навігаційне меню */
-        .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 16px; display: flex; gap: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; align-items: center; }
-        .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #4b5563; text-decoration: none; border-radius: 8px; background: #f3f4f6; cursor: pointer; }
-        .nav-link.active { background-color: #2563eb; color: white; }
+        /* ОНОВЛЕНО: Навігаційне меню у фісташкових тонах */
+        .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 16px; display: flex; gap: 6px; box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); width: 100%; box-sizing: border-box; align-items: center; border: 1px solid #d1fae5; }
+        .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #115e59; text-decoration: none; border-radius: 8px; background: #f0fdf4; cursor: pointer; }
+        /* ОНОВЛЕНО: Активна вкладка тепер хвойно-шавлієва */
+        .nav-link.active { background-color: #115e59; color: white; }
         
         /* Кругла кнопка адміна */
-        .admin-menu-btn { width: 42px; height: 42px; background-color: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: none; flex-shrink: 0; text-decoration: none; }
+        .admin-menu-btn { width: 42px; height: 42px; background-color: #115e59; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: none; flex-shrink: 0; text-decoration: none; transition: transform 0.1s ease; }
+        .admin-menu-btn:active { transform: scale(0.9); }
         
-        .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; margin-bottom: 16px; }
-        h2 { margin-top: 0; margin-bottom: 4px; font-size: 20px; color: #1f2937; }
-        p { color: #6b7280; font-size: 14px; margin-top: 0; margin-bottom: 16px; }
-        .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
-        .track-label { font-size: 13px; font-weight: 600; color: #4b5563; margin-bottom: 6px; display: block; }
+        /* ОНОВЛЕНО: Головна картка з м'якою тінню */
+        .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); width: 100%; box-sizing: border-box; margin-bottom: 16px; border: 1px solid #d1fae5; }
+        h2 { margin-top: 0; margin-bottom: 4px; font-size: 20px; color: #115e59; font-weight: 800; }
+        p { color: #0f766e; font-size: 14px; margin-top: 0; margin-bottom: 16px; opacity: 0.8; }
         
-        .btn-submit { width: 100%; background: #2563eb; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; }
-        .btn-submit:hover { background: #1d4ed8; }
-        .btn-green { background: #16a34a; margin-top: 20px; }
+        /* ОНОВЛЕНО: Поля введення у стилі Матча */
+        .input-field { width: 100%; padding: 12px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; transition: border-color 0.2s, box-shadow 0.2s; color: #115e59; font-weight: 500; }
+        .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
+        .track-label { font-size: 12px; font-weight: 700; color: #115e59; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* ОНОВЛЕНО: Кнопки дій */
+        .btn-submit { width: 100%; background: #0d9488; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; transition: background 0.2s, transform 0.1s; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.15); }
+        .btn-submit:hover { background: #0f766e; }
+        .btn-submit:active { transform: scale(0.98); }
+        
+        /* ОНОВЛЕНО: Зелена кнопка збереження */
+        .btn-green { background: #16a34a; margin-top: 20px; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.15); }
         .btn-green:hover { background: #15803d; }
         
-        /* Розгортаний список кілометрів (Акордеон) */
-        .accordion-header { background: #e2e8f0; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: bold; color: #334155; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border: 1px solid #cbd5e1; user-select: none; }
+        /* ОНОВЛЕНО: Розгортаний список кілометрів (Акордеон) у шавлієвих тонах */
+        .accordion-header { background: #e6f4ea; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: bold; color: #115e59; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border: 1px solid #c2e7d9; user-select: none; }
         .accordion-content { display: none; }
         .accordion-content.open { display: block; }
         
-        .km-checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 180px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; margin-bottom: 16px; background: #f9fafb; }
-        .km-item { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #374151; padding: 4px; cursor: pointer; }
-        .km-item input { width: 16px; height: 16px; cursor: pointer; }
+        /* ОНОВЛЕНО: Сітка чекбоксів всередині акордеону */
+        .km-checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 180px; overflow-y: auto; border: 1px solid #a7f3d0; border-radius: 10px; padding: 10px; margin-bottom: 16px; background: #f0fdf4; }
+        .km-item { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #115e59; padding: 4px; cursor: pointer; font-weight: 500; }
+        .km-item input { width: 16px; height: 16px; cursor: pointer; accent-color: #0d9488; }
  
-        /* Стилі лінійної діаграми */
-        .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
-        .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 2px; text-align: center; }
-        .km-date-info { font-size: 11px; color: #9ca3af; text-align: center; margin-bottom: 8px; font-style: italic; }
-        .track-title-mini { font-size: 11px; font-weight: bold; color: #6b7280; margin-bottom: 6px; margin-top: 8px; text-transform: uppercase; display: flex; justify-content: space-between; }
+        /* ОНОВЛЕНО: Блоки кілометрів інтерактивної діаграми */
+        .km-block { border: 1px solid #d1fae5; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #e6f4ea; }
+        .km-title { font-weight: bold; font-size: 15px; color: #115e59; margin-bottom: 2px; text-align: center; letter-spacing: 0.3px; }
+        .km-date-info { font-size: 11px; color: #0f766e; opacity: 0.7; text-align: center; margin-bottom: 8px; font-style: italic; }
+        .track-title-mini { font-size: 11px; font-weight: bold; color: #0f766e; margin-bottom: 6px; margin-top: 8px; text-transform: uppercase; display: flex; justify-content: space-between; }
         
         .piket-grid { display: flex; gap: 4px; width: 100%; justify-content: space-between; margin-bottom: 4px; }
         .piket-cell { flex: 1; height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s ease; position: relative; }
-        .piket-cell:active { transform: scale(0.9); }
+        .piket-cell:active { transform: scale(0.92); }
         
         /* Класична світлофорна палітра */
         .cell-red { background-color: #ef4444; color: white; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
@@ -54,9 +66,9 @@
         /* Маркер тимчасових змін сокирою */
         .cell-changed::after { content: '🪓'; position: absolute; top: -1px; right: 1px; font-size: 8px; }
  
-        /* ОНОВЛЕНИЙ МОНІТОР САМОАУДИТУ ВНИЗУ ЕКРАНУ СМАРТФОНУ */
-        .debug-panel { margin-top: 8px; padding: 14px; background-color: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .debug-title { font-weight: bold; color: #334155; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        /* ОНОВЛЕНО: Монітор самоаудиту адаптовано під зелену палітру */
+        .debug-panel { margin-top: 8px; padding: 14px; background-color: #e6f4ea; border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(11,94,89,0.02); }
+        .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 6px; border-bottom: 1px solid #c2e7d9; padding-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 110px; overflow-y: auto; text-align: left; }
     </style>
 </head>
@@ -106,7 +118,7 @@
                 <button class="btn-submit" onclick="generateInteractiveDiagram()">Внести дані (відкрити діаграму)</button>
             </div>
  
-            <div id="diagram-section" style="display: none; margin-top: 20px; border-top: 2px dashed #e5e7eb; padding-top: 15px;">
+            <div id="diagram-section" style="display: none; margin-top: 20px; border-top: 2px dashed #a7f3d0; padding-top: 15px;">
                 <h2>✏️ Позначення обкошування</h2>
                 <p style="margin-bottom: 8px;">Натисніть на пікет, щоб зафіксувати <b>🪓 Обкошено</b>. Повторний клік скасовує зміну.</p>
                 
