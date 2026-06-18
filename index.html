@@ -66,7 +66,7 @@
     <div class="container">
         <div class="nav-menu">
             <a href="#" class="nav-link active" onclick="return false;">📊 Графіки</a>
-            <a href="master.html" class="nav-link">🧑🔧 Майстер</a>
+            <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
             <button class="admin-menu-btn" onclick="openAdminSidebar()">⚙️</button>
         </div>
 
@@ -344,8 +344,6 @@
                 return;
             }
 
-            // Для зворотної сумісності з таблицею розширюємо поля, якщо ви додали їх до БД.
-            // Якщо у вашій таблиці tracks ще немає колонок start_pk та end_pk, Supabase запише дефолтні дані КМ.
             const bodyData = { 
                 pd: pd, 
                 peregon: peregon, 
@@ -429,20 +427,23 @@
             }
         }
 
-        function showCustomToast(date) {
+        function showCustomToast(text, isAlert = false) {
             const toast = document.getElementById('custom-toast');
             clearTimeout(toastTimeout);
             
-            toast.innerHTML = `🌱 Обкошено: <span style="color: #4ade80; margin-left: 4px;">${date || 'дата не вказана'}</span>`;
-            toast.classList.add('show');
+            if (isAlert) {
+                toast.innerHTML = `⚠️ <span style="color: #f87171; margin-left: 4px;">${text}</span>`;
+            } else {
+                toast.innerHTML = `🌱 Обкошено: <span style="color: #4ade80; margin-left: 4px;">${text}</span>`;
+            }
             
+            toast.classList.add('show');
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
         }
 
         function renderTrackLine(parentBlock, pd, peregon, km, type) {
-            // Фільтруємо конфігурацію саме для цієї колії
             const specificTrack = tracksData.find(t => t.pd === pd && t.peregon === peregon && t.track_type === type);
             if(!specificTrack) return;
 
@@ -454,7 +455,6 @@
             const piketGrid = document.createElement('div');
             piketGrid.className = 'piket-grid';
 
-            // Отримуємо межі пікетів з бази (за замовчуванням 1 і 10, якщо полів немає)
             const trackStartKm = specificTrack.start_km;
             const trackEndKm = specificTrack.end_km;
             const limitStartPk = (specificTrack.start_pk !== undefined && km === trackStartKm) ? specificTrack.start_pk : 1;
@@ -463,7 +463,6 @@
             for (let pk = 1; pk <= 10; pk++) {
                 const cell = document.createElement('div');
                 
-                // Перевірка, чи входить цей пікет в зону відповідальності даної ділянки колії
                 let isInsideTrackBoundaries = true;
                 if (km === trackStartKm && pk < limitStartPk) isInsideTrackBoundaries = false;
                 if (km === trackEndKm && pk > limitEndPk) isInsideTrackBoundaries = false;
@@ -475,25 +474,59 @@
                     continue;
                 }
 
-                cell.className = 'piket-cell cell-empty';
-                cell.innerHTML = pk;
-
+                // Шукаємо запис в базі даних (забезпечуємо сумісність назв полів 'piket' та 'pikets')
                 const statusReport = mowingData.find(m => 
                     m.pd === pd && 
                     m.peregon === peregon && 
                     parseInt(m.km) === km && 
-                    parseInt(m.piket) === pk &&
+                    (parseInt(m.piket) === pk || parseInt(m.pikets) === pk) &&
                     (m.track_type === type || !m.track_type)
                 );
 
+                // За замовчуванням пікет вважається непокошеним (червоним)
+                cell.className = 'piket-cell cell-red';
+                cell.innerHTML = pk;
+                
+                cell.onclick = function() {
+                    showCustomToast("Немає даних про обкошування / Потрібно обкосити", true);
+                };
+
                 if (statusReport) {
-                    if (statusReport.status === 'green' || statusReport.status === 'done') cell.className = 'piket-cell cell-green';
-                    else if (statusReport.status === 'yellow' || statusReport.status === 'process') cell.className = 'piket-cell cell-yellow';
-                    else if (statusReport.status === 'red' || statusReport.status === 'bad') cell.className = 'piket-cell cell-red';
+                    // Визначаємо наявну дату (перевіряємо і date, і mow_date)
+                    const stringDate = statusReport.date || statusReport.mow_date;
                     
-                    cell.onclick = function() {
-                        showCustomToast(statusReport.date);
-                    };
+                    if (stringDate) {
+                        const today = new Date();
+                        const mowDate = new Date(stringDate);
+                        
+                        // Розрахунок різниці в днях між датами
+                        const diffTime = Math.abs(today - mowDate);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                        if (diffDays <= 30) {
+                            cell.className = 'piket-cell cell-green';
+                        } else if (diffDays > 30 && diffDays <= 45) {
+                            cell.className = 'piket-cell cell-yellow';
+                        } else {
+                            cell.className = 'piket-cell cell-red'; // Понад 45 днів — знову заросло
+                        }
+
+                        // Конвертуємо ISO-дату (РРРР-ММ-ДД) у правильний формат (ДД/ММ/РРРР)
+                        const formattedDate = mowDate.toLocaleDateString('uk-UA').replace(/\./g, '/');
+
+                        cell.onclick = function() {
+                            showCustomToast(`${formattedDate} (${diffDays} дн. тому)`);
+                        };
+                    } else {
+                        // Резервний варіант: якщо запис існує, але дата порожня, орієнтуємося на текстовий статус
+                        if (statusReport.status === 'green' || statusReport.status === 'done') cell.className = 'piket-cell cell-green';
+                        else if (statusReport.status === 'yellow' || statusReport.status === 'process') cell.className = 'piket-cell cell-yellow';
+                        else cell.className = 'piket-cell cell-red';
+
+                        cell.onclick = function() {
+                            showCustomToast(stringDate || "дата не вказана");
+                        };
+                    }
                 }
                 piketGrid.appendChild(cell);
             }
