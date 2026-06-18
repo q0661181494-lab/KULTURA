@@ -54,6 +54,9 @@
         .admin-content { padding: 20px; flex: 1; overflow-y: auto; }
         .btn-submit { width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; }
         .btn-submit:hover { background: #1d4ed8; }
+        .btn-danger { width: 100%; background: #ef4444; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; }
+        .btn-danger:hover { background: #dc2626; }
+        .admin-separator { border: 0; height: 1px; background: #e5e7eb; margin: 24px 0; }
 
         .debug-panel { margin-top: 20px; padding: 14px; background-color: #1e293b; border: 2px solid #334155; color: #38bdf8; border-radius: 12px; font-size: 11px; font-family: monospace; }
         .debug-title { font-weight: bold; color: #f43f5e; margin-bottom: 6px; border-bottom: 1px solid #334155; padding-bottom: 4px; }
@@ -71,7 +74,7 @@
 
         <div class="screen">
             <h2>📊 Лінійна діаграма</h2>
-            <p>Система автоматичного контролю стану обкошування робіт.</p>
+            <p>Система автоматичногольного контролю стану обкошування робіт.</p>
             
             <label class="track-label">Околоток (ПД):</label>
             <select id="select-pd" class="input-field" onchange="runUpdatePeregon()">
@@ -161,6 +164,15 @@
                 </select>
 
                 <button class="btn-submit" onclick="submitNewTrack()">Зберегти в Supabase</button>
+
+                <hr class="admin-separator">
+
+                <h4>🗑️ Очистити дані околотку</h4>
+                <label class="track-label">Оберіть околоток (ПД) для видалення:</label>
+                <select id="delete-pd-select" class="input-field">
+                    <option value="">-- Оберіть ПД --</option>
+                </select>
+                <button class="btn-danger" onclick="deletePdTracksData()">Видалити ділянки з Supabase</button>
             </div>
         </div>
     </div>
@@ -217,17 +229,31 @@
 
         function buildPdList() {
             const select = document.getElementById('select-pd');
+            const deleteSelect = document.getElementById('delete-pd-select');
             const currentSelected = select.value;
+            const currentDeleteSelected = deleteSelect ? deleteSelect.value : "";
+            
             select.innerHTML = '<option value="">-- Оберіть околоток --</option>';
+            if(deleteSelect) deleteSelect.innerHTML = '<option value="">-- Оберіть ПД --</option>';
             
             const uniquePds = [...new Set(tracksData.map(item => item.pd))];
             uniquePds.forEach(pd => {
                 const opt = document.createElement('option');
-                opt.value = pd; opt.innerText = pd; select.appendChild(opt);
+                opt.value = pd; opt.innerText = pd; 
+                select.appendChild(opt);
+                
+                if(deleteSelect) {
+                    const optDel = document.createElement('option');
+                    optDel.value = pd; optDel.innerText = pd;
+                    deleteSelect.appendChild(optDel);
+                }
             });
             
             if(currentSelected && uniquePds.includes(currentSelected)) {
                 select.value = currentSelected;
+            }
+            if(deleteSelect && currentDeleteSelected && uniquePds.includes(currentDeleteSelected)) {
+                deleteSelect.value = currentDeleteSelected;
             }
         }
 
@@ -359,6 +385,47 @@
             } catch(e) {
                 alert("Помилка збереження: " + e.message);
                 printLog("Помилка відправки даних", "error");
+            }
+        }
+
+        async function deletePdTracksData() {
+            const pdToDel = document.getElementById('delete-pd-select').value;
+            if(!pdToDel) {
+                alert("Будь ласка, оберіть околоток для видалення!");
+                return;
+            }
+
+            if(!confirm(`Ви дійсно хочете видалити всі ділянки для ${pdToDel}? Цю дію неможливо скасувати.`)) {
+                return;
+            }
+
+            printLog(`Видалення ділянок околотку ${pdToDel} з хмари...`);
+
+            try {
+                const res = await fetch(`${baseDbUrl}/rest/v1/tracks?pd=eq.${encodeURIComponent(pdToDel)}`, {
+                    method: 'DELETE',
+                    headers: { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey }
+                });
+
+                if(res.ok) {
+                    printLog(`Ділянки для ${pdToDel} успішно видалено`, "success");
+                    alert(`Всі ділянки околотку ${pdToDel} успішно видалено з бази!`);
+                    
+                    // Скидаємо фільтри, якщо було видалено поточний активний околоток
+                    if(document.getElementById('select-pd').value === pdToDel) {
+                        document.getElementById('select-pd').value = "";
+                        document.getElementById('select-peregon').innerHTML = '<option value="">-- Спочатку оберіть околоток --</option>';
+                        document.getElementById('diagram-container').innerHTML = '';
+                    }
+
+                    await loadDataFromCloud();
+                } else {
+                    const txt = await res.text();
+                    throw new Error(txt);
+                }
+            } catch(e) {
+                alert("Помилка видалення: " + e.message);
+                printLog("Помилка під час видалення даних околотку", "error");
             }
         }
 
