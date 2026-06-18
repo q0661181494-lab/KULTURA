@@ -14,14 +14,15 @@
         .nav-link.active { background-color: #2563eb; color: white; }
         
         /* Кругла кнопка адміна */
-        .admin-menu-btn { width: 42px; height: 42px; background-color: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: none; flex-shrink: 0; transition: transform 0.1s ease; }
+        .admin-menu-btn { width: 42px; height: 42px; background-color: #334155; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: none; flex-shrink: 0; transition: transform 0.1s ease; }
         .admin-menu-btn:active { transform: scale(0.9); }
         
         .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); position: relative; overflow: hidden; margin-bottom: 16px; }
         h2 { margin-top: 0; margin-bottom: 4px; font-size: 20px; color: #1f2937; }
         p { color: #6b7280; font-size: 14px; margin-top: 0; margin-bottom: 16px; }
-        .input-field { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; }
-        .track-label { font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block; }
+        .input-field { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; transition: border-color 0.2s, box-shadow 0.2s; color: #334155; }
+        .input-field:focus { outline: none; border-color: #64748b; box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.15); }
+        .track-label { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.3px; }
         
         /* Рядок для групування КМ та ПК */
         .geo-row { display: flex; gap: 10px; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
@@ -42,21 +43,33 @@
         
         .status-msg { text-align: center; color: #6b7280; font-size: 14px; margin-top: 10px; }
         
-        .custom-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2000; opacity: 0; display: flex; align-items: center; gap: 8px; pointer-events: none; }
+        .custom-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #334155; color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2000; opacity: 0; display: flex; align-items: center; gap: 8px; pointer-events: none; }
         .custom-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         
-        /* БІЧНА ПАНЕЛЬ АДМІНІСТРАТОРА */
-        .admin-sidebar { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100%; background: white; box-shadow: -5px 0 25px rgba(0,0,0,0.15); transition: right 0.3s ease; z-index: 1000; display: flex; flex-direction: column; box-sizing: border-box; }
+        /* СТАЛЕВА БІЧНА ПАНЕЛЬ АДМІНІСТРАТОРА */
+        .admin-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(2px); z-index: 999; display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .admin-overlay.open { display: block; opacity: 1; }
+        
+        .admin-sidebar { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100%; background: #f8fafc; box-shadow: -10px 0 30px rgba(15, 23, 42, 0.15); transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000; display: flex; flex-direction: column; box-sizing: border-box; }
         .admin-sidebar.open { right: 0; }
-        .admin-header { background: #1e293b; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .admin-header h3 { margin: 0; font-size: 18px; }
-        .close-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-        .admin-content { padding: 20px; flex: 1; overflow-y: auto; }
-        .btn-submit { width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; }
-        .btn-submit:hover { background: #1d4ed8; }
-        .btn-danger { width: 100%; background: #ef4444; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; }
-        .btn-danger:hover { background: #dc2626; }
-        .admin-separator { border: 0; height: 1px; background: #e5e7eb; margin: 24px 0; }
+        .admin-header { background: #334155; color: white; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .admin-header h3 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: 0.5px; }
+        .close-btn { background: none; border: none; color: #cbd5e1; font-size: 26px; cursor: pointer; transition: color 0.2s; padding: 0; line-height: 1; }
+        .close-btn:hover { color: white; }
+        
+        .admin-content { padding: 16px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        
+        /* Модернізовані мікро-картки всередині адмінки */
+        .admin-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .admin-card h4 { margin-top: 0; margin-bottom: 14px; font-size: 15px; color: #334155; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+        
+        .btn-submit { width: 100%; background: #475569; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 6px; transition: background 0.2s, transform 0.1s; }
+        .btn-submit:hover { background: #334155; }
+        .btn-submit:active { transform: scale(0.98); }
+        
+        .btn-danger { width: 100%; background: #b91c1c; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 6px; transition: background 0.2s, transform 0.1s; }
+        .btn-danger:hover { background: #991b1b; }
+        .btn-danger:active { transform: scale(0.98); }
 
         /* ОНОВЛЕНИЙ МОНІТОР САМОАУДИТУ ВНИЗУ ЕКРАНУ СМАРТФОНУ */
         .debug-panel { margin-top: 8px; padding: 14px; background-color: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
@@ -104,76 +117,82 @@
 
     <div id="custom-toast" class="custom-toast"></div>
 
+    <div id="admin-overlay" class="admin-overlay" onclick="closeAdminSidebar()"></div>
+
     <div id="admin-sidebar" class="admin-sidebar">
         <div class="admin-header">
-            <h3>⚙️ Панель адміністратора</h3>
+            <h3>⚙️ ПАНЕЛЬ АДМІНІСТРАТОРА</h3>
             <button class="close-btn" onclick="closeAdminSidebar()">×</button>
         </div>
         
         <div class="admin-content">
-            <div id="admin-auth-block">
-                <label class="track-label" style="margin-top: 10px;">Введіть пароль доступу:</label>
-                <input type="password" id="admin-password-input" class="input-field" placeholder="••••">
-                <button class="btn-submit" onclick="checkAdminPasswordInside()">Увійти</button>
+            <div id="admin-auth-block" class="admin-card">
+                <label class="track-label">Вхід у систему контролю:</label>
+                <input type="password" id="admin-password-input" class="input-field" placeholder="Введіть пароль доступу...">
+                <button class="btn-submit" onclick="checkAdminPasswordInside()">Авторизуватись</button>
             </div>
 
-            <div id="admin-controls-block" style="display: none;">
-                <h4>➕ Додати нову ділянку (track)</h4>
+            <div id="admin-controls-block" style="display: none; flex-direction: column; gap: 16px;">
                 
-                <label class="track-label">Назва ПД (напр., ПД-13):</label>
-                <input type="text" id="add-pd" class="input-field" placeholder="ПД-13">
+                <div class="admin-card">
+                    <h4>➕ Додати нову ділянку (track)</h4>
+                    
+                    <label class="track-label">Назва ПД (напр., ПД-13):</label>
+                    <input type="text" id="add-pd" class="input-field" placeholder="ПД-13">
 
-                <label class="track-label">Назва перегону:</label>
-                <input type="text" id="add-peregon" class="input-field" placeholder="Путивль - Кошари">
+                    <label class="track-label">Назва перегону:</label>
+                    <input type="text" id="add-peregon" class="input-field" placeholder="Путивль - Кошари">
 
-                <div class="geo-row">
-                    <div class="geo-col">
-                        <label class="track-label">Початок (КМ):</label>
-                        <input type="number" id="add-start" class="input-field" placeholder="52">
+                    <div class="geo-row">
+                        <div class="geo-col">
+                            <label class="track-label">Початок (КМ):</label>
+                            <input type="number" id="add-start" class="input-field" placeholder="52">
+                        </div>
+                        <div class="geo-col">
+                            <label class="track-label">Пікет (ПК):</label>
+                            <select id="add-start-pk" class="input-field">
+                                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                                <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="geo-col">
-                        <label class="track-label">Пікет (ПК):</label>
-                        <select id="add-start-pk" class="input-field">
-                            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                            <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                            <option value="10">10</option>
-                        </select>
+
+                    <div class="geo-row">
+                        <div class="geo-col">
+                            <label class="track-label">Кінець (КМ):</label>
+                            <input type="number" id="add-end" class="input-field" placeholder="64">
+                        </div>
+                        <div class="geo-col">
+                            <label class="track-label">Пікет (ПК):</label>
+                            <select id="add-end-pk" class="input-field">
+                                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                                <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                                <option value="10" selected>10</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <label class="track-label">Тип колії:</label>
+                    <select id="add-type" class="input-field">
+                        <option value="парна">парна</option>
+                        <option value="непарна">непарна</option>
+                    </select>
+
+                    <button class="btn-submit" onclick="submitNewTrack()">Зберегти в Supabase</button>
                 </div>
 
-                <div class="geo-row">
-                    <div class="geo-col">
-                        <label class="track-label">Кінець (КМ):</label>
-                        <input type="number" id="add-end" class="input-field" placeholder="64">
-                    </div>
-                    <div class="geo-col">
-                        <label class="track-label">Пікет (ПК):</label>
-                        <select id="add-end-pk" class="input-field">
-                            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                            <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                            <option value="10" selected>10</option>
-                        </select>
-                    </div>
+                <div class="admin-card">
+                    <h4>🗑️ Очистити дані околотку</h4>
+                    <label class="track-label">Оберіть околоток (ПД) для видалення:</label>
+                    <select id="delete-pd-select" class="input-field">
+                        <option value="">-- Оберіть ПД --</option>
+                    </select>
+                    <button class="btn-danger" onclick="deletePdTracksData()">Видалити ділянки з Supabase</button>
                 </div>
-
-                <label class="track-label">Тип колії:</label>
-                <select id="add-type" class="input-field">
-                    <option value="парна">парна</option>
-                    <option value="непарна">непарна</option>
-                </select>
-
-                <button class="btn-submit" onclick="submitNewTrack()">Зберегти в Supabase</button>
-
-                <hr class="admin-separator">
-
-                <h4>🗑️ Очистити дані околотку</h4>
-                <label class="track-label">Оберіть околоток (ПД) для видалення:</label>
-                <select id="delete-pd-select" class="input-field">
-                    <option value="">-- Оберіть ПД --</option>
-                </select>
-                <button class="btn-danger" onclick="deletePdTracksData()">Видалити ділянки з Supabase</button>
+                
             </div>
         </div>
     </div>
@@ -191,8 +210,8 @@
             if(!consoleElem) return;
             const line = document.createElement('div');
             line.style.marginBottom = "3px";
-            if (status === 'success') line.style.color = '#16a34a'; // Приємний зелений для світлого фону
-            if (status === 'error') line.style.color = '#dc2626'; // Насичений червоний для помилок
+            if (status === 'success') line.style.color = '#16a34a'; 
+            if (status === 'error') line.style.color = '#dc2626'; 
             line.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
             consoleElem.appendChild(line);
             consoleElem.scrollTop = consoleElem.scrollHeight;
@@ -311,7 +330,12 @@
         }
 
         function openAdminSidebar() {
-            document.getElementById('admin-sidebar').classList.add('open');
+            document.getElementById('admin-overlay').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('admin-overlay').classList.add('open');
+                document.getElementById('admin-sidebar').classList.add('open');
+            }, 10);
+            
             document.getElementById('admin-auth-block').style.display = 'block';
             document.getElementById('admin-controls-block').style.display = 'none';
             document.getElementById('admin-password-input').value = '';
@@ -319,6 +343,10 @@
 
         function closeAdminSidebar() {
             document.getElementById('admin-sidebar').classList.remove('open');
+            document.getElementById('admin-overlay').classList.remove('open');
+            setTimeout(() => {
+                document.getElementById('admin-overlay').style.display = 'none';
+            }, 300);
         }
 
         function checkAdminPasswordInside() {
@@ -327,7 +355,7 @@
 
             if (enteredPassword === savedPassword) {
                 document.getElementById('admin-auth-block').style.display = 'none';
-                document.getElementById('admin-controls-block').style.display = 'block';
+                document.getElementById('admin-controls-block').style.display = 'flex';
                 printLog("Адмін успішно авторизований в панелі", "success");
             } else {
                 alert("Невірний пароль!");
@@ -369,7 +397,7 @@
                 });
 
                 if(res.ok) {
-                    printLog("Запис успішно додано в tracks", "success");
+                    printLog("Запис успешно додано в tracks", "success");
                     alert("Ділянку успішно додано в базу!");
                     document.getElementById('add-pd').value = '';
                     document.getElementById('add-peregon').value = '';
