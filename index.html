@@ -72,6 +72,9 @@
         .btn-danger:hover { background: #9f1239; }
         .btn-danger:active { transform: scale(0.98); }
 
+        /* Стилі для підпису розробника */
+        .admin-footer-credits { text-align: center; font-size: 11px; color: #0f766e; font-weight: bold; letter-spacing: 0.5px; opacity: 0.75; margin-top: auto; padding-top: 16px; padding-bottom: 4px; text-transform: uppercase; border-top: 1px dashed #caf4dc; }
+
         /* Монітор самоаудиту */
         .debug-panel { margin-top: 8px; padding: 14px; background-color: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .debug-title { font-weight: bold; color: #334155; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -118,6 +121,7 @@
 
     <div id="custom-toast" class="custom-toast"></div>
 
+    <!-- Тло для затемнення екрану при відкритті адмінки -->
     <div id="admin-overlay" class="admin-overlay" onclick="closeAdminSidebar()"></div>
 
     <div id="admin-sidebar" class="admin-sidebar">
@@ -127,12 +131,14 @@
         </div>
         
         <div class="admin-content">
+            <!-- Блок авторизації у вигляді картки -->
             <div id="admin-auth-block" class="admin-card">
                 <label class="track-label">Вхід у систему контролю:</label>
                 <input type="password" id="admin-password-input" class="input-field" placeholder="Введіть пароль доступу...">
                 <button class="btn-submit" onclick="checkAdminPasswordInside()">Авторизуватись</button>
             </div>
 
+            <!-- Блок керування у вигляді окремих карток -->
             <div id="admin-controls-block" style="display: none; flex-direction: column; gap: 16px;">
                 
                 <div class="admin-card">
@@ -194,6 +200,11 @@
                     <button class="btn-danger" onclick="deletePdTracksData()">Видалити ділянки з Supabase</button>
                 </div>
                 
+            </div>
+
+            <!-- ПІДПИС РОЗРОБНИКА В САМОМУ НИЗУ КОНТЕНТУ -->
+            <div class="admin-footer-credits">
+                © 2026 ПЧУ-5 Сергій ШИНКАРЕНКО
             </div>
         </div>
     </div>
