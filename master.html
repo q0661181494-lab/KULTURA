@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧑🔧 Кабінет Шляхового Майстра (ПД)</title>
+    <title>🧑‍🔧 Кабінет Шляхового Майстра (ПД)</title>
     <style>
         body { font-family: -apple-system, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; box-sizing: border-box; }
@@ -28,11 +28,10 @@
         .btn-save-cloud { background: #16a34a; margin-top: 16px; font-size: 16px; padding: 14px; }
         .btn-save-cloud:hover { background: #15803d; }
 
-        /* Стилі інтерактивної карти */
+        /* Стилі інтерактивної карти одного кілометра */
         .km-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #fafafa; }
         .km-title { font-weight: bold; font-size: 15px; color: #374151; margin-bottom: 4px; text-align: center; }
         .track-title-mini { font-size: 11px; font-weight: bold; color: #6b7280; margin-bottom: 6px; text-transform: uppercase; display: flex; justify-content: space-between; }
-        .track-subtitle-info { font-size: 11px; color: #9ca3af; font-style: italic; text-align: center; margin-bottom: 8px; }
         
         .piket-grid { display: flex; gap: 4px; width: 100%; justify-content: space-between; margin-bottom: 4px; }
         .piket-cell { flex: 1; height: 38px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; user-select: none; transition: transform 0.1s ease; position: relative; }
@@ -57,12 +56,12 @@
     <div class="container">
         <div class="nav-menu">
             <a href="index.html" class="nav-link">📊 Графіки</a>
-            <a href="#" class="nav-link active" onclick="return false;">🧑🔧 Майстер</a>
+            <a href="#" class="nav-link active" onclick="return false;">🧑‍🔧 Майстер</a>
             <button class="admin-menu-btn" onclick="redirectToAdminMode()">⚙️</button>
         </div>
 
         <div class="screen" id="auth-screen">
-            <h2>🧑🔧 Вхід у кабінет майстра</h2>
+            <h2>🧑‍🔧 Вхід у кабінет майстра</h2>
             <p>Будь ласка, введіть ваш табельний пароль для ідентифікації біля колій.</p>
             
             <label class="track-label">Пароль лінійного майстра:</label>
@@ -71,7 +70,7 @@
         </div>
 
         <div class="screen" id="work-screen" style="display: none;">
-            <h2 id="master-welcome-title">🧑🔧 Кабінет ПД</h2>
+            <h2 id="master-welcome-title">🧑‍🔧 Кабінет ПД</h2>
             <p>Внесення фактичних обсягів виконаних робіт з очищення чагарників.</p>
 
             <label class="track-label">Оберіть перегін:</label>
@@ -79,7 +78,11 @@
             </select>
 
             <label class="track-label">Оберіть колію:</label>
-            <select id="form-track-type" class="input-field" onchange="generateInteractiveDiagram()">
+            <select id="form-track-type" class="input-field" onchange="runMasterUpdateKmOptions()">
+            </select>
+
+            <label class="track-label">Оберіть кілометр:</label>
+            <select id="form-km" class="input-field" onchange="generateInteractiveDiagram()">
             </select>
 
             <label class="track-label">Дата виконання робіт:</label>
@@ -88,6 +91,7 @@
             <div id="interactive-map-zone" style="margin-top: 10px;">
                 <h3 style="font-size: 16px; margin-bottom: 4px; color: #374151;">📝 Позначення обкошування</h3>
                 <p style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">Натисніть на пікет, щоб зафіксувати 🪓 <b>Обкошено</b>. Повторний клік скасовує зміну.</p>
+                
                 <div id="piket-blocks-container"></div>
                 
                 <button class="btn-submit btn-save-cloud" onclick="saveAllChangesToCloud()">Зберегти зміни в Supabase</button>
@@ -109,7 +113,6 @@
         let currentCloudMowing = [];
         let localChangesMap = {}; // Зберігає тимчасові кліки майстра {"KM-PK": {km, piket, status}}
 
-        // Набір паролів для майстрів (ПД)
         const masterRegistry = {
             "1111": "ПД-11",
             "1212": "ПД-12",
@@ -142,9 +145,8 @@
             sessionPd = masterRegistry[pass];
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('work-screen').style.display = 'block';
-            document.getElementById('master-welcome-title').innerText = `🧑🔧 Кабінет майстра (${sessionPd})`;
+            document.getElementById('master-welcome-title').innerText = `🧑‍🔧 Кабінет майстра (${sessionPd})`;
             
-            // Встановлюємо сьогоднішню дату за замовчуванням
             document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
             
             logMaster(`Вхід виконано успішно під іменем ${sessionPd}`, 'success');
@@ -156,12 +158,10 @@
             const headersAuth = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
 
             try {
-                // 1. Завантажуємо конфігурацію ділянок (tracks) саме цього майстра
                 const resTracks = await fetch(`${baseDbUrl}/rest/v1/tracks?pd=eq.${encodeURIComponent(sessionPd)}&select=*`, { headers: headersAuth });
                 if (!resTracks.ok) throw new Error("Помилка при запиті tracks");
                 globalTracks = await resTracks.json();
 
-                // 2. Завантажуємо дані поточного косіння (mowing)
                 const resMow = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(sessionPd)}&select=*`, { headers: headersAuth });
                 if (!resMow.ok) throw new Error("Помилка при запиті mowing");
                 currentCloudMowing = await resMow.json();
@@ -207,122 +207,118 @@
                 selectType.appendChild(opt);
             });
 
+            runMasterUpdateKmOptions();
+        }
+
+        function runMasterUpdateKmOptions() {
+            const peregon = document.getElementById('form-peregon').value;
+            const type = document.getElementById('form-track-type').value;
+            const selectKm = document.getElementById('form-km');
+            selectKm.innerHTML = '';
+
+            if(!peregon || !type) return;
+
+            const specificTrack = globalTracks.find(t => t.peregon === peregon && t.track_type === type);
+            if(!specificTrack) return;
+
+            // Генеруємо список кілометрів (ТІЛЬКИ ЦИФРИ)
+            for(let km = specificTrack.start_km; km <= specificTrack.end_km; km++) {
+                const opt = document.createElement('option');
+                opt.value = km;
+                opt.innerText = km; // Тільки цифра, без "КМ"
+                selectKm.appendChild(opt);
+            }
+
             generateInteractiveDiagram();
         }
 
         function calculateStatusByAge(record) {
-            if (!record) return 'red'; // Якщо даних немає взагалі — трава висока (червоний)
-            
-            // Якщо статус прямо записаний (як 'green', 'yellow', 'red')
+            if (!record) return 'red';
             if (record.status === 'green' || record.status === 'done') return 'green';
             if (record.status === 'yellow' || record.status === 'process') return 'yellow';
             if (record.status === 'red' || record.status === 'bad') return 'red';
-            
             return 'red';
         }
 
         function generateInteractiveDiagram() {
             const peregon = document.getElementById('form-peregon').value;
             const type = document.getElementById('form-track-type').value;
+            const kmStr = document.getElementById('form-km').value;
             const container = document.getElementById('piket-blocks-container');
             container.innerHTML = '';
 
-            if(!peregon || !type) return;
+            if(!peregon || !type || !kmStr) return;
 
-            // Знаходимо межі для конкретної колії
+            const km = parseInt(kmStr);
             const specificTrack = globalTracks.find(t => t.peregon === peregon && t.track_type === type);
-            if(!specificTrack) {
-                container.innerHTML = '<div style="color:#ef4444; font-size:14px;">Конфігурацію ділянки не знайдено.</div>';
-                return;
-            }
+            if(!specificTrack) return;
 
-            const startKm = specificTrack.start_km;
-            const endKm = specificTrack.end_km;
+            const kmBlock = document.createElement('div');
+            kmBlock.className = 'km-block';
 
-            for (let km = startKm; km <= endKm; km++) {
-                const kmBlock = document.createElement('div');
-                kmBlock.className = 'km-block';
+            const kmTitle = document.createElement('div');
+            kmTitle.className = 'km-title';
+            kmTitle.innerText = `Кілометр ${km}`;
+            kmBlock.appendChild(kmTitle);
 
-                const kmTitle = document.createElement('div');
-                kmTitle.className = 'km-title';
-                kmTitle.innerText = `Кілометр ${km}`;
-                kmBlock.appendChild(kmTitle);
+            const miniTitle = document.createElement('div');
+            miniTitle.className = 'track-title-mini';
+            miniTitle.innerHTML = `<span>КОЛІЯ: ${type.toUpperCase()}</span><span>ПІКЕТИ 1-10</span>`;
+            kmBlock.appendChild(miniTitle);
 
-                const miniTitle = document.createElement('div');
-                miniTitle.className = 'track-title-mini';
-                miniTitle.innerHTML = `<span>КОЛІЯ: ${type.toUpperCase()}</span><span>ПІКЕТИ 1-10</span>`;
-                kmBlock.appendChild(miniTitle);
+            const piketGrid = document.createElement('div');
+            piketGrid.className = 'piket-grid';
 
-                const piketGrid = document.createElement('div');
-                piketGrid.className = 'piket-grid';
+            // Межі діючих пікетів із бази
+            const limitStartPk = (specificTrack.start_pk !== undefined && km === specificTrack.start_km) ? specificTrack.start_pk : 1;
+            const limitEndPk = (specificTrack.end_pk !== undefined && km === specificTrack.end_km) ? specificTrack.end_pk : 10;
 
-                // Визначаємо валідні межі пікетів з бази даних
-                const limitStartPk = (specificTrack.start_pk !== undefined && km === startKm) ? specificTrack.start_pk : 1;
-                const limitEndPk = (specificTrack.end_pk !== undefined && km === endKm) ? specificTrack.end_pk : 10;
-
-                for (let pk = 1; pk <= 10; pk++) {
-                    const cell = document.createElement('div');
-                    
-                    // Перевіряємо, чи знаходиться цей пікет в зоні відповідальності майстра
-                    let isInsideTrackBoundaries = true;
-                    if (km === startKm && pk < limitStartPk) isInsideTrackBoundaries = false;
-                    if (km === endKm && pk > limitEndPk) isInsideTrackBoundaries = false;
-
-                    if (!isInsideTrackBoundaries) {
-                        cell.className = 'piket-cell cell-empty';
-                        cell.innerHTML = '•';
-                        cell.style.cursor = 'default';
-                        piketGrid.appendChild(cell);
-                        continue;
-                    }
-
-                    // Перевіряємо наявність запису в хмарі
-                    const cloudRecord = currentCloudMowing.find(m => 
-                        m.peregon === peregon && m.track_type === type && parseInt(m.km) === km && parseInt(m.piket) === pk
-                    );
-
-                    let currentVisualStatus = calculateStatusByAge(cloudRecord);
-                    const changeKey = `${km}-${pk}`;
-
-                    // Перевіряємо, чи є для цього пікету незбережений локальний клік майстра
-                    if (localChangesMap[changeKey]) {
-                        cell.className = 'piket-cell cell-green cell-changed';
-                    } else {
-                        cell.className = `piket-cell cell-${currentVisualStatus}`;
-                    }
-                    
-                    cell.innerText = pk;
-
-                    // Логіка перемикання прапорця обкошування (сокири 🪓) за кліком
-                    cell.onclick = function() {
-                        if (localChangesMap[changeKey]) {
-                            // Якщо вже був клікнутий — скасовуємо локальну зміну і повертаємо колір з бази
-                            delete localChangesMap[changeKey];
-                            cell.className = `piket-cell cell-${currentVisualStatus}`;
-                            cell.classList.remove('cell-changed');
-                        } else {
-                            // Додаємо в карту локальних змін
-                            localChangesMap[changeKey] = { km: km, piket: pk, status: 'green' };
-                            cell.className = 'piket-cell cell-green cell-changed';
-                        }
-                    };
-
-                    piketGrid.appendChild(cell);
-                }
-
-                kmBlock.appendChild(piketGrid);
+            for (let pk = 1; pk <= 10; pk++) {
+                const cell = document.createElement('div');
                 
-                // Візуальний підпис, якщо даних по косінню на КМ ще немає зовсім
-                const hasAnyCloudDataOnKm = currentCloudMowing.some(m => m.peregon === peregon && m.track_type === type && parseInt(m.km) === km);
-                if(!hasAnyCloudDataOnKm) {
-                    const subInfo = document.createElement('div');
-                    subInfo.className = 'track-subtitle-info';
-                    subInfo.innerText = "Нова ділянка (немає даних про косіння)";
-                    kmBlock.appendChild(subInfo);
+                let isInsideTrackBoundaries = true;
+                if (km === specificTrack.start_km && pk < limitStartPk) isInsideTrackBoundaries = false;
+                if (km === specificTrack.end_km && pk > limitEndPk) isInsideTrackBoundaries = false;
+
+                if (!isInsideTrackBoundaries) {
+                    cell.className = 'piket-cell cell-empty';
+                    cell.innerHTML = '•';
+                    cell.style.cursor = 'default';
+                    piketGrid.appendChild(cell);
+                    continue;
                 }
 
-                container.appendChild(kmBlock);
+                const cloudRecord = currentCloudMowing.find(m => 
+                    m.peregon === peregon && m.track_type === type && parseInt(m.km) === km && parseInt(m.piket) === pk
+                );
+
+                let currentVisualStatus = calculateStatusByAge(cloudRecord);
+                const changeKey = `${km}-${pk}`;
+
+                if (localChangesMap[changeKey]) {
+                    cell.className = 'piket-cell cell-green cell-changed';
+                } else {
+                    cell.className = `piket-cell cell-${currentVisualStatus}`;
+                }
+                
+                cell.innerText = pk;
+
+                cell.onclick = function() {
+                    if (localChangesMap[changeKey]) {
+                        delete localChangesMap[changeKey];
+                        cell.className = `piket-cell cell-${currentVisualStatus}`;
+                        cell.classList.remove('cell-changed');
+                    } else {
+                        localChangesMap[changeKey] = { km: km, piket: pk, status: 'green' };
+                        cell.className = 'piket-cell cell-green cell-changed';
+                    }
+                };
+
+                piketGrid.appendChild(cell);
             }
+
+            kmBlock.appendChild(piketGrid);
+            container.appendChild(kmBlock);
         }
 
         async function saveAllChangesToCloud() {
@@ -341,14 +337,13 @@
                 return; 
             }
 
-            // Формуємо масив об'єктів під структуру таблиці 'mowing' в Supabase
             const recordsToUpload = changeEntries.map(ch => ({
                 pd: sessionPd,
                 peregon: peregon,
                 track_type: type,
                 km: ch.km,
                 piket: ch.piket,
-                status: ch.status, // 'green'
+                status: ch.status,
                 date: date
             }));
 
@@ -358,7 +353,7 @@
                 'apikey': fullKey, 
                 'authorization': 'Bearer ' + fullKey, 
                 'Content-Type': 'application/json',
-                'Prefer': 'resolution=merge-duplicates' // Режим UPSERT (заміна дублікатів по унікальних ключах)
+                'Prefer': 'resolution=merge-duplicates' 
             };
 
             try {
@@ -376,15 +371,12 @@
                 logMaster("Синхронізацію успішно завершено!", "success");
                 alert(`Дані успішно збережено! Обкошено пікетів: ${recordsToUpload.length}`);
                 
-                // Скидаємо буфер локальних змін, бо вони вже записані в базу
                 localChangesMap = {};
 
-                // Перезавантажуємо свіжі дані косіння з Supabase для оновлення інтерфейсу
                 const headersAuth = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resMow = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(sessionPd)}&select=*`, { headers: headersAuth });
                 currentCloudMowing = await resMow.json();
                 
-                // Перемальовуємо діаграму
                 generateInteractiveDiagram();
 
             } catch(e) {
