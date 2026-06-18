@@ -54,8 +54,11 @@
         .admin-content { padding: 20px; flex: 1; overflow-y: auto; }
         .btn-submit { width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; }
         .btn-submit:hover { background: #1d4ed8; }
-        .btn-secondary { background: #dc2626; margin-top: 12px; }
-        .btn-secondary:hover { background: #b91c1c; }
+        .btn-secondary { background: #4b5563; margin-top: 5px; }
+
+        .debug-panel { margin-top: 20px; padding: 14px; background-color: #1e293b; border: 2px solid #334155; color: #38bdf8; border-radius: 12px; font-size: 11px; font-family: monospace; }
+        .debug-title { font-weight: bold; color: #f43f5e; margin-bottom: 6px; border-bottom: 1px solid #334155; padding-bottom: 4px; }
+        .debug-scroll { max-height: 120px; overflow-y: auto; text-align: left; }
     </style>
 </head>
 <body>
@@ -160,14 +163,10 @@
 
                 <button class="btn-submit" onclick="submitNewTrack()">Зберегти в Supabase</button>
                 
-                <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 25px 0;">
+                <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;">
                 
-                <h4>🗑️ Керування даними</h4>
-                <label class="track-label">Оберіть околоток для видалення:</label>
-                <select id="delete-pd-select" class="input-field">
-                    <option value="">-- Спочатку завантажте дані --</option>
-                </select>
-                <button class="btn-submit btn-secondary" onclick="deleteTrackDataByPd()">Очистити ділянки обраного ПД</button>
+                <h4>🔑 Безпека</h4>
+                <button class="btn-submit btn-secondary" onclick="changeAdminPassword()">Змінити пароль адміна</button>
             </div>
         </div>
     </div>
@@ -216,7 +215,6 @@
                     statusTxt.innerText = "Будь ласка, оберіть околоток та перегін.";
                 }
                 buildPdList();
-                buildDeletePdList(); // Наповнюємо адмінський список видалення
                 printLog("Дані хмари успішно синхронізовано", "success");
             } catch (err) {
                 printLog("Критична помилка завантаження: " + err.message, 'error');
@@ -237,18 +235,6 @@
             if(currentSelected && uniquePds.includes(currentSelected)) {
                 select.value = currentSelected;
             }
-        }
-
-        // Автоматично будує випадаючий список наявних ПД в панелі видалення
-        function buildDeletePdList() {
-            const select = document.getElementById('delete-pd-select');
-            select.innerHTML = '<option value="">-- Оберіть околоток (ПД) --</option>';
-            
-            const uniquePds = [...new Set(tracksData.map(item => item.pd))].sort();
-            uniquePds.forEach(pd => {
-                const opt = document.createElement('option');
-                opt.value = pd; opt.innerText = pd; select.appendChild(opt);
-            });
         }
 
         function runUpdatePeregon() {
@@ -328,6 +314,22 @@
             }
         }
 
+        function changeAdminPassword() {
+            let savedPassword = localStorage.getItem('admin_password') || '1234';
+            let oldPass = prompt("Введіть поточний пароль:");
+            if (oldPass !== savedPassword) {
+                alert("Поточний пароль невірний!");
+                return;
+            }
+            let newPass = prompt("Введіть НОВИЙ пароль:");
+            if (newPass) {
+                localStorage.setItem('admin_password', newPass);
+                alert("Пароль успішно змінено!");
+                printLog("Пароль адміністратора оновлено", "success");
+                openAdminSidebar();
+            }
+        }
+
         async function submitNewTrack() {
             const pd = document.getElementById('add-pd').value.trim();
             const peregon = document.getElementById('add-peregon').value.trim();
@@ -379,55 +381,6 @@
             } catch(e) {
                 alert("Помилка збереження: " + e.message);
                 printLog("Помилка відправки даних", "error");
-            }
-        }
-
-        // Логіка видалення конфігурації ділянок за окремим названим ПД
-        async function deleteTrackDataByPd() {
-            const targetPd = document.getElementById('delete-pd-select').value;
-            
-            if (!targetPd) {
-                alert("Будь ласка, спочатку оберіть околоток (ПД) зі списку!");
-                return;
-            }
-
-            const checkConfirmation = confirm(`⚠️ КРИТИЧНА ДІЯ!\nВи впевнені, що хочете БЕЗПОВОРОТНО видалити всі наявні ділянки для околотка: ${targetPd}?\nДані інших ПД залишаться незмінними.`);
-            if (!checkConfirmation) return;
-
-            printLog(`Запуск видалення ділянок для ${targetPd}...`);
-
-            const requestHeaders = { 
-                'apikey': fullKey, 
-                'authorization': 'Bearer ' + fullKey, 
-                'Content-Type': 'application/json'
-            };
-
-            try {
-                // Відправляємо DELETE запит з фільтрацією по колонці pd (pd=eq.Назва)
-                const response = await fetch(`${baseDbUrl}/rest/v1/tracks?pd=eq.${encodeURIComponent(targetPd)}`, {
-                    method: 'DELETE',
-                    headers: requestHeaders
-                });
-
-                if (response.ok) {
-                    printLog(`Усі ділянки для ${targetPd} успішно видалено з хмари`, "success");
-                    alert(`Всі ділянки для ${targetPd} успішно видалено з бази даних!`);
-                    
-                    // Перезавантажуємо масиви конфігурації прямо з хмари
-                    await loadDataFromCloud();
-                    
-                    // Повністю оновлюємо селектори на екрані
-                    document.getElementById('select-pd').value = "";
-                    document.getElementById('select-peregon').innerHTML = '<option value="">-- Спочатку оберіть околоток --</option>';
-                    document.getElementById('diagram-container').innerHTML = '';
-                    runUpdatePeregon();
-                } else {
-                    const errorText = await response.text();
-                    throw new Error(errorText);
-                }
-            } catch (err) {
-                printLog(`Помилка видалення даних: ${err.message}`, "error");
-                alert(`Не вдалося видалити ділянки: ${err.message}`);
             }
         }
 
@@ -521,6 +474,7 @@
                     continue;
                 }
 
+                // Шукаємо запис в базі даних (забезпечуємо сумісність назв полів 'piket' та 'pikets')
                 const statusReport = mowingData.find(m => 
                     m.pd === pd && 
                     m.peregon === peregon && 
@@ -529,6 +483,7 @@
                     (m.track_type === type || !m.track_type)
                 );
 
+                // За замовчуванням пікет вважається непокошеним (червоним)
                 cell.className = 'piket-cell cell-red';
                 cell.innerHTML = pk;
                 
@@ -537,12 +492,14 @@
                 };
 
                 if (statusReport) {
+                    // Визначаємо наявну дату (перевіряємо і date, і mow_date)
                     const stringDate = statusReport.date || statusReport.mow_date;
                     
                     if (stringDate) {
                         const today = new Date();
                         const mowDate = new Date(stringDate);
                         
+                        // Розрахунок різниці в днях між датами
                         const diffTime = Math.abs(today - mowDate);
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -551,15 +508,17 @@
                         } else if (diffDays > 30 && diffDays <= 45) {
                             cell.className = 'piket-cell cell-yellow';
                         } else {
-                            cell.className = 'piket-cell cell-red';
+                            cell.className = 'piket-cell cell-red'; // Понад 45 днів — знову заросло
                         }
 
+                        // Конвертуємо ISO-дату (РРРР-ММ-ДД) у правильний формат (ДД/ММ/РРРР)
                         const formattedDate = mowDate.toLocaleDateString('uk-UA').replace(/\./g, '/');
 
                         cell.onclick = function() {
                             showCustomToast(`${formattedDate} (${diffDays} дн. тому)`);
                         };
                     } else {
+                        // Резервний варіант: якщо запис існує, але дата порожня, орієнтуємося на текстовий статус
                         if (statusReport.status === 'green' || statusReport.status === 'done') cell.className = 'piket-cell cell-green';
                         else if (statusReport.status === 'yellow' || statusReport.status === 'process') cell.className = 'piket-cell cell-yellow';
                         else cell.className = 'piket-cell cell-red';
