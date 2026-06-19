@@ -5,26 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📊 Двоколійна залізнична діаграма (Матча)</title>
     <style>
-        /* ПОВЕРНЕНО: Фірмове легке фісташкове тло */
+        /* Фірмове легке фісташкове тло */
         body { font-family: -apple-system, sans-serif; background-color: #f0fdf4; margin: 0; padding: 12px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 480px; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        /* ПОВЕРНЕНО: Навігаційне меню у шавлієвих тонах */
+        /* Навігаційне меню у шавлієвих тонах */
         .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 12px; display: flex; gap: 6px; box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); width: 100%; box-sizing: border-box; align-items: center; border: 1px solid #d1fae5; }
         .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #115e59; text-decoration: none; border-radius: 8px; background: #f0fdf4; cursor: pointer; }
-        /* Активна вкладка тепер хвойно-шавлієва */
         .nav-link.active { background-color: #115e59; color: white; }
         
         /* Кругла кнопка налаштувань */
         .admin-menu-btn { width: 42px; height: 42px; background-color: #f0fdf4; color: #115e59; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: 1px solid #a7f3d0; flex-shrink: 0; text-decoration: none; }
         .admin-menu-btn.active { background-color: #115e59; color: white; border-color: #115e59; }
         
-        /* ПОВЕРНЕНО: Головна картка з м'якою шавлієвою рамкою */
+        /* Головна картка з м'якою шавлієвою рамкою */
         .screen { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); width: 100%; box-sizing: border-box; margin-bottom: 12px; border: 1px solid #d1fae5; }
         h2 { margin-top: 0; margin-bottom: 4px; font-size: 19px; color: #115e59; font-weight: 800; text-align: center; }
         p { color: #0f766e; font-size: 13px; margin-top: 0; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
-        /* ПОВЕРНЕНО: Поля введення у стилі Матча */
+        /* Поля введення у стилі Матча */
         .input-field { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; transition: border-color 0.2s, box-shadow 0.2s; }
         .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
         .track-label { font-size: 11px; font-weight: 700; color: #115e59; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -32,10 +31,13 @@
         .btn-submit { width: 100%; background: #0d9488; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.15); transition: background 0.2s; }
         .btn-submit:hover { background: #0f766e; }
 
+        /* Форма авторизації адміна */
+        .auth-box { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
+
         /* 🚂 ДВОКОЛІЙНА ВЕРТИКАЛЬНА ПЛАТФОРМА */
         .railway-canvas { display: flex; flex-direction: column; width: 100%; margin-top: 8px; }
         
-        /* ПОВЕРНЕНО: Стильний залізничний знак кілометра в хвойних тонах */
+        /* Залізничний знак кілометра в хвойних тонах */
         .km-signboard { background: #e6f4ea; border: 2px solid #115e59; border-radius: 8px; padding: 8px; margin: 18px 0 8px 0; text-align: center; font-weight: 900; font-size: 14px; color: #115e59; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 2px 5px rgba(17,94,89,0.05); }
         .km-signboard:first-child { margin-top: 0; }
         
@@ -45,30 +47,28 @@
         .header-center-space { width: 42px; }
         .header-right-track { flex: 1; padding-left: 16px; }
 
-        /* Рядок пікета (Ліва брівка + Колія 1 + Номер ПК + Колія 2 + Права брівка) */
+        /* Рядок пікета */
         .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; }
         
         /* Зони обкошування (Брівки узбіччя) */
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
         
-        /* ОНОВЛЕНО: Центральний маркер пікета адаптовано під колір шавлії */
+        /* Центральний маркер пікета */
         .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
         
-        /* 🛤️ ВІЗУАЛІЗАЦІЯ РЕЙКОВОЇ НИТКИ під колір нашої еко-системи */
+        /* Візуалізація рейкової нитки */
         .rail-line-visual { width: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: #cbd5e1; }
-        /* Рейки (металеві нитки) */
         .rail-line-visual::before, .rail-line-visual::after { content: ""; position: absolute; top: 0; width: 2px; height: 100%; background: #475569; }
         .rail-line-visual::before { left: 1px; }
         .rail-line-visual::after { right: 1px; }
-        /* Шпали (залізобетонні/дерев'яні засічки) */
         .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
 
-        /* Класична світлофорна палітра для брівок (яскрава та інформативна) */
+        /* Світлофорна палітра для брівок */
         .status-clear-green { background-color: #22c55e; color: white; }
         .status-warn-yellow { background-color: #eab308; color: #1f2937; }
         .status-overgrown-red { background-color: #ef4444; color: white; }
         
-        /* ПОВЕРНЕНО: Монітор самоаудиту в глибоких зелених тонах */
+        /* Монітор самоаудиту */
         .debug-panel { margin-top: 8px; padding: 12px; background-color: #e6f4ea; border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(11,94,89,0.02); }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 90px; overflow-y: auto; text-align: left; }
@@ -80,10 +80,9 @@
         <div class="nav-menu">
             <a href="#" class="nav-link active" id="nav-btn-charts" onclick="switchScreen('charts')">📊 Графіки</a>
             <a href="master.html" class="nav-link" id="nav-btn-master">🧑‍🔧 Майстер</a>
-            <button class="admin-menu-btn" id="nav-btn-admin" onclick="switchScreen('admin')">⚙️</button>
+            <button class="admin-menu-btn" id="nav-btn-admin" onclick="switchScreen('auth')">⚙️</button>
         </div>
 
-        <!-- Екран 1: Графіки перегону -->
         <div class="screen" id="screen-charts">
             <h2>📊 Двоколійна діаграма</h2>
             <p>Стан обкошування брівок непарної (лівої) та парної (правої) колій</p>
@@ -94,11 +93,19 @@
             <label class="track-label">Перегін:</label>
             <select id="filter-peregon" class="input-field" onchange="drawDoubleTrackDiagram()"></select>
 
-            <!-- ГОЛОВНИЙ ЗАЛІЗНИЧНИЙ КАНВАС -->
             <div id="diagram-render-zone" class="railway-canvas"></div>
         </div>
 
-        <!-- Екран 2: Адмінка -->
+        <div class="screen" id="screen-auth" style="display: none;">
+            <h2>🔒 Доступ обмежено</h2>
+            <p>Для входу в панель адміністрування введіть пароль захисту</p>
+            <div class="auth-box">
+                <label class="track-label">Пароль адміністратора:</label>
+                <input type="password" id="admin-password-input" class="input-field" placeholder="••••••••">
+                <button class="btn-submit" onclick="verifyAdminPassword()">Підтвердити вхід</button>
+            </div>
+        </div>
+
         <div class="screen" id="screen-admin" style="display: none;">
             <h2>⚙️ Конфігурація ділянок</h2>
             <p>Створення двоколійних меж для нових перегонів</p>
@@ -119,7 +126,7 @@
         </div>
 
         <div class="debug-panel">
-            <div class="debug-title">🖥 silence️ Монітор системи</div>
+            <div class="debug-title">🖥️ Монітор системи</div>
             <div id="debug-console" class="debug-scroll"></div>
         </div>
     </div>
@@ -130,6 +137,7 @@
 
         let tracksData = [];
         let mowingData = [];
+        let isAdminAuthenticated = false; // Статус авторизації
 
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
@@ -144,20 +152,47 @@
 
         function switchScreen(screenName) {
             const scrCharts = document.getElementById('screen-charts');
+            const scrAuth = document.getElementById('screen-auth');
             const scrAdmin = document.getElementById('screen-admin');
             const btnCharts = document.getElementById('nav-btn-charts');
             const btnAdmin = document.getElementById('nav-btn-admin');
 
+            // Приховуємо всі екрани перед перемиканням
+            scrCharts.style.display = 'none';
+            scrAuth.style.display = 'none';
+            scrAdmin.style.display = 'none';
+            btnCharts.classList.remove('active');
+            btnAdmin.classList.remove('active');
+
             if (screenName === 'charts') {
                 scrCharts.style.display = 'block';
-                scrAdmin.style.display = 'none';
                 btnCharts.classList.add('active');
-                btnAdmin.classList.remove('active');
-            } else {
-                scrCharts.style.display = 'none';
-                scrAdmin.style.display = 'block';
-                btnCharts.classList.remove('active');
+            } else if (screenName === 'auth') {
+                // Якщо вже авторизовані — пускаємо одразу в адмінку, інакше — на форму пароля
+                if (isAdminAuthenticated) {
+                    scrAdmin.style.display = 'block';
+                } else {
+                    scrAuth.style.display = 'block';
+                    document.getElementById('admin-password-input').value = ""; // Очищення поля
+                }
                 btnAdmin.classList.add('active');
+            } else if (screenName === 'admin') {
+                scrAdmin.style.display = 'block';
+                btnAdmin.classList.add('active');
+            }
+        }
+
+        // ПЕРЕВІРКА ПАРОЛЯ
+        function verifyAdminPassword() {
+            const enteredPass = document.getElementById('admin-password-input').value;
+            // Перевіряємо ваш стандартний залізничний пароль "ПД-13" (або замініть на потрібний)
+            if (enteredPass === "ПД-13") {
+                isAdminAuthenticated = true;
+                logSys("Авторизація адміністратора успішна", "success");
+                switchScreen('admin');
+            } else {
+                alert("Невірний пароль адміністратора!");
+                logSys("Спроба несанкціонованого входу", "error");
             }
         }
 
@@ -274,7 +309,7 @@
                     leftTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(leftTrackVisual);
 
-                    // 3. Центральний пікет
+                    // 3. Central ПК
                     const centerPiket = document.createElement('div');
                     centerPiket.className = 'piket-center-core';
                     centerPiket.innerText = pk;
@@ -318,6 +353,8 @@
                 });
 
                 alert("Двоколійний перегін створено!");
+                // Після успішного збереження скидаємо авторизацію для безпеки
+                isAdminAuthenticated = false;
                 await reloadDataFromCloud();
                 switchScreen('charts');
             } catch(e) {
