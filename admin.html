@@ -34,18 +34,14 @@
         .km-section { display: flex; flex-direction: column; margin-bottom: 14px; width: 100%; box-sizing: border-box; }
         .km-input-wrapper { width: 120px; }
 
-        /* Панель для вибору ПК справжніми галочками */
-        .pk-checkbox-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; margin-bottom: 4px; width: 100%; }
-        
-        .pk-checkbox-label { flex: 1; min-width: 40px; height: 40px; background: white; border: 1px solid #a7f3d0; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #115e59; cursor: pointer; user-select: none; transition: background 0.2s, border-color 0.2s, color 0.2s; box-sizing: border-box; }
-        .pk-checkbox-label input { display: none; } /* Приховуємо стандартний чекбокс */
-        .pk-checkbox-label span { margin-bottom: 1px; }
-        .pk-checkbox-label .chk-indicator { font-size: 9px; color: #a7f3d0; font-weight: normal; transition: color 0.2s; }
-        
-        /* Стан коли чекбокс активний (вибрано галочкою) */
-        .pk-checkbox-label.selected { background: #0d9488; border-color: #0d9488; color: white; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.2); }
-        .pk-checkbox-label.selected .chk-indicator { color: white; }
-        .pk-checkbox-label:hover:not(.selected) { background: #f0fdf4; border-color: #0d9488; }
+        /* Універсальні стилі для списків, що розгортаються (для ПД та нових списків ПК) */
+        .multiselect-dropdown { position: relative; width: 100%; margin-bottom: 12px; box-sizing: border-box; }
+        .multiselect-header { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+        .multiselect-options { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #a7f3d0; border-radius: 10px; margin-top: 4px; max-height: 200px; overflow-y: auto; z-index: 10; box-shadow: 0 10px 20px rgba(11, 94, 89, 0.1); box-sizing: border-box; padding: 4px; }
+        .multiselect-options.show { display: block; }
+        .multiselect-item { display: flex; align-items: center; padding: 8px 12px; font-size: 14px; color: #115e59; font-weight: 500; cursor: pointer; border-radius: 6px; user-select: none; }
+        .multiselect-item:hover { background: #f0fdf4; }
+        .multiselect-item input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-color: #0d9488; cursor: pointer; }
 
         .btn-submit { width: 100%; background: #0d9488; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.15); transition: background 0.2s; }
         .btn-submit:hover { background: #0f766e; }
@@ -57,16 +53,7 @@
         .auth-box { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
         .section-divider { height: 1px; background: #e2e8f0; margin: 24px 0; border: none; }
 
-        /* Випадаючий список з галочками для ПД */
-        .multiselect-dropdown { position: relative; width: 100%; margin-bottom: 12px; box-sizing: border-box; }
-        .multiselect-header { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .multiselect-options { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #a7f3d0; border-radius: 10px; margin-top: 4px; max-height: 160px; overflow-y: auto; z-index: 10; box-shadow: 0 10px 20px rgba(11, 94, 89, 0.1); box-sizing: border-box; padding: 4px; }
-        .multiselect-options.show { display: block; }
-        .multiselect-item { display: flex; align-items: center; padding: 8px 12px; font-size: 14px; color: #115e59; font-weight: 500; cursor: pointer; border-radius: 6px; }
-        .multiselect-item:hover { background: #f0fdf4; }
-        .multiselect-item input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-color: #0d9488; cursor: pointer; }
-
-        /* Монітор самоаудиту */
+        /* Монітор системи */
         .debug-panel { margin-top: 8px; padding: 12px; background-color: #e6f4ea; border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(11,94,89,0.02); }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 90px; overflow-y: auto; text-align: left; }
@@ -111,7 +98,13 @@
                     <input type="number" id="admin-start-km" class="input-field">
                 </div>
                 <span style="font-size:10px; color:#0f766e; font-weight:600; margin-top:4px; display:block;">Оберіть початкові пікети (ПК) галочкою:</span>
-                <div class="pk-checkbox-group" id="start-pk-group"></div>
+                <div class="multiselect-dropdown" id="dropdown-start-pk-container">
+                    <div class="multiselect-header" id="start-pk-header" onclick="toggleDropdown('start-pk-options')">
+                        <span id="start-pk-label">ПК-1</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="multiselect-options" id="start-pk-options"></div>
+                </div>
             </div>
 
             <div class="km-section">
@@ -121,7 +114,13 @@
                     <input type="number" id="admin-end-km" class="input-field">
                 </div>
                 <span style="font-size:10px; color:#0f766e; font-weight:600; margin-top:4px; display:block;">Оберіть кінцеві пікети (ПК) галочкою:</span>
-                <div class="pk-checkbox-group" id="end-pk-group"></div>
+                <div class="multiselect-dropdown" id="dropdown-end-pk-container">
+                    <div class="multiselect-header" id="end-pk-header" onclick="toggleDropdown('end-pk-options')">
+                        <span id="end-pk-label">ПК-10</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="multiselect-options" id="end-pk-options"></div>
+                </div>
             </div>
 
             <button class="btn-submit" onclick="saveNewTrackToCloud()">Зберегти перегін у базу</button>
@@ -132,8 +131,8 @@
             <p>Видалення створених конфігурацій перегонів для вибраних ПД</p>
 
             <label class="track-label">Виберіть ПД для очищення:</label>
-            <div class="multiselect-dropdown">
-                <div class="multiselect-header" id="dropdown-header" onclick="toggleDropdown()">
+            <div class="multiselect-dropdown" id="dropdown-pd-container">
+                <div class="multiselect-header" id="dropdown-header" onclick="toggleDropdown('dropdown-options')">
                     <span id="dropdown-label">Оберіть ПД...</span>
                     <span>▼</span>
                 </div>
@@ -156,9 +155,9 @@
         let tracksData = [];
         let selectedPds = [];
 
-        // Масиви для збереження стану незалежних галочок ПК (мультивибір)
-        let selectedStartPks = [1];  // За замовчуванням ПК-1
-        let selectedEndPks = [10];   // За замовчуванням ПК-10
+        // Масиви для збереження обраних галочками ПК (За замовчуванням ПК-1 та ПК-10)
+        let selectedStartPks = [1];
+        let selectedEndPks = [10];
 
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
@@ -171,58 +170,87 @@
             con.scrollTop = con.scrollHeight;
         }
 
-        // Генерація інтерфейсу справжніх чекбоксів (галочок) для ПК 1-10
-        function initPkCheckboxes() {
-            const startGroup = document.getElementById('start-pk-group');
-            const endGroup = document.getElementById('end-pk-group');
+        // Генерація списків ПК 1-10 з галочками у спливаючих рядках
+        function initPkDropdowns() {
+            const startOptions = document.getElementById('start-pk-options');
+            const endOptions = document.getElementById('end-pk-options');
             
-            startGroup.innerHTML = "";
-            endGroup.innerHTML = "";
+            startOptions.innerHTML = "";
+            endOptions.innerHTML = "";
 
             for (let i = 1; i <= 10; i++) {
-                // Побудова для Початку ділянки
-                const startLabel = document.createElement('label');
-                const isStartSel = selectedStartPks.includes(i);
-                startLabel.className = `pk-checkbox-label ${isStartSel ? 'selected' : ''}`;
-                startLabel.id = `start-pk-lbl-${i}`;
-                startLabel.innerHTML = `<span>${i}</span><span class="chk-indicator">${isStartSel ? '✓' : ''}</span>
-                    <input type="checkbox" value="${i}" ${isStartSel ? 'checked' : ''} onchange="togglePkCheckbox('start', ${i}, this.checked)">`;
-                startGroup.appendChild(startLabel);
+                // Рядки для Початку ділянки
+                const startItem = document.createElement('div');
+                startItem.className = 'multiselect-item';
+                const startChk = document.createElement('input');
+                startChk.type = 'checkbox';
+                startChk.value = i;
+                startChk.checked = selectedStartPks.includes(i);
+                startChk.onchange = (e) => handlePkChange('start', i, e.target.checked);
+                
+                const startLabel = document.createElement('span');
+                startLabel.innerText = `ПК-${i}`;
+                startItem.appendChild(startChk);
+                startItem.appendChild(startLabel);
+                startItem.onclick = (e) => { if (e.target !== startChk) { startChk.checked = !startChk.checked; startChk.dispatchEvent(new Event('change')); } };
+                startOptions.appendChild(startItem);
 
-                // Побудова для Кінця ділянки
-                const endLabel = document.createElement('label');
-                const isEndSel = selectedEndPks.includes(i);
-                endLabel.className = `pk-checkbox-label ${isEndSel ? 'selected' : ''}`;
-                endLabel.id = `end-pk-lbl-${i}`;
-                endLabel.innerHTML = `<span>${i}</span><span class="chk-indicator">${isEndSel ? '✓' : ''}</span>
-                    <input type="checkbox" value="${i}" ${isEndSel ? 'checked' : ''} onchange="togglePkCheckbox('end', ${i}, this.checked)">`;
-                endGroup.appendChild(endLabel);
+                // Рядки для Кінця ділянки
+                const endItem = document.createElement('div');
+                endItem.className = 'multiselect-item';
+                const endChk = document.createElement('input');
+                endChk.type = 'checkbox';
+                endChk.value = i;
+                endChk.checked = selectedEndPks.includes(i);
+                endChk.onchange = (e) => handlePkChange('end', i, e.target.checked);
+                
+                const endLabel = document.createElement('span');
+                endLabel.innerText = `ПК-${i}`;
+                endItem.appendChild(endChk);
+                endItem.appendChild(endLabel);
+                endItem.onclick = (e) => { if (e.target !== endChk) { endChk.checked = !endChk.checked; endChk.dispatchEvent(new Event('change')); } };
+                endOptions.appendChild(endItem);
             }
+            updatePkLabels();
         }
 
-        // Обробка зміни стану кожної окремої галочки ПК
-        function togglePkCheckbox(type, value, isChecked) {
+        // Обробка вибору галочок ПК
+        function handlePkChange(type, val, isChecked) {
             if (type === 'start') {
                 if (isChecked) {
-                    if (!selectedStartPks.includes(value)) selectedStartPks.push(value);
+                    if (!selectedStartPks.includes(val)) selectedStartPks.push(val);
                 } else {
-                    selectedStartPks = selectedStartPks.filter(v => v !== value);
+                    selectedStartPks = selectedStartPks.filter(v => v !== val);
                 }
-                const lbl = document.getElementById(`start-pk-lbl-${value}`);
-                lbl.classList.toggle('selected', isChecked);
-                lbl.querySelector('.chk-indicator').innerText = isChecked ? '✓' : '';
-                logSys(`Початкові ПК: [${selectedStartPks.sort((a,b)=>a-b).join(', ')}]`);
             } else {
                 if (isChecked) {
-                    if (!selectedEndPks.includes(value)) selectedEndPks.push(value);
+                    if (!selectedEndPks.includes(val)) selectedEndPks.push(val);
                 } else {
-                    selectedEndPks = selectedEndPks.filter(v => v !== value);
+                    selectedEndPks = selectedEndPks.filter(v => v !== val);
                 }
-                const lbl = document.getElementById(`end-pk-lbl-${value}`);
-                lbl.classList.toggle('selected', isChecked);
-                lbl.querySelector('.chk-indicator').innerText = isChecked ? '✓' : '';
-                logSys(`Кінцеві ПК: [${selectedEndPks.sort((a,b)=>a-b).join(', ')}]`);
             }
+            updatePkLabels();
+        }
+
+        // Оновлення тексту в заголовках рядків ПК
+        function updatePkLabels() {
+            const startLabel = document.getElementById('start-pk-label');
+            const endLabel = document.getElementById('end-pk-label');
+
+            if (selectedStartPks.length === 0) startLabel.innerText = "Оберіть ПК...";
+            else startLabel.innerText = "ПК: " + selectedStartPks.sort((a,b)=>a-b).join(', ');
+
+            if (selectedEndPks.length === 0) endLabel.innerText = "Оберіть ПК...";
+            else endLabel.innerText = "ПК: " + selectedEndPks.sort((a,b)=>a-b).join(', ');
+        }
+
+        // Перемикання відображення спливаючих блоків
+        function toggleDropdown(id) {
+            // Закриваємо всі інші перед відкриттям поточного
+            ['start-pk-options', 'end-pk-options', 'dropdown-options'].forEach(optId => {
+                if(optId !== id) document.getElementById(optId).classList.remove('show');
+            });
+            document.getElementById(id).classList.toggle('show');
         }
 
         function verifyAdminPassword() {
@@ -231,7 +259,7 @@
                 logSys("Авторизація адміністратора успішна", "success");
                 document.getElementById('screen-auth').style.display = 'none';
                 document.getElementById('screen-admin').style.display = 'block';
-                initPkCheckboxes(); // Малюємо панелі галочок ПК при переході в панель
+                initPkDropdowns(); // Будуємо спливаючі рядки для ПК
                 loadPdsForCleaning();
             } else {
                 alert("Невірний пароль адміністратора!");
@@ -289,10 +317,6 @@
             });
         }
 
-        function toggleDropdown() {
-            document.getElementById('dropdown-options').classList.toggle('show');
-        }
-
         function handleCheckboxChange(e, pd) {
             if (e.target.checked) {
                 if (!selectedPds.includes(pd)) selectedPds.push(pd);
@@ -313,9 +337,11 @@
             }
         }
 
+        // Закриття спливаючих рядків при кліку поза елементами
         window.addEventListener('click', function(e) {
-            const dropdown = document.querySelector('.multiselect-dropdown');
-            if (dropdown && !dropdown.contains(e.target)) {
+            if (!e.target.closest('.multiselect-dropdown')) {
+                document.getElementById('start-pk-options').classList.remove('show');
+                document.getElementById('end-pk-options').classList.remove('show');
                 document.getElementById('dropdown-options').classList.remove('show');
             }
         });
@@ -359,9 +385,9 @@
             if (!pdNum || !peregon || isNaN(startKm) || isNaN(endKm)) {
                 alert("Заповніть усі поля!"); return;
             }
-            
+
             if (selectedStartPks.length === 0 || selectedEndPks.length === 0) {
-                alert("Оберіть хоча б по одному пікету для початку та кінця ділянки!"); return;
+                alert("Оберіть хоча б по одній галочці ПК для початку та кінця ділянки!"); return;
             }
 
             const fullPdName = "ПД-" + pdNum;
@@ -369,7 +395,7 @@
             
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
             
-            // Беремо перші обрані значення зі списку галочок для збереження в базу даних
+            // Визначаємо межі відповідно до встановлених галочок
             const finalStartPk = Math.min(...selectedStartPks);
             const finalEndPk = Math.max(...selectedEndPks);
 
