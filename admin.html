@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Панель адміністратора (Матча)</title>
+    <style>
+        /* Фірмове легке фісташкове тло */
+        body { font-family: -apple-system, sans-serif; background-color: #f0fdf4; margin: 0; padding: 12px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 480px; box-sizing: border-box; display: flex; flex-direction: column; }
+        
+        /* Меню навігації зворотного напрямку */
+        .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 12px; display: flex; gap: 6px; box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); width: 100%; box-sizing: border-box; align-items: center; border: 1px solid #d1fae5; }
+        .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #115e59; text-decoration: none; border-radius: 8px; background: #f0fdf4; cursor: pointer; }
+        
+        .admin-menu-btn { width: 42px; height: 42px; background-color: #115e59; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid #115e59; flex-shrink: 0; text-decoration: none; pointer-events: none; }
+        
+        /* Головна картка */
+        .screen { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); width: 100%; box-sizing: border-box; margin-bottom: 12px; border: 1px solid #d1fae5; }
+        h2 { margin-top: 0; margin-bottom: 4px; font-size: 19px; color: #115e59; font-weight: 800; text-align: center; }
+        p { color: #0f766e; font-size: 13px; margin-top: 0; margin-bottom: 16px; text-align: center; opacity: 0.8; }
+        
+        /* Поля введення */
+        .input-field { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; transition: border-color 0.2s, box-shadow 0.2s; }
+        .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
+        .track-label { font-size: 11px; font-weight: 700; color: #115e59; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .btn-submit { width: 100%; background: #0d9488; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.15); transition: background 0.2s; }
+        .btn-submit:hover { background: #0f766e; }
+
+        .auth-box { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
+
+        /* Монітор самоаудиту */
+        .debug-panel { margin-top: 8px; padding: 12px; background-color: #e6f4ea; border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(11,94,89,0.02); }
+        .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .debug-scroll { max-height: 90px; overflow-y: auto; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="nav-menu">
+            <a href="index.html" class="nav-link">📊 Графіки</a>
+            <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
+            <button class="admin-menu-btn">⚙️</button>
+        </div>
+
+        <div class="screen" id="screen-auth">
+            <h2>🔒 Доступ обмежено</h2>
+            <p>Для входу в панель адміністрування введіть пароль захисту</p>
+            <div class="auth-box">
+                <label class="track-label">Пароль адміністратора:</label>
+                <input type="password" id="admin-password-input" class="input-field" placeholder="••••••••" onkeydown="if(event.key==='Enter') verifyAdminPassword()">
+                <button class="btn-submit" onclick="verifyAdminPassword()">Підтвердити вхід</button>
+            </div>
+        </div>
+
+        <div class="screen" id="screen-admin" style="display: none;">
+            <h2>⚙️ Конфігурація ділянок</h2>
+            <p>Створення двоколійних меж для нових перегонів</p>
+            
+            <label class="track-label">Назва ПД (напр. ПД-13):</label>
+            <input type="text" id="admin-pd" class="input-field" placeholder="ПД-13">
+
+            <label class="track-label">Назва перегону:</label>
+            <input type="text" id="admin-peregon" class="input-field" placeholder="Перегін Путивль - Кошари">
+
+            <label class="track-label">Початковий кілометр:</label>
+            <input type="number" id="admin-start-km" class="input-field" placeholder="52">
+
+            <label class="track-label">Кінцевий кілометр:</label>
+            <input type="number" id="admin-end-km" class="input-field" placeholder="60">
+
+            <button class="btn-submit" onclick="saveNewTrackToCloud()">Зберегти перегін у базу</button>
+        </div>
+
+        <div class="debug-panel">
+            <div class="debug-title">🖥️ Монітор системи</div>
+            <div id="debug-console" class="debug-scroll"></div>
+        </div>
+    </div>
+
+    <script>
+        const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
+        const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
+
+        function logSys(text, status = 'info') {
+            const con = document.getElementById('debug-console');
+            if(!con) return;
+            const div = document.createElement('div');
+            if(status === 'success') div.style.color = '#16a34a';
+            if(status === 'error') div.style.color = '#dc2626';
+            div.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
+            con.appendChild(div);
+            con.scrollTop = con.scrollHeight;
+        }
+
+        // Перевірка вшитого пароля "1234"
+        function verifyAdminPassword() {
+            const enteredPass = document.getElementById('admin-password-input').value;
+            if (enteredPass === "1234") {
+                logSys("Авторизація адміністратора успішна", "success");
+                document.getElementById('screen-auth').style.display = 'none';
+                document.getElementById('screen-admin').style.display = 'block';
+            } else {
+                alert("Невірний пароль адміністратора!");
+                logSys("Спроба несанкціонованого входу", "error");
+            }
+        }
+
+        async function saveNewTrackToCloud() {
+            const pd = document.getElementById('admin-pd').value.trim();
+            const peregon = document.getElementById('admin-peregon').value.trim();
+            const startKm = parseInt(document.getElementById('admin-start-km').value);
+            const endKm = parseInt(document.getElementById('admin-end-km').value);
+
+            if (!pd || !peregon || isNaN(startKm) || isNaN(endKm)) {
+                alert("Заповніть усі поля!"); return;
+            }
+
+            logSys("Запис конфігурації в хмару...");
+            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
+            
+            try {
+                // Створення непарної лінії
+                await fetch(`${baseDbUrl}/rest/v1/tracks`, {
+                    method: 'POST', headers, body: JSON.stringify({ pd, peregon, track_type: 'непарна', start_km: startKm, end_km: endKm })
+                });
+                // Створення парної лінії
+                await fetch(`${baseDbUrl}/rest/v1/tracks`, {
+                    method: 'POST', headers, body: JSON.stringify({ pd, peregon, track_type: 'парна', start_km: startKm, end_km: endKm })
+                });
+
+                logSys("Двоколійний перегін успішно створено!", "success");
+                alert("Двоколійний перегін створено!");
+                // Перенаправлення назад на головні графіки
+                window.location.href = "index.html";
+            } catch(e) {
+                alert("Помилка збереження: " + e.message);
+                logSys("Помилка Supabase: " + e.message, "error");
+            }
+        }
+
+        window.onload = function() {
+            logSys("Система безпеки активована. Очікування пароля...");
+        };
+    </script>
+</body>
+</html>
