@@ -25,19 +25,27 @@
         .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
         .track-label { font-size: 11px; font-weight: 700; color: #115e59; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
         
+        /* Спеціальний рядок для вводу ПД з префіксом */
+        .pd-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .pd-prefix { font-size: 16px; font-weight: bold; color: #115e59; }
+        .pd-number-box { width: 70px !important; margin-bottom: 0 !important; text-align: center; }
+
+        /* Рядок для спарених полів КМ + ПК */
+        .km-pk-row { display: flex; gap: 10px; margin-bottom: 12px; width: 100%; }
+        .km-pk-col { flex: 1; display: flex; flex-direction: column; }
+        .km-pk-col .input-field { margin-bottom: 0 !important; }
+
         .btn-submit { width: 100%; background: #0d9488; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.15); transition: background 0.2s; }
         .btn-submit:hover { background: #0f766e; }
 
-        /* Кнопка очищення (червона для попередження) */
+        /* Кнопка очищення */
         .btn-danger { width: 100%; background: #ef4444; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15); transition: background 0.2s; }
         .btn-danger:hover { background: #b91c1c; }
 
         .auth-box { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
-
-        /* Розділювач секцій */
         .section-divider { height: 1px; background: #e2e8f0; margin: 24px 0; border: none; }
 
-        /* СТИЛІ ДЛЯ ВИПАДАЮЧОГО СПИСКУ З ГАЛОЧКАМИ */
+        /* Стилі для випадаючого списку з галочками */
         .multiselect-dropdown { position: relative; width: 100%; margin-bottom: 12px; box-sizing: border-box; }
         .multiselect-header { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .multiselect-options { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #a7f3d0; border-radius: 10px; margin-top: 4px; max-height: 160px; overflow-y: auto; z-index: 10; box-shadow: 0 10px 20px rgba(11, 94, 89, 0.1); box-sizing: border-box; padding: 4px; }
@@ -66,7 +74,7 @@
             <p>Для входу в панель адміністрування введіть пароль захисту</p>
             <div class="auth-box">
                 <label class="track-label">Пароль адміністратора:</label>
-                <input type="password" id="admin-password-input" class="input-field" placeholder="••••••••" onkeydown="if(event.key==='Enter') verifyAdminPassword()">
+                <input type="password" id="admin-password-input" class="input-field" onkeydown="if(event.key==='Enter') verifyAdminPassword()">
                 <button class="btn-submit" onclick="verifyAdminPassword()">Підтвердити вхід</button>
             </div>
         </div>
@@ -75,17 +83,48 @@
             <h2>⚙️ Конфігурація ділянок</h2>
             <p>Створення двоколійних меж для нових перегонів</p>
             
-            <label class="track-label">Назва ПД (напр. ПД-13):</label>
-            <input type="text" id="admin-pd" class="input-field" placeholder="ПД-13">
+            <label class="track-label">Введіть околоток:</label>
+            <div class="pd-input-row">
+                <span class="pd-prefix">ПД-</span>
+                <input type="number" id="admin-pd-num" class="input-field pd-number-box">
+            </div>
 
             <label class="track-label">Назва перегону:</label>
-            <input type="text" id="admin-peregon" class="input-field" placeholder="Перегін Путивль - Кошари">
+            <input type="text" id="admin-peregon" class="input-field">
 
-            <label class="track-label">Початковий кілометр:</label>
-            <input type="number" id="admin-start-km" class="input-field" placeholder="52">
+            <label class="track-label">Початок ділянки:</label>
+            <div class="km-pk-row">
+                <div class="km-pk-col">
+                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px;">Кілометр</span>
+                    <input type="number" id="admin-start-km" class="input-field">
+                </div>
+                <div class="km-pk-col">
+                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px;">Пікет (ПК)</span>
+                    <select id="admin-start-pk" class="input-field">
+                        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+            </div>
 
-            <label class="track-label">Кінцевий кілометр:</label>
-            <input type="number" id="admin-end-km" class="input-field" placeholder="60">
+            <label class="track-label">Кінець ділянки:</label>
+            <div class="km-pk-row">
+                <div class="km-pk-col">
+                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px;">Кілометр</span>
+                    <input type="number" id="admin-end-km" class="input-field">
+                </div>
+                <div class="km-pk-col">
+                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px;">Пікет (ПК)</span>
+                    <select id="admin-end-pk" class="input-field">
+                        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                        <option value="10" selected>10</option>
+                    </select>
+                </div>
+            </div>
 
             <button class="btn-submit" onclick="saveNewTrackToCloud()">Зберегти перегін у базу</button>
 
@@ -100,8 +139,7 @@
                     <span id="dropdown-label">Оберіть ПД...</span>
                     <span>▼</span>
                 </div>
-                <div class="multiselect-options" id="dropdown-options">
-                    </div>
+                <div class="multiselect-options" id="dropdown-options"></div>
             </div>
 
             <button class="btn-danger" onclick="clearSelectedPdTracks()">Очистити вибрані ПД</button>
@@ -131,29 +169,25 @@
             con.scrollTop = con.scrollHeight;
         }
 
-        // Перевірка вшитого пароля "1234"
         function verifyAdminPassword() {
             const enteredPass = document.getElementById('admin-password-input').value;
             if (enteredPass === "1234") {
                 logSys("Авторизація адміністратора успішна", "success");
                 document.getElementById('screen-auth').style.display = 'none';
                 document.getElementById('screen-admin').style.display = 'block';
-                loadPdsForCleaning(); // Підвантажуємо дані ПД одразу після входу
+                loadPdsForCleaning();
             } else {
                 alert("Невірний пароль адміністратора!");
                 logSys("Спроба несанкціонованого входу", "error");
             }
         }
 
-        // Завантаження унікальних ПД з бази даних
         async function loadPdsForCleaning() {
             logSys("Завантаження списку околотків для очищення...");
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
                 const resTracks = await fetch(`${baseDbUrl}/rest/v1/tracks?select=pd`, { headers });
                 tracksData = await resTracks.json();
-                
-                // Отримуємо унікальні назви ПД
                 const uniquePds = [...new Set(tracksData.map(t => t.pd))].sort();
                 renderMultiselect(uniquePds);
                 logSys(`Знайдено ПД для адміністрування: ${uniquePds.length}`, "success");
@@ -162,7 +196,6 @@
             }
         }
 
-        // Генерація випадаючого списку з галочками
         function renderMultiselect(pds) {
             const container = document.getElementById('dropdown-options');
             container.innerHTML = "";
@@ -189,14 +222,12 @@
                 item.appendChild(checkbox);
                 item.appendChild(label);
                 
-                // Клік по всьому рядку перемикає галочку
                 item.onclick = (e) => {
                     if (e.target !== checkbox) {
                         checkbox.checked = !checkbox.checked;
                         checkbox.dispatchEvent(new Event('change'));
                     }
                 };
-
                 container.appendChild(item);
             });
         }
@@ -225,7 +256,6 @@
             }
         }
 
-        // Закриття випадаючого списку при кліку поза ним
         window.addEventListener('click', function(e) {
             const dropdown = document.querySelector('.multiselect-dropdown');
             if (dropdown && !dropdown.contains(e.target)) {
@@ -233,14 +263,13 @@
             }
         });
 
-        // ФУНКЦІЯ ОЧИЩЕННЯ ДАНИХ АДМІНІСТРАТОРА ДЛЯ ОБРАНИХ ПД
         async function clearSelectedPdTracks() {
             if (selectedPds.length === 0) {
                 alert("Будь ласка, виберіть хоча б один околоток (ПД) галочкою!");
                 return;
             }
 
-            const confirmText = `Ви впевнені, що хочете ПОВНІСТЮ ВИДАЛИТЬ конфігурацію перегонів для околотків: ${selectedPds.join(', ')}?\n\nЦя дія стертиме лише межі ділянок адміністратора.`;
+            const confirmText = `Ви впевнені, що хочете ПОВНІСТЮ ВИДАЛИТЬ конфігурацію перегонів для околотків: ${selectedPds.join(', ')}?`;
             if (!confirm(confirmText)) return;
 
             logSys(`Запуск очищення для: ${selectedPds.join(', ')}...`);
@@ -248,53 +277,54 @@
 
             try {
                 let successCount = 0;
-
-                // Видаляємо дані з таблиці tracks по черзі для кожного обраного ПД
                 for (const pd of selectedPds) {
                     const deleteUrl = `${baseDbUrl}/rest/v1/tracks?pd=eq.${encodeURIComponent(pd)}`;
-                    const response = await fetch(deleteUrl, {
-                        method: 'DELETE',
-                        headers: headers
-                    });
-
-                    if (response.ok) {
-                        successCount++;
-                    } else {
-                        logSys(`Помилка видалення ПД ${pd}`, "error");
-                    }
+                    const response = await fetch(deleteUrl, { method: 'DELETE', headers });
+                    if (response.ok) successCount++;
                 }
 
                 if (successCount > 0) {
                     logSys(`Успішно очищено околотків: ${successCount}`, "success");
-                    alert(`Дані для вибраних ПД (${selectedPds.join(', ')}) успішно очищено!`);
-                    // Оновлюємо список
+                    alert(`Дані успішно очищено!`);
                     await loadPdsForCleaning();
                 }
             } catch (e) {
                 alert("Помилка під час очищення: " + e.message);
-                logSys("Критична помилка очищення: " + e.message, "error");
             }
         }
 
         async function saveNewTrackToCloud() {
-            const pd = document.getElementById('admin-pd').value.trim();
+            const pdNum = document.getElementById('admin-pd-num').value.trim();
             const peregon = document.getElementById('admin-peregon').value.trim();
             const startKm = parseInt(document.getElementById('admin-start-km').value);
+            const startPk = parseInt(document.getElementById('admin-start-pk').value);
             const endKm = parseInt(document.getElementById('admin-end-km').value);
+            const endPk = parseInt(document.getElementById('admin-end-pk').value);
 
-            if (!pd || !peregon || isNaN(startKm) || isNaN(endKm)) {
+            if (!pdNum || !peregon || isNaN(startKm) || isNaN(endKm)) {
                 alert("Заповніть усі поля!"); return;
             }
 
-            logSys("Запис конфігурації в хмару...");
+            const fullPdName = "ПД-" + pdNum; // Склеюємо префікс і введений номер ПД
+            logSys(`Запис конфігурації ${fullPdName} в хмару...`);
+            
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
             
             try {
+                // Додаємо також параметри start_pk та end_pk для точного позиціонування меж ділянки
                 await fetch(`${baseDbUrl}/rest/v1/tracks`, {
-                    method: 'POST', headers, body: JSON.stringify({ pd, peregon, track_type: 'непарна', start_km: startKm, end_km: endKm })
+                    method: 'POST', headers, body: JSON.stringify({ 
+                        pd: fullPdName, peregon, track_type: 'непарна', 
+                        start_km: startKm, start_piket: startPk, 
+                        end_km: endKm, end_piket: endPk 
+                    })
                 });
                 await fetch(`${baseDbUrl}/rest/v1/tracks`, {
-                    method: 'POST', headers, body: JSON.stringify({ pd, peregon, track_type: 'парна', start_km: startKm, end_km: endKm })
+                    method: 'POST', headers, body: JSON.stringify({ 
+                        pd: fullPdName, peregon, track_type: 'парна', 
+                        start_km: startKm, start_piket: startPk, 
+                        end_km: endKm, end_piket: endPk 
+                    })
                 });
 
                 logSys("Двоколійний перегін успішно створено!", "success");
