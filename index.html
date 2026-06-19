@@ -53,7 +53,7 @@
         /* Зони обкошування (Брівки узбіччя) */
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
         
-        /* Центральний маркер пікета */
+        /* Central ПК маркер */
         .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
         
         /* Візуалізація рейкової нитки */
@@ -137,7 +137,7 @@
 
         let tracksData = [];
         let mowingData = [];
-        let isAdminAuthenticated = false; // Статус авторизації
+        let isAdminAuthenticated = false;
 
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
@@ -157,7 +157,6 @@
             const btnCharts = document.getElementById('nav-btn-charts');
             const btnAdmin = document.getElementById('nav-btn-admin');
 
-            // Приховуємо всі екрани перед перемиканням
             scrCharts.style.display = 'none';
             scrAuth.style.display = 'none';
             scrAdmin.style.display = 'none';
@@ -168,12 +167,11 @@
                 scrCharts.style.display = 'block';
                 btnCharts.classList.add('active');
             } else if (screenName === 'auth') {
-                // Якщо вже авторизовані — пускаємо одразу в адмінку, інакше — на форму пароля
                 if (isAdminAuthenticated) {
                     scrAdmin.style.display = 'block';
                 } else {
                     scrAuth.style.display = 'block';
-                    document.getElementById('admin-password-input').value = ""; // Очищення поля
+                    document.getElementById('admin-password-input').value = "";
                 }
                 btnAdmin.classList.add('active');
             } else if (screenName === 'admin') {
@@ -182,11 +180,10 @@
             }
         }
 
-        // ПЕРЕВІРКА ПАРОЛЯ
+        // ПЕРЕВІРКА ОНОВЛЕНОГО ПАРОЛЯ
         function verifyAdminPassword() {
             const enteredPass = document.getElementById('admin-password-input').value;
-            // Перевіряємо ваш стандартний залізничний пароль "ПД-13" (або замініть на потрібний)
-            if (enteredPass === "ПД-13") {
+            if (enteredPass === "1234") {
                 isAdminAuthenticated = true;
                 logSys("Авторизація адміністратора успішна", "success");
                 switchScreen('admin');
@@ -353,7 +350,6 @@
                 });
 
                 alert("Двоколійний перегін створено!");
-                // Після успішного збереження скидаємо авторизацію для безпеки
                 isAdminAuthenticated = false;
                 await reloadDataFromCloud();
                 switchScreen('charts');
