@@ -5,84 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📊 Лінійна діаграма з Адмін-панеллю</title>
     <style>
-        /* ОНОВЛЕНО: Загальне тло всього додатка під стиль адмінки */
         body { font-family: -apple-system, sans-serif; background-color: #f0fdf4; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 450px; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        /* ОНОВЛЕНО: Навігаційне меню у фісташкових тонах */
+        /* Навігація */
         .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 16px; display: flex; gap: 6px; box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); width: 100%; box-sizing: border-box; align-items: center; border: 1px solid #d1fae5; }
         .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #115e59; text-decoration: none; border-radius: 8px; background: #f0fdf4; cursor: pointer; }
-        /* ОНОВЛЕНО: Активна вкладка тепер хвойно-шавлієва */
         .nav-link.active { background-color: #115e59; color: white; }
         
-        /* Кругла кнопка адміна */
-        .admin-menu-btn { width: 42px; height: 42px; background-color: #115e59; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: none; flex-shrink: 0; transition: transform 0.1s ease; }
-        .admin-menu-btn:active { transform: scale(0.9); }
+        .admin-menu-btn { width: 42px; height: 42px; background-color: #f0fdf4; color: #115e59; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: 1px solid #a7f3d0; flex-shrink: 0; text-decoration: none; }
+        .admin-menu-btn.active { background-color: #115e59; color: white; border-color: #115e59; }
         
-        /* ОНОВЛЕНО: Головна картка з м'якою тінню */
-        .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); position: relative; overflow: hidden; margin-bottom: 16px; border: 1px solid #d1fae5; }
+        .screen { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); width: 100%; box-sizing: border-box; margin-bottom: 16px; border: 1px solid #d1fae5; }
         h2 { margin-top: 0; margin-bottom: 4px; font-size: 20px; color: #115e59; font-weight: 800; }
         p { color: #0f766e; font-size: 14px; margin-top: 0; margin-bottom: 16px; opacity: 0.8; }
         
-        /* ОНОВЛЕНО: Поля вибору в стилі Матча */
-        .input-field { width: 100%; padding: 12px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; transition: border-color 0.2s, box-shadow 0.2s; color: #115e59; font-weight: 500; }
-        .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
+        .input-field { width: 100%; padding: 12px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 16px; font-size: 15px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; }
         .track-label { font-size: 12px; font-weight: 700; color: #115e59; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Рядок для групування КМ та ПК */
-        .geo-row { display: flex; gap: 10px; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
-        .geo-col { flex: 1; }
-        .geo-col .input-field { margin-bottom: 0; }
-
-        /* ОНОВЛЕНО: Картки кілометрів тепер мають ніжне фісташкове тло */
-        .km-block { border: 1px solid #d1fae5; border-radius: 12px; padding: 12px; margin-top: 16px; background-color: #e6f4ea; }
-        .km-title { font-weight: bold; font-size: 15px; color: #115e59; margin-bottom: 8px; text-align: center; letter-spacing: 0.3px; }
-        .track-title-mini { font-size: 11px; font-weight: bold; color: #0f766e; margin-bottom: 6px; margin-top: 8px; text-transform: uppercase; display: flex; justify-content: space-between; }
-        
-        .piket-grid { display: flex; gap: 4px; width: 100%; justify-content: space-between; margin-bottom: 4px; }
-        .piket-cell { flex: 1; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s ease, opacity 0.1s ease; }
-        .piket-cell:active { transform: scale(0.92); }
-        /* ОНОВЛЕНО: Порожні осередки гармоніюють із тлом */
-        .cell-empty { background-color: #cbd5e1; color: #64748b; cursor: default; }
-        .cell-green { background-color: #22c55e; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
-        .cell-yellow { background-color: #eab308; color: #1f2937; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
-        .cell-red { background-color: #ef4444; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
-        
-        .status-msg { text-align: center; color: #0f766e; font-size: 14px; margin-top: 10px; font-weight: 500; }
-        
-        .custom-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #115e59; color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 10px 25px rgba(13, 148, 136, 0.2); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2000; opacity: 0; display: flex; align-items: center; gap: 8px; pointer-events: none; }
-        .custom-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        
-        /* МОДНА СВІТЛА ШАВЛІЄВА БІЧНА ПАНЕЛЬ */
-        .admin-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 148, 136, 0.15); backdrop-filter: blur(4px); z-index: 999; display: none; opacity: 0; transition: opacity 0.3s ease; }
-        .admin-overlay.open { display: block; opacity: 1; }
-        
-        .admin-sidebar { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100%; background: #f0fdf4; box-shadow: -10px 0 35px rgba(11, 66, 63, 0.12); transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000; display: flex; flex-direction: column; box-sizing: border-box; }
-        .admin-sidebar.open { right: 0; }
-        .admin-header { background: #115e59; color: white; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(17, 94, 89, 0.15); }
-        .admin-header h3 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.6px; }
-        .close-btn { background: none; border: none; color: #a7f3d0; font-size: 26px; cursor: pointer; transition: color 0.2s; padding: 0; line-height: 1; }
-        .close-btn:hover { color: white; }
-        
-        .admin-content { padding: 16px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
-        
-        /* Білі мікро-картки на ніжному фісташковому тлі */
-        .admin-card { background: white; border: 1px solid #d1fae5; border-radius: 14px; padding: 18px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01); }
-        .admin-card h4 { margin-top: 0; margin-bottom: 14px; font-size: 15px; color: #115e59; font-weight: 700; border-bottom: 2px solid #f0fdf4; padding-bottom: 8px; }
-        
-        /* Кнопки у стилі Матча та Брусниця */
-        .btn-submit { width: 100%; background: #0d9488; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 6px; transition: background 0.2s, transform 0.1s; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.15); }
+        .btn-submit { width: 100%; background: #0d9488; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.15); }
         .btn-submit:hover { background: #0f766e; }
-        .btn-submit:active { transform: scale(0.98); }
         
-        .btn-danger { width: 100%; background: #be123c; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 6px; transition: background 0.2s, transform 0.1s; box-shadow: 0 2px 4px rgba(190, 18, 60, 0.15); }
-        .btn-danger:hover { background: #9f1239; }
-        .btn-danger:active { transform: scale(0.98); }
-
-        /* Стилі для підпису розробника */
-        .admin-footer-credits { text-align: center; font-size: 11px; color: #0f766e; font-weight: bold; letter-spacing: 0.5px; opacity: 0.75; margin-top: auto; padding-top: 16px; padding-bottom: 4px; text-transform: uppercase; border-top: 1px dashed #caf4dc; }
-
-        /* ОНОВЛЕНО: Монітор самоаудиту адаптовано під зелену палітру */
+        /* 🔔 ОНОВЛЕНІ СТИЛІ ДЛЯ ВЕРТИКАЛЬНОЇ ДІАГРАМИ "НИТКА КОЛІЇ" */
+        .vertical-railway-line { display: flex; flex-direction: column; width: 100%; margin-top: 10px; position: relative; }
+        
+        /* Межа кілометра - як залізничний знак чи міцна межа */
+        .km-divider-boundary { background: #e6f4ea; border: 2px solid #115e59; border-radius: 8px; padding: 10px; margin: 20px 0 10px 0; text-align: center; font-weight: 900; font-size: 15px; color: #115e59; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(17,94,89,0.1); text-transform: uppercase; }
+        .km-divider-boundary:first-child { margin-top: 0; }
+        
+        /* Інформація про останнє косіння під назвою кілометра */
+        .km-divider-date { font-size: 11px; font-weight: normal; color: #0f766e; font-style: italic; margin-top: 2px; text-transform: none; letter-spacing: 0; }
+        
+        /* Вертикальний рядок пікета (на всю ширину екрану) */
+        .piket-vertical-row { display: flex; align-items: center; margin-bottom: 5px; height: 46px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        
+        /* Лівка частина: Номер пікета */
+        .piket-num-badge { width: 65px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; background-color: #115e59; color: white; border-right: 1px solid rgba(0,0,0,0.1); text-transform: uppercase; flex-shrink: 0; }
+        
+        /* Права частина: Статус та дні */
+        .piket-status-content { flex: 1; height: 100%; display: flex; align-items: center; padding-left: 14px; padding-right: 14px; font-size: 13px; font-weight: bold; justify-content: space-between; }
+        .piket-days-label { font-size: 11px; font-weight: normal; opacity: 0.85; font-family: monospace; }
+        
+        /* Класична світлофорна палітра (тепер для всього рядка статусу) */
+        .cell-red { background-color: #ef4444; color: white; }
+        .cell-yellow { background-color: #eab308; color: #1f2937; }
+        .cell-green { background-color: #22c55e; color: white; }
+        
+        /* Дебаг-панель */
         .debug-panel { margin-top: 8px; padding: 14px; background-color: #e6f4ea; border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(11,94,89,0.02); }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 6px; border-bottom: 1px solid #c2e7d9; padding-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 110px; overflow-y: auto; text-align: left; }
@@ -92,123 +61,55 @@
 
     <div class="container">
         <div class="nav-menu">
-            <a href="#" class="nav-link active" onclick="return false;">📊 Графіки</a>
-            <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
-            <button class="admin-menu-btn" onclick="openAdminSidebar()">⚙️</button>
+            <a href="#" class="nav-link active" id="nav-btn-charts" onclick="switchScreen('charts')">📊 Графіки</a>
+            <a href="master.html" class="nav-link" id="nav-btn-master">🧑‍🔧 Майстер</a>
+            <button class="admin-menu-btn" id="nav-btn-admin" onclick="switchScreen('admin')">⚙️</button>
         </div>
 
-        <div class="screen">
-            <h2>📊 Лінійна діаграма</h2>
-            <p>Система автоматичногольного контролю стану обкошування робіт.</p>
+        <div class="screen" id="screen-charts">
+            <h2>📊 Лінійна діаграма обкошування</h2>
+            <p>Стан поточної колії та пікетів на основі останніх даних.</p>
             
             <label class="track-label">Околоток (ПД):</label>
-            <select id="select-pd" class="input-field" onchange="runUpdatePeregon()">
-                <option value="">-- Очікування хмари... --</option>
-            </select>
+            <select id="filter-pd" class="input-field" onchange="handlePdChange()"></select>
 
             <label class="track-label">Перегін:</label>
-            <select id="select-peregon" class="input-field" onchange="runUpdatePeregonAndRender()">
-                <option value="">-- Спочатку оберіть околоток --</option>
-            </select>
+            <select id="filter-peregon" class="input-field" onchange="handlePeregonChange()"></select>
 
             <label class="track-label">Колія:</label>
-            <select id="select-track-type" class="input-field" onchange="runRenderDiagram()">
+            <select id="filter-track-type" class="input-field" onchange="drawDiagram()"></select>
+
+            <div id="diagram-render-zone" class="vertical-railway-line"></div>
+        </div>
+
+        <div class="screen" id="screen-admin" style="display: none;">
+            <h2>⚙️ Адміністрування ділянок</h2>
+            <p>Додавання нових перегонів та меж кілометрів у базу даних.</p>
+            
+            <label class="track-label">Назва ПД (напр. ПД-13):</label>
+            <input type="text" id="admin-pd" class="input-field" placeholder="ПД-13">
+
+            <label class="track-label">Назва перегону:</label>
+            <input type="text" id="admin-peregon" class="input-field" placeholder="Перегін Путивль - Кошари">
+
+            <label class="track-label">Тип колії:</label>
+            <select id="admin-track-type" class="input-field">
+                <option value="непарна">Непарна колія</option>
+                <option value="парна">Парна колія</option>
             </select>
 
-            <div id="diagram-container">
-                <div class="status-msg" id="main-status-text">Завантаження конфігурації...</div>
-            </div>
+            <label class="track-label">Початковий кілометр:</label>
+            <input type="number" id="admin-start-km" class="input-field" placeholder="52">
+
+            <label class="track-label">Кінцевий кілометр:</label>
+            <input type="number" id="admin-end-km" class="input-field" placeholder="60">
+
+            <button class="btn-submit" onclick="saveNewTrackToCloud()">Зберегти ділянку в базу</button>
         </div>
 
         <div class="debug-panel">
             <div class="debug-title">🖥️ Монітор самоаудиту системи</div>
             <div id="debug-console" class="debug-scroll"></div>
-        </div>
-    </div>
-
-    <div id="custom-toast" class="custom-toast"></div>
-
-    <div id="admin-overlay" class="admin-overlay" onclick="closeAdminSidebar()"></div>
-
-    <div id="admin-sidebar" class="admin-sidebar">
-        <div class="admin-header">
-            <h3>⚙️ ПАНЕЛЬ АДМІНІСТРАТОРА</h3>
-            <button class="close-btn" onclick="closeAdminSidebar()">×</button>
-        </div>
-        
-        <div class="admin-content">
-            <div id="admin-auth-block" class="admin-card">
-                <label class="track-label">Вхід у систему контролю:</label>
-                <input type="password" id="admin-password-input" class="input-field" placeholder="Введіть пароль доступу...">
-                <button class="btn-submit" onclick="checkAdminPasswordInside()">Авторизуватись</button>
-            </div>
-
-            <div id="admin-controls-block" style="display: none; flex-direction: column; gap: 16px;">
-                
-                <div class="admin-card">
-                    <h4>➕ Додати нову ділянку (track)</h4>
-                    
-                    <label class="track-label">Назва ПД (напр., ПД-13):</label>
-                    <input type="text" id="add-pd" class="input-field" placeholder="ПД-13">
-
-                    <label class="track-label">Назва перегону:</label>
-                    <input type="text" id="add-peregon" class="input-field" placeholder="Путивль - Кошари">
-
-                    <div class="geo-row">
-                        <div class="geo-col">
-                            <label class="track-label">Початок (КМ):</label>
-                            <input type="number" id="add-start" class="input-field" placeholder="52">
-                        </div>
-                        <div class="geo-col">
-                            <label class="track-label">Пікет (ПК):</label>
-                            <select id="add-start-pk" class="input-field">
-                                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                                <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                                <option value="10">10</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="geo-row">
-                        <div class="geo-col">
-                            <label class="track-label">Кінець (КМ):</label>
-                            <input type="number" id="add-end" class="input-field" placeholder="64">
-                        </div>
-                        <div class="geo-col">
-                            <label class="track-label">Пікет (ПК):</label>
-                            <select id="add-end-pk" class="input-field">
-                                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                                <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                                <option value="10" selected>10</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <label class="track-label">Тип колії:</label>
-                    <select id="add-type" class="input-field">
-                        <option value="парна">парна</option>
-                        <option value="непарна">непарна</option>
-                    </select>
-
-                    <button class="btn-submit" onclick="submitNewTrack()">Зберегти в Supabase</button>
-                </div>
-
-                <div class="admin-card">
-                    <h4>🗑️ Очистити дані околотку</h4>
-                    <label class="track-label">Оберіть околоток (ПД) для видалення:</label>
-                    <select id="delete-pd-select" class="input-field">
-                        <option value="">-- Оберіть ПД --</option>
-                    </select>
-                    <button class="btn-danger" onclick="deletePdTracksData()">Видалити ділянки з Supabase</button>
-                </div>
-                
-            </div>
-
-            <div class="admin-footer-credits">
-                © 2026 ПЧУ-5 Сергій ШИНКАРЕНКО
-            </div>
         </div>
     </div>
 
@@ -218,402 +119,240 @@
 
         let tracksData = [];
         let mowingData = [];
-        let toastTimeout;
 
-        function printLog(text, status = 'info') {
-            const consoleElem = document.getElementById('debug-console');
-            if(!consoleElem) return;
-            const line = document.createElement('div');
-            line.style.marginBottom = "3px";
-            if (status === 'success') line.style.color = '#16a34a'; 
-            if (status === 'error') line.style.color = '#dc2626'; 
-            line.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
-            consoleElem.appendChild(line);
-            consoleElem.scrollTop = consoleElem.scrollHeight;
+        function logSys(text, status = 'info') {
+            const con = document.getElementById('debug-console');
+            if(!con) return;
+            const div = document.createElement('div');
+            div.style.marginBottom = "3px";
+            if(status === 'success') div.style.color = '#16a34a';
+            if(status === 'error') div.style.color = '#dc2626';
+            div.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
+            con.appendChild(div);
+            con.scrollTop = con.scrollHeight;
         }
 
-        window.onload = function() {
-            loadDataFromCloud();
+        function switchScreen(screenName) {
+            const scrCharts = document.getElementById('screen-charts');
+            const scrAdmin = document.getElementById('screen-admin');
+            const btnCharts = document.getElementById('nav-btn-charts');
+            const btnAdmin = document.getElementById('nav-btn-admin');
+
+            if (screenName === 'charts') {
+                scrCharts.style.display = 'block';
+                scrAdmin.style.display = 'none';
+                btnCharts.classList.add('active');
+                btnAdmin.classList.remove('active');
+            } else {
+                scrCharts.style.display = 'none';
+                scrAdmin.style.display = 'block';
+                btnCharts.classList.remove('active');
+                btnAdmin.classList.add('active');
+            }
+        }
+
+        async function initApp() {
+            logSys("Запуск системи...");
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('openAdmin') === 'true') {
-                openAdminSidebar();
+                switchScreen('admin');
             }
-        };
+            await reloadDataFromCloud();
+        }
 
-        async function loadDataFromCloud() {
-            const requestHeaders = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
+        async function reloadDataFromCloud() {
+            logSys("Завантаження даних із хмари Supabase...");
+            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
-                const resTracks = await fetch(baseDbUrl + "/rest/v1/tracks?select=*", { headers: requestHeaders });
-                if (!resTracks.ok) throw new Error("Помилка завантаження tracks");
+                const resTracks = await fetch(`${baseDbUrl}/rest/v1/tracks?select=*`, { headers });
                 tracksData = await resTracks.json();
 
-                const resMowing = await fetch(baseDbUrl + "/rest/v1/mowing?select=*", { headers: requestHeaders });
-                if (!resMowing.ok) throw new Error("Помилка завантаження mowing");
+                const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?select=*`, { headers });
                 mowingData = await resMowing.json();
 
-                const statusTxt = document.getElementById('main-status-text');
-                if(statusTxt && !document.getElementById('select-peregon').value) {
-                    statusTxt.innerText = "Будь ласка, оберіть околоток та перегін.";
-                }
-                buildPdList();
-                printLog("Дані хмари успішно синхронізовано", "success");
-            } catch (err) {
-                printLog("Критична помилка завантаження: " + err.message, 'error');
+                logSys(`Успішно завантажено ділянок: ${tracksData.length}, записів косіння: ${mowingData.length}`, 'success');
+                populatePdDropdown();
+            } catch (e) {
+                logSys("Помилка завантаження даних: " + e.message, 'error');
             }
         }
 
-        function buildPdList() {
-            const select = document.getElementById('select-pd');
-            const deleteSelect = document.getElementById('delete-pd-select');
-            const currentSelected = select.value;
-            const currentDeleteSelected = deleteSelect ? deleteSelect.value : "";
-            
-            select.innerHTML = '<option value="">-- Оберіть околоток --</option>';
-            if(deleteSelect) deleteSelect.innerHTML = '<option value="">-- Оберіть ПД --</option>';
-            
-            const uniquePds = [...new Set(tracksData.map(item => item.pd))];
+        function populatePdDropdown() {
+            const select = document.getElementById('filter-pd');
+            select.innerHTML = "";
+            const uniquePds = [...new Set(tracksData.map(t => t.pd))].sort();
             uniquePds.forEach(pd => {
-                const opt = document.createElement('option');
-                opt.value = pd; opt.innerText = pd; 
-                select.appendChild(opt);
-                
-                if(deleteSelect) {
-                    const optDel = document.createElement('option');
-                    optDel.value = pd; optDel.innerText = pd;
-                    deleteSelect.appendChild(optDel);
-                }
+                const opt = document.createElement('option'); opt.value = pd; opt.innerText = pd; select.appendChild(opt);
             });
-            
-            if(currentSelected && uniquePds.includes(currentSelected)) {
-                select.value = currentSelected;
-            }
-            if(deleteSelect && currentDeleteSelected && uniquePds.includes(currentDeleteSelected)) {
-                deleteSelect.value = currentDeleteSelected;
-            }
+            if(uniquePds.length > 0) handlePdChange();
         }
 
-        function runUpdatePeregon() {
-            const selectedPd = document.getElementById('select-pd').value;
-            const selectPeregon = document.getElementById('select-peregon');
-            selectPeregon.innerHTML = '<option value="">-- Оберіть перегін --</option>';
-            document.getElementById('diagram-container').innerHTML = '';
-            
-            if (!selectedPd) return;
-            const filtered = tracksData.filter(t => t.pd === selectedPd);
-            const uniquePeregons = [...new Set(filtered.map(t => t.peregon))];
-
+        function handlePdChange() {
+            const pd = document.getElementById('filter-pd').value;
+            const select = document.getElementById('filter-peregon');
+            select.innerHTML = "";
+            const filtered = tracksData.filter(t => t.pd === pd);
+            const uniquePeregons = [...new Set(filtered.map(t => t.peregon))].sort();
             uniquePeregons.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p; opt.innerText = `Перегін ${p}`; selectPeregon.appendChild(opt);
+                const opt = document.createElement('option'); opt.value = p; opt.innerText = p; select.appendChild(opt);
             });
+            if(uniquePeregons.length > 0) handlePeregonChange();
         }
 
-        function runUpdatePeregonAndRender() {
-            updateTrackTypeOptions();
-            runRenderDiagram();
+        function handlePeregonChange() {
+            const pd = document.getElementById('filter-pd').value;
+            const peregon = document.getElementById('filter-peregon').value;
+            const select = document.getElementById('filter-track-type');
+            select.innerHTML = "";
+
+            const filtered = tracksData.filter(t => t.pd === pd && t.peregon === peregon);
+            const hasEven = filtered.some(t => t.track_type === 'парна');
+            const hasOdd = filtered.some(t => t.track_type === 'непарна');
+
+            if (hasOdd) select.innerHTML += '<option value="непарна">Тільки Непарна колія</option>';
+            if (hasEven) select.innerHTML += '<option value="парна">Тільки Парна колія</option>';
+
+            drawDiagram();
         }
 
-        function updateTrackTypeOptions() {
-            const selectedPd = document.getElementById('select-pd').value;
-            const selectedPeregon = document.getElementById('select-peregon').value;
-            const selectType = document.getElementById('select-track-type');
+        function calculateStatusAndDays(cloudRecord) {
+            if (!cloudRecord || cloudRecord.status !== 'green') {
+                return { status: 'red', text: 'Заросло або немає даних', days: '—' };
+            }
+            if (!cloudRecord.date) {
+                return { status: 'green', text: 'Обкошено (дата не вказана)', days: '0 дн.' };
+            }
+
+            const mowedDate = new Date(cloudRecord.date);
+            const today = new Date();
+            const diffTime = Math.abs(today - mowedDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays >= 45) return { status: 'red', text: 'Критично (потребує обкошування)', days: `${diffDays} дн.` };
+            if (diffDays >= 30) return { status: 'yellow', text: 'Увага (термін підходить)', days: `${diffDays} дн.` };
+            return { status: 'green', text: 'Обкошено', days: `${diffDays} дн.` };
+        }
+
+        /* 🔔 ОНОВЛЕНА ФУНКЦІЯ ГЕНЕРАЦІЇ ВЕРТИКАЛЬНОЇ ДІАГРАМИ */
+        function drawDiagram() {
+            const pd = document.getElementById('filter-pd').value;
+            const peregon = document.getElementById('filter-peregon').value;
+            const trackType = document.getElementById('filter-track-type').value;
+            const container = document.getElementById('diagram-render-zone');
             
-            if (!selectedPd || !selectedPeregon) {
-                selectType.innerHTML = '<option value="all">Обидві колії (Непарна та Парна)</option>';
+            container.innerHTML = "";
+
+            const currentTrack = tracksData.find(t => t.pd === pd && t.peregon === peregon && t.track_type === trackType);
+            if (!currentTrack) {
+                container.innerHTML = "<p style='color:red; text-align:center;'>Ділянку не знайдено в конфігурації.</p>";
                 return;
             }
 
-            const activeTracks = tracksData.filter(t => t.pd === selectedPd && t.peregon === selectedPeregon);
-            const hasEven = activeTracks.some(t => t.track_type === 'парна');
-            const hasOdd = activeTracks.some(t => t.track_type === 'непарна');
+            // Йдемо по кожному кілометру зверху вниз
+            for (let km = currentTrack.start_km; km <= currentTrack.end_km; km++) {
+                
+                // 1. Створюємо велику горизонтальну межу кілометра
+                const kmHeader = document.createElement('div');
+                kmHeader.className = 'km-divider-boundary';
+                kmHeader.innerText = `Кілометр ${km}`;
 
-            selectType.innerHTML = '';
+                // Шукаємо найсвіжішу дату по всьому кілометру для підпису під назвою
+                const kmRecords = mowingData.filter(m => 
+                    m.peregon === peregon && m.track_type === trackType && parseInt(m.km) === km
+                );
+                let latestDate = null;
+                kmRecords.forEach(r => {
+                    if(r.date) {
+                        const d = new Date(r.date);
+                        if(!latestDate || d > latestDate) latestDate = d;
+                    }
+                });
 
-            if (hasEven && hasOdd) {
-                selectType.innerHTML += '<option value="all">Обидві колії (Непарна та Парна)</option>';
-                selectType.innerHTML += '<option value="непарна">Тільки Непарна колія</option>';
-                selectType.innerHTML += '<option value="парна">Тільки Парна колія</option>';
-            } else if (hasOdd) {
-                selectType.innerHTML += '<option value="непарна">Тільки Непарна колія</option>';
-            } else if (hasEven) {
-                selectType.innerHTML += '<option value="парна">Тільки Парна колія</option>';
-            } else {
-                selectType.innerHTML += '<option value="all">Обидві колії (Непарна та Парна)</option>';
-                selectType.innerHTML += '<option value="непарна">Тільки Непарна колія</option>';
-                selectType.innerHTML += '<option value="парна">Тільки Парна колія</option>';
+                const dateInfoSub = document.createElement('div');
+                dateInfoSub.className = 'km-divider-date';
+                if(latestDate) {
+                    dateInfoSub.innerText = `Останній захід: ${latestDate.toLocaleDateString('uk-UA')}`;
+                } else {
+                    dateInfoSub.innerText = `Дані про обкошування відсутні`;
+                }
+                kmHeader.appendChild(dateInfoSub);
+                container.appendChild(kmHeader);
+
+                // 2. Створюємо пікети 1-10 вертикально один за одним всередині цього кілометра
+                for (let pk = 1; pk <= 10; pk++) {
+                    const cloudRecord = mowingData.find(m => 
+                        m.peregon === peregon && m.track_type === trackType && parseInt(m.km) === km && parseInt(m.piket) === pk
+                    );
+
+                    const analysis = calculateStatusAndDays(cloudRecord);
+
+                    // Створюємо рядок для пікета
+                    const piketRow = document.createElement('div');
+                    piketRow.className = 'piket-vertical-row';
+
+                    // Ліва плашка з номером пікета
+                    const numBadge = document.createElement('div');
+                    numBadge.className = 'piket-num-badge';
+                    numBadge.innerText = `ПК ${pk}`;
+                    piketRow.appendChild(numBadge);
+
+                    // Права плашка із кольоровим статусом на всю ширину
+                    const statusContent = document.createElement('div');
+                    statusContent.className = `piket-status-content cell-${analysis.status}`;
+                    
+                    // Текст статусу та дні з моменту косіння
+                    statusContent.innerHTML = `
+                        <span>${analysis.text}</span>
+                        <span class="piket-days-label">${analysis.days}</span>
+                    `;
+                    
+                    piketRow.appendChild(statusContent);
+                    container.appendChild(piketRow);
+                }
             }
+            logSys(`Діаграму переналаштовано на вертикальний вигляд для ${peregon}`, 'info');
         }
 
-        function openAdminSidebar() {
-            document.getElementById('admin-overlay').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('admin-overlay').classList.add('open');
-                document.getElementById('admin-sidebar').classList.add('open');
-            }, 10);
-            
-            document.getElementById('admin-auth-block').style.display = 'block';
-            document.getElementById('admin-controls-block').style.display = 'none';
-            document.getElementById('admin-password-input').value = '';
-        }
+        async function saveNewTrackToCloud() {
+            const pd = document.getElementById('admin-pd').value.trim();
+            const peregon = document.getElementById('admin-peregon').value.trim();
+            const type = document.getElementById('admin-track-type').value;
+            const startKm = parseInt(document.getElementById('admin-start-km').value);
+            const endKm = parseInt(document.getElementById('admin-end-km').value);
 
-        function closeAdminSidebar() {
-            document.getElementById('admin-sidebar').classList.remove('open');
-            document.getElementById('admin-overlay').classList.remove('open');
-            setTimeout(() => {
-                document.getElementById('admin-overlay').style.display = 'none';
-            }, 300);
-        }
-
-        function checkAdminPasswordInside() {
-            let savedPassword = localStorage.getItem('admin_password') || '1234';
-            let enteredPassword = document.getElementById('admin-password-input').value;
-
-            if (enteredPassword === savedPassword) {
-                document.getElementById('admin-auth-block').style.display = 'none';
-                document.getElementById('admin-controls-block').style.display = 'flex';
-                printLog("Адмін успішно авторизований в панелі", "success");
-            } else {
-                alert("Невірний пароль!");
-                printLog("Невірний пароль бічної панелі", "error");
-            }
-        }
-
-        async function submitNewTrack() {
-            const pd = document.getElementById('add-pd').value.trim();
-            const peregon = document.getElementById('add-peregon').value.trim();
-            const start = parseInt(document.getElementById('add-start').value);
-            const startPk = parseInt(document.getElementById('add-start-pk').value);
-            const end = parseInt(document.getElementById('add-end').value);
-            const endPk = parseInt(document.getElementById('add-end-pk').value);
-            const type = document.getElementById('add-type').value;
-
-            if(!pd || !peregon || isNaN(start) || isNaN(end) || isNaN(startPk) || isNaN(endPk)) {
-                alert("Заповніть всі поля коректно!");
-                return;
+            if (!pd || !peregon || isNaN(startKm) || isNaN(endKm)) {
+                alert("Будь ласка, заповніть усі поля адмін-панелі!"); return;
             }
 
-            const bodyData = { 
-                pd: pd, 
-                peregon: peregon, 
-                start_km: start, 
-                start_pk: startPk, 
-                end_km: end, 
-                end_pk: endPk, 
-                track_type: type 
+            logSys("Надсилання нової ділянки в Supabase...");
+            const bodyData = { pd, peregon, track_type: type, start_km: startKm, end_km: endKm };
+            const headers = { 
+                'apikey': fullKey, 
+                'authorization': 'Bearer ' + fullKey, 
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
             };
-            
-            printLog("Надсилання нової ділянки в хмару...");
 
             try {
-                const res = await fetch(baseDbUrl + "/rest/v1/tracks", {
+                const res = await fetch(`${baseDbUrl}/rest/v1/tracks`, {
                     method: 'POST',
-                    headers: { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+                    headers: headers,
                     body: JSON.stringify(bodyData)
                 });
-
                 if(res.ok) {
-                    printLog("Запис успешно додано в tracks", "success");
-                    alert("Ділянку успішно додано в базу!");
-                    document.getElementById('add-pd').value = '';
-                    document.getElementById('add-peregon').value = '';
-                    document.getElementById('add-start').value = '';
-                    document.getElementById('add-end').value = '';
-                    document.getElementById('add-start-pk').value = '1';
-                    document.getElementById('add-end-pk').value = '10';
-                    await loadDataFromCloud();
-                    runUpdatePeregon();
+                    logSys("Нову ділянку успішно додано!", "success");
+                    alert("Ділянку додано успішно!");
+                    await reloadDataFromCloud();
+                    switchScreen('charts');
                 } else {
-                    const txt = await res.text();
-                    throw new Error(txt);
+                    const txt = await res.text(); throw new Error(txt);
                 }
             } catch(e) {
-                alert("Помилка збереження: " + e.message);
-                printLog("Помилка відправки даних", "error");
+                alert("Помилка запису: " + e.message); logSys("Помилка адмінки", "error");
             }
         }
 
-        async function deletePdTracksData() {
-            const pdToDel = document.getElementById('delete-pd-select').value;
-            if(!pdToDel) {
-                alert("Будь ласка, оберіть околоток для видалення!");
-                return;
-            }
-
-            if(!confirm(`Ви дійсно хочете видалити всі ділянки для ${pdToDel}? Цю дію неможливо скасувати.`)) {
-                return;
-            }
-
-            printLog(`Видалення ділянок околотку ${pdToDel} з хмари...`);
-
-            try {
-                const res = await fetch(`${baseDbUrl}/rest/v1/tracks?pd=eq.${encodeURIComponent(pdToDel)}`, {
-                    method: 'DELETE',
-                    headers: { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey }
-                });
-
-                if(res.ok) {
-                    printLog(`Ділянки для ${pdToDel} успішно видалено`, "success");
-                    alert(`Всі ділянки околотку ${pdToDel} успішно видалено з бази!`);
-                    
-                    if(document.getElementById('select-pd').value === pdToDel) {
-                        document.getElementById('select-pd').value = "";
-                        document.getElementById('select-peregon').innerHTML = '<option value="">-- Спочатку оберіть околоток --</option>';
-                        document.getElementById('diagram-container').innerHTML = '';
-                    }
-
-                    await loadDataFromCloud();
-                } else {
-                    const txt = await res.text();
-                    throw new Error(txt);
-                }
-            } catch(e) {
-                alert("Помилка видалення: " + e.message);
-                printLog("Помилка під час видалення даних околотку", "error");
-            }
-        }
-
-        function runRenderDiagram() {
-            const selectedPd = document.getElementById('select-pd').value;
-            const selectedPeregon = document.getElementById('select-peregon').value;
-            const filterTrackType = document.getElementById('select-track-type').value;
-            const container = document.getElementById('diagram-container');
-            container.innerHTML = '';
-
-            if (!selectedPd || !selectedPeregon) return;
-            
-            const activeTracks = tracksData.filter(t => t.pd === selectedPd && t.peregon === selectedPeregon);
-            if(activeTracks.length === 0) {
-                container.innerHTML = '<div class="status-msg">Немає конфігурації для цієї ділянки.</div>';
-                return;
-            }
-
-            let minKm = Infinity; let maxKm = -Infinity;
-            activeTracks.forEach(t => {
-                if(t.start_km < minKm) minKm = t.start_km;
-                if(t.end_km > maxKm) maxKm = t.end_km;
-            });
-
-            printLog(`Рендеринг діаграми (КМ ${minKm} - КМ ${maxKm})...`);
-
-            for (let km = minKm; km <= maxKm; km++) {
-                const kmBlock = document.createElement('div');
-                kmBlock.className = 'km-block';
-
-                const kmTitle = document.createElement('div');
-                kmTitle.className = 'km-title';
-                kmTitle.innerText = `Кілометр ${km}`;
-                kmBlock.appendChild(kmTitle);
-
-                if (filterTrackType === 'all' || filterTrackType === 'непарна') {
-                    renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'непарна');
-                }
-                if (filterTrackType === 'all' || filterTrackType === 'парна') {
-                    renderTrackLine(kmBlock, selectedPd, selectedPeregon, km, 'парна');
-                }
-
-                container.appendChild(kmBlock);
-            }
-        }
-
-        function showCustomToast(text, isAlert = false) {
-            const toast = document.getElementById('custom-toast');
-            clearTimeout(toastTimeout);
-            
-            if (isAlert) {
-                toast.innerHTML = `⚠️ <span style="color: #fca5a5; margin-left: 4px;">${text}</span>`;
-            } else {
-                toast.innerHTML = `🌱 Обкошено: <span style="color: #a7f3d0; margin-left: 4px;">${text}</span>`;
-            }
-            
-            toast.classList.add('show');
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        function renderTrackLine(parentBlock, pd, peregon, km, type) {
-            const specificTrack = tracksData.find(t => t.pd === pd && t.peregon === peregon && t.track_type === type);
-            if(!specificTrack) return;
-
-            const miniTitle = document.createElement('div');
-            miniTitle.className = 'track-title-mini';
-            miniTitle.innerHTML = `<span>Колія: ${type}</span><span style="color:#0f766e; font-weight:normal; opacity:0.7;">пікети 1-10</span>`;
-            parentBlock.appendChild(miniTitle);
-
-            const piketGrid = document.createElement('div');
-            piketGrid.className = 'piket-grid';
-
-            const trackStartKm = specificTrack.start_km;
-            const trackEndKm = specificTrack.end_km;
-            const limitStartPk = (specificTrack.start_pk !== undefined && km === trackStartKm) ? specificTrack.start_pk : 1;
-            const limitEndPk = (specificTrack.end_pk !== undefined && km === trackEndKm) ? specificTrack.end_pk : 10;
-
-            for (let pk = 1; pk <= 10; pk++) {
-                const cell = document.createElement('div');
-                
-                let isInsideTrackBoundaries = true;
-                if (km === trackStartKm && pk < limitStartPk) isInsideTrackBoundaries = false;
-                if (km === trackEndKm && pk > limitEndPk) isInsideTrackBoundaries = false;
-
-                if (!isInsideTrackBoundaries) {
-                    cell.className = 'piket-cell cell-empty';
-                    cell.innerHTML = '•';
-                    piketGrid.appendChild(cell);
-                    continue;
-                }
-
-                const statusReport = mowingData.find(m => 
-                    m.pd === pd && 
-                    m.peregon === peregon && 
-                    parseInt(m.km) === km && 
-                    (parseInt(m.piket) === pk || parseInt(m.pikets) === pk) &&
-                    (m.track_type === type || !m.track_type)
-                );
-
-                cell.className = 'piket-cell cell-red';
-                cell.innerHTML = pk;
-                
-                cell.onclick = function() {
-                    showCustomToast("Немає даних про обкошування / Потрібно обкосити", true);
-                };
-
-                if (statusReport) {
-                    const stringDate = statusReport.date || statusReport.mow_date;
-                    
-                    if (stringDate) {
-                        const today = new Date();
-                        const mowDate = new Date(stringDate);
-                        
-                        const diffTime = Math.abs(today - mowDate);
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                        if (diffDays <= 30) {
-                            cell.className = 'piket-cell cell-green';
-                        } else if (diffDays > 30 && diffDays <= 45) {
-                            cell.className = 'piket-cell cell-yellow';
-                        } else {
-                            cell.className = 'piket-cell cell-red';
-                        }
-
-                        const formattedDate = mowDate.toLocaleDateString('uk-UA').replace(/\./g, '/');
-
-                        cell.onclick = function() {
-                            showCustomToast(`${formattedDate} (${diffDays} дн. тому)`);
-                        };
-                    } else {
-                        if (statusReport.status === 'green' || statusReport.status === 'done') cell.className = 'piket-cell cell-green';
-                        else if (statusReport.status === 'yellow' || statusReport.status === 'process') cell.className = 'piket-cell cell-yellow';
-                        else cell.className = 'piket-cell cell-red';
-
-                        cell.onclick = function() {
-                            showCustomToast(stringDate || "дата не вказана");
-                        };
-                    }
-                }
-                piketGrid.appendChild(cell);
-            }
-            parentBlock.appendChild(piketGrid);
-        }
+        window.onload = initApp;
     </script>
 </body>
 </html>
