@@ -25,15 +25,27 @@
         .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
         .track-label { font-size: 11px; font-weight: 700; color: #115e59; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Спеціальний рядок для вводу ПД з префіксом */
+        /* Рядок для вводу ПД з префіксом */
         .pd-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
         .pd-prefix { font-size: 16px; font-weight: bold; color: #115e59; }
         .pd-number-box { width: 70px !important; margin-bottom: 0 !important; text-align: center; }
 
-        /* Рядок для спарених полів КМ + ПК */
-        .km-pk-row { display: flex; gap: 10px; margin-bottom: 12px; width: 100%; }
-        .km-pk-col { flex: 1; display: flex; flex-direction: column; }
-        .km-pk-col .input-field { margin-bottom: 0 !important; }
+        /* Вертикальна побудова секцій меж */
+        .km-section { display: flex; flex-direction: column; margin-bottom: 14px; width: 100%; box-sizing: border-box; }
+        .km-input-wrapper { width: 120px; }
+
+        /* Панель для вибору ПК галочками (кнопками) */
+        .pk-checkbox-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; margin-bottom: 4px; width: 100%; }
+        
+        .pk-checkbox-label { flex: 1; min-width: 40px; height: 40px; background: white; border: 1px solid #a7f3d0; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #115e59; cursor: pointer; user-select: none; transition: background 0.2s, border-color 0.2s, color 0.2s; box-sizing: border-box; }
+        .pk-checkbox-label input { display: none; } 
+        .pk-checkbox-label span { margin-bottom: 1px; }
+        .pk-checkbox-label .chk-indicator { font-size: 9px; color: #a7f3d0; font-weight: normal; transition: color 0.2s; }
+        
+        /* Стан коли галочка вибрана (зелений Матча) */
+        .pk-checkbox-label.selected { background: #0d9488; border-color: #0d9488; color: white; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.2); }
+        .pk-checkbox-label.selected .chk-indicator { color: white; }
+        .pk-checkbox-label:hover:not(.selected) { background: #f0fdf4; border-color: #0d9488; }
 
         .btn-submit { width: 100%; background: #0d9488; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.15); transition: background 0.2s; }
         .btn-submit:hover { background: #0f766e; }
@@ -45,7 +57,7 @@
         .auth-box { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
         .section-divider { height: 1px; background: #e2e8f0; margin: 24px 0; border: none; }
 
-        /* Стилі для випадаючого списку з галочками */
+        /* Випадаючий список з галочками для ПД */
         .multiselect-dropdown { position: relative; width: 100%; margin-bottom: 12px; box-sizing: border-box; }
         .multiselect-header { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .multiselect-options { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #a7f3d0; border-radius: 10px; margin-top: 4px; max-height: 160px; overflow-y: auto; z-index: 10; box-shadow: 0 10px 20px rgba(11, 94, 89, 0.1); box-sizing: border-box; padding: 4px; }
@@ -92,38 +104,24 @@
             <label class="track-label">Назва перегону:</label>
             <input type="text" id="admin-peregon" class="input-field">
 
-            <label class="track-label">Початок ділянки:</label>
-            <div class="km-pk-row">
-                <div class="km-pk-col">
-                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px;">Кілометр</span>
+            <div class="km-section">
+                <label class="track-label">Початок ділянки:</label>
+                <div class="km-input-wrapper">
+                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px; display:block;">Кілометр</span>
                     <input type="number" id="admin-start-km" class="input-field">
                 </div>
-                <div class="km-pk-col">
-                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px;">Пікет (ПК)</span>
-                    <select id="admin-start-pk" class="input-field">
-                        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                        <option value="10">10</option>
-                    </select>
-                </div>
+                <span style="font-size:10px; color:#0f766e; font-weight:600; margin-top:4px; display:block;">Оберіть початковий пікет (ПК):</span>
+                <div class="pk-checkbox-group" id="start-pk-group"></div>
             </div>
 
-            <label class="track-label">Кінець ділянки:</label>
-            <div class="km-pk-row">
-                <div class="km-pk-col">
-                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px;">Кілометр</span>
+            <div class="km-section">
+                <label class="track-label">Кінець ділянки:</label>
+                <div class="km-input-wrapper">
+                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px; display:block;">Кілометр</span>
                     <input type="number" id="admin-end-km" class="input-field">
                 </div>
-                <div class="km-pk-col">
-                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px;">Пікет (ПК)</span>
-                    <select id="admin-end-pk" class="input-field">
-                        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                        <option value="10" selected>10</option>
-                    </select>
-                </div>
+                <span style="font-size:10px; color:#0f766e; font-weight:600; margin-top:4px; display:block;">Оберіть кінцевий пікет (ПК):</span>
+                <div class="pk-checkbox-group" id="end-pk-group"></div>
             </div>
 
             <button class="btn-submit" onclick="saveNewTrackToCloud()">Зберегти перегін у базу</button>
@@ -158,6 +156,10 @@
         let tracksData = [];
         let selectedPds = [];
 
+        // Значення за замовчуванням для вибору ПК кнопками
+        let currentStartPk = 1;
+        let currentEndPk = 10;
+
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
             if(!con) return;
@@ -169,12 +171,59 @@
             con.scrollTop = con.scrollHeight;
         }
 
+        // Генерація панелей кнопок-галочок ПК 1-10
+        function initPkCheckboxes() {
+            const startGroup = document.getElementById('start-pk-group');
+            const endGroup = document.getElementById('end-pk-group');
+            
+            startGroup.innerHTML = "";
+            endGroup.innerHTML = "";
+
+            for (let i = 1; i <= 10; i++) {
+                // Побудова для Початку ділянки
+                const startLabel = document.createElement('label');
+                startLabel.className = `pk-checkbox-label ${i === currentStartPk ? 'selected' : ''}`;
+                startLabel.id = `start-pk-lbl-${i}`;
+                startLabel.innerHTML = `<span>${i}</span><span class="chk-indicator">${i === currentStartPk ? '✓' : ''}</span>
+                    <input type="radio" name="start_pk_radio" value="${i}" ${i === currentStartPk ? 'checked' : ''} onchange="selectPk('start', ${i})">`;
+                startGroup.appendChild(startLabel);
+
+                // Побудова для Кінця ділянки
+                const endLabel = document.createElement('label');
+                endLabel.className = `pk-checkbox-label ${i === currentEndPk ? 'selected' : ''}`;
+                endLabel.id = `end-pk-lbl-${i}`;
+                endLabel.innerHTML = `<span>${i}</span><span class="chk-indicator">${i === currentEndPk ? '✓' : ''}</span>
+                    <input type="radio" name="end_pk_radio" value="${i}" ${i === currentEndPk ? 'checked' : ''} onchange="selectPk('end', ${i})">`;
+                endGroup.appendChild(endLabel);
+            }
+        }
+
+        // Обробка натискання на кнопку ПК (перемикання виділення)
+        function selectPk(type, value) {
+            if (type === 'start') {
+                document.getElementById(`start-pk-lbl-${currentStartPk}`).classList.remove('selected');
+                document.getElementById(`start-pk-lbl-${currentStartPk}`).querySelector('.chk-indicator').innerText = '';
+                currentStartPk = value;
+                document.getElementById(`start-pk-lbl-${currentStartPk}`).classList.add('selected');
+                document.getElementById(`start-pk-lbl-${currentStartPk}`).querySelector('.chk-indicator').innerText = '✓';
+                logSys(`Початок ділянки встановлено на ПК-${value}`);
+            } else {
+                document.getElementById(`end-pk-lbl-${currentEndPk}`).classList.remove('selected');
+                document.getElementById(`end-pk-lbl-${currentEndPk}`).querySelector('.chk-indicator').innerText = '';
+                currentEndPk = value;
+                document.getElementById(`end-pk-lbl-${currentEndPk}`).classList.add('selected');
+                document.getElementById(`end-pk-lbl-${currentEndPk}`).querySelector('.chk-indicator').innerText = '✓';
+                logSys(`Кінець ділянки встановлено на ПК-${value}`);
+            }
+        }
+
         function verifyAdminPassword() {
             const enteredPass = document.getElementById('admin-password-input').value;
             if (enteredPass === "1234") {
                 logSys("Авторизація адміністратора успішна", "success");
                 document.getElementById('screen-auth').style.display = 'none';
                 document.getElementById('screen-admin').style.display = 'block';
+                initPkCheckboxes(); // Малюємо кнопки ПК при вході в адмінку
                 loadPdsForCleaning();
             } else {
                 alert("Невірний пароль адміністратора!");
@@ -297,33 +346,31 @@
             const pdNum = document.getElementById('admin-pd-num').value.trim();
             const peregon = document.getElementById('admin-peregon').value.trim();
             const startKm = parseInt(document.getElementById('admin-start-km').value);
-            const startPk = parseInt(document.getElementById('admin-start-pk').value);
             const endKm = parseInt(document.getElementById('admin-end-km').value);
-            const endPk = parseInt(document.getElementById('admin-end-pk').value);
 
             if (!pdNum || !peregon || isNaN(startKm) || isNaN(endKm)) {
                 alert("Заповніть усі поля!"); return;
             }
 
-            const fullPdName = "ПД-" + pdNum; // Склеюємо префікс і введений номер ПД
+            const fullPdName = "ПД-" + pdNum;
             logSys(`Запис конфігурації ${fullPdName} в хмару...`);
             
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
             
             try {
-                // Додаємо також параметри start_pk та end_pk для точного позиціонування меж ділянки
+                // Передаємо в базу точні значення початкового та кінцевого ПК з активованих кнопок
                 await fetch(`${baseDbUrl}/rest/v1/tracks`, {
                     method: 'POST', headers, body: JSON.stringify({ 
                         pd: fullPdName, peregon, track_type: 'непарна', 
-                        start_km: startKm, start_piket: startPk, 
-                        end_km: endKm, end_piket: endPk 
+                        start_km: startKm, start_piket: currentStartPk, 
+                        end_km: endKm, end_piket: currentEndPk 
                     })
                 });
                 await fetch(`${baseDbUrl}/rest/v1/tracks`, {
                     method: 'POST', headers, body: JSON.stringify({ 
                         pd: fullPdName, peregon, track_type: 'парна', 
-                        start_km: startKm, start_piket: startPk, 
-                        end_km: endKm, end_piket: endPk 
+                        start_km: startKm, start_piket: currentStartPk, 
+                        end_km: endKm, end_piket: currentEndPk 
                     })
                 });
 
