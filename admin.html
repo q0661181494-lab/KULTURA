@@ -9,10 +9,9 @@
         body { font-family: -apple-system, sans-serif; background-color: #f0fdf4; margin: 0; padding: 12px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 480px; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        /* Меню навігації зворотного напрямку */
+        /* Меню навігації */
         .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 12px; display: flex; gap: 6px; box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); width: 100%; box-sizing: border-box; align-items: center; border: 1px solid #d1fae5; }
         .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #115e59; text-decoration: none; border-radius: 8px; background: #f0fdf4; cursor: pointer; }
-        
         .admin-menu-btn { width: 42px; height: 42px; background-color: #115e59; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid #115e59; flex-shrink: 0; text-decoration: none; pointer-events: none; }
         
         /* Головна картка */
@@ -30,13 +29,16 @@
         .pd-prefix { font-size: 16px; font-weight: bold; color: #115e59; }
         .pd-number-box { width: 70px !important; margin-bottom: 0 !important; text-align: center; }
 
-        /* Вертикальна побудова секцій меж */
-        .km-section { display: flex; flex-direction: column; margin-bottom: 14px; width: 100%; box-sizing: border-box; }
-        .km-input-wrapper { width: 120px; }
+        /* ОНОВЛЕНО: Горизонтальний рядок для КМ + ПК в один ряд */
+        .km-section { display: flex; flex-direction: column; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
+        .km-pk-row { display: flex; gap: 10px; width: 100%; align-items: flex-end; }
+        .km-col { flex: 1; min-width: 0; }
+        .pk-col { flex: 1.2; min-width: 0; }
+        .sub-heading { font-size: 10px; color: #0f766e; font-weight: 600; margin-bottom: 4px; display: block; white-space: nowrap; }
 
-        /* Універсальні стилі для списків, що розгортаються (для ПД та нових списків ПК) */
-        .multiselect-dropdown { position: relative; width: 100%; margin-bottom: 12px; box-sizing: border-box; }
-        .multiselect-header { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+        /* Універсальні стилі для списків, що розгортаються */
+        .multiselect-dropdown { position: relative; width: 100%; box-sizing: border-box; }
+        .multiselect-header { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; height: 41px; }
         .multiselect-options { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #a7f3d0; border-radius: 10px; margin-top: 4px; max-height: 200px; overflow-y: auto; z-index: 10; box-shadow: 0 10px 20px rgba(11, 94, 89, 0.1); box-sizing: border-box; padding: 4px; }
         .multiselect-options.show { display: block; }
         .multiselect-item { display: flex; align-items: center; padding: 8px 12px; font-size: 14px; color: #115e59; font-weight: 500; cursor: pointer; border-radius: 6px; user-select: none; }
@@ -93,33 +95,41 @@
 
             <div class="km-section">
                 <label class="track-label">Початок ділянки:</label>
-                <div class="km-input-wrapper">
-                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px; display:block;">Кілометр</span>
-                    <input type="number" id="admin-start-km" class="input-field">
-                </div>
-                <span style="font-size:10px; color:#0f766e; font-weight:600; margin-top:4px; display:block;">Оберіть початкові пікети (ПК) галочкою:</span>
-                <div class="multiselect-dropdown" id="dropdown-start-pk-container">
-                    <div class="multiselect-header" id="start-pk-header" onclick="toggleDropdown('start-pk-options')">
-                        <span id="start-pk-label">ПК-1</span>
-                        <span>▼</span>
+                <div class="km-pk-row">
+                    <div class="km-col">
+                        <span class="sub-heading">Кілометр</span>
+                        <input type="number" id="admin-start-km" class="input-field" style="margin-bottom:0;">
                     </div>
-                    <div class="multiselect-options" id="start-pk-options"></div>
+                    <div class="pk-col">
+                        <span class="sub-heading">Виберіть ПК (галочка)</span>
+                        <div class="multiselect-dropdown">
+                            <div class="multiselect-header" onclick="toggleDropdown('start-pk-options')">
+                                <span id="start-pk-label">1</span>
+                                <span>▼</span>
+                            </div>
+                            <div class="multiselect-options" id="start-pk-options"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="km-section">
                 <label class="track-label">Кінець ділянки:</label>
-                <div class="km-input-wrapper">
-                    <span style="font-size:10px; color:#0f766e; font-weight:600; margin-bottom:2px; display:block;">Кілометр</span>
-                    <input type="number" id="admin-end-km" class="input-field">
-                </div>
-                <span style="font-size:10px; color:#0f766e; font-weight:600; margin-top:4px; display:block;">Оберіть кінцеві пікети (ПК) галочкою:</span>
-                <div class="multiselect-dropdown" id="dropdown-end-pk-container">
-                    <div class="multiselect-header" id="end-pk-header" onclick="toggleDropdown('end-pk-options')">
-                        <span id="end-pk-label">ПК-10</span>
-                        <span>▼</span>
+                <div class="km-pk-row">
+                    <div class="km-col">
+                        <span class="sub-heading">Кілометр</span>
+                        <input type="number" id="admin-end-km" class="input-field" style="margin-bottom:0;">
                     </div>
-                    <div class="multiselect-options" id="end-pk-options"></div>
+                    <div class="pk-col">
+                        <span class="sub-heading">Виберіть ПК (галочка)</span>
+                        <div class="multiselect-dropdown">
+                            <div class="multiselect-header" onclick="toggleDropdown('end-pk-options')">
+                                <span id="end-pk-label">10</span>
+                                <span>▼</span>
+                            </div>
+                            <div class="multiselect-options" id="end-pk-options"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -131,8 +141,8 @@
             <p>Видалення створених конфігурацій перегонів для вибраних ПД</p>
 
             <label class="track-label">Виберіть ПД для очищення:</label>
-            <div class="multiselect-dropdown" id="dropdown-pd-container">
-                <div class="multiselect-header" id="dropdown-header" onclick="toggleDropdown('dropdown-options')">
+            <div class="multiselect-dropdown">
+                <div class="multiselect-header" onclick="toggleDropdown('dropdown-options')">
                     <span id="dropdown-label">Оберіть ПД...</span>
                     <span>▼</span>
                 </div>
@@ -155,7 +165,7 @@
         let tracksData = [];
         let selectedPds = [];
 
-        // Масиви для збереження обраних галочками ПК (За замовчуванням ПК-1 та ПК-10)
+        // Масиви початкового стану галочок ПК
         let selectedStartPks = [1];
         let selectedEndPks = [10];
 
@@ -170,7 +180,7 @@
             con.scrollTop = con.scrollHeight;
         }
 
-        // Генерація списків ПК 1-10 з галочками у спливаючих рядках
+        // Генерація списків ПК 1-10 (відображаються тільки цифри)
         function initPkDropdowns() {
             const startOptions = document.getElementById('start-pk-options');
             const endOptions = document.getElementById('end-pk-options');
@@ -179,7 +189,7 @@
             endOptions.innerHTML = "";
 
             for (let i = 1; i <= 10; i++) {
-                // Рядки для Початку ділянки
+                // Початок
                 const startItem = document.createElement('div');
                 startItem.className = 'multiselect-item';
                 const startChk = document.createElement('input');
@@ -189,13 +199,13 @@
                 startChk.onchange = (e) => handlePkChange('start', i, e.target.checked);
                 
                 const startLabel = document.createElement('span');
-                startLabel.innerText = `ПК-${i}`;
+                startLabel.innerText = i; // Тільки чиста цифра
                 startItem.appendChild(startChk);
                 startItem.appendChild(startLabel);
                 startItem.onclick = (e) => { if (e.target !== startChk) { startChk.checked = !startChk.checked; startChk.dispatchEvent(new Event('change')); } };
                 startOptions.appendChild(startItem);
 
-                // Рядки для Кінця ділянки
+                // Кінець
                 const endItem = document.createElement('div');
                 endItem.className = 'multiselect-item';
                 const endChk = document.createElement('input');
@@ -205,7 +215,7 @@
                 endChk.onchange = (e) => handlePkChange('end', i, e.target.checked);
                 
                 const endLabel = document.createElement('span');
-                endLabel.innerText = `ПК-${i}`;
+                endLabel.innerText = i; // Тільки чиста цифра
                 endItem.appendChild(endChk);
                 endItem.appendChild(endLabel);
                 endItem.onclick = (e) => { if (e.target !== endChk) { endChk.checked = !endChk.checked; endChk.dispatchEvent(new Event('change')); } };
@@ -214,7 +224,6 @@
             updatePkLabels();
         }
 
-        // Обробка вибору галочок ПК
         function handlePkChange(type, val, isChecked) {
             if (type === 'start') {
                 if (isChecked) {
@@ -232,21 +241,18 @@
             updatePkLabels();
         }
 
-        // Оновлення тексту в заголовках рядків ПК
         function updatePkLabels() {
             const startLabel = document.getElementById('start-pk-label');
             const endLabel = document.getElementById('end-pk-label');
 
-            if (selectedStartPks.length === 0) startLabel.innerText = "Оберіть ПК...";
-            else startLabel.innerText = "ПК: " + selectedStartPks.sort((a,b)=>a-b).join(', ');
+            if (selectedStartPks.length === 0) startLabel.innerText = "...";
+            else startLabel.innerText = selectedStartPks.sort((a,b)=>a-b).join(', ');
 
-            if (selectedEndPks.length === 0) endLabel.innerText = "Оберіть ПК...";
-            else endLabel.innerText = "ПК: " + selectedEndPks.sort((a,b)=>a-b).join(', ');
+            if (selectedEndPks.length === 0) endLabel.innerText = "...";
+            else endLabel.innerText = selectedEndPks.sort((a,b)=>a-b).join(', ');
         }
 
-        // Перемикання відображення спливаючих блоків
         function toggleDropdown(id) {
-            // Закриваємо всі інші перед відкриттям поточного
             ['start-pk-options', 'end-pk-options', 'dropdown-options'].forEach(optId => {
                 if(optId !== id) document.getElementById(optId).classList.remove('show');
             });
@@ -259,7 +265,7 @@
                 logSys("Авторизація адміністратора успішна", "success");
                 document.getElementById('screen-auth').style.display = 'none';
                 document.getElementById('screen-admin').style.display = 'block';
-                initPkDropdowns(); // Будуємо спливаючі рядки для ПК
+                initPkDropdowns(); 
                 loadPdsForCleaning();
             } else {
                 alert("Невірний пароль адміністратора!");
@@ -337,7 +343,6 @@
             }
         }
 
-        // Закриття спливаючих рядків при кліку поза елементами
         window.addEventListener('click', function(e) {
             if (!e.target.closest('.multiselect-dropdown')) {
                 document.getElementById('start-pk-options').classList.remove('show');
@@ -387,7 +392,7 @@
             }
 
             if (selectedStartPks.length === 0 || selectedEndPks.length === 0) {
-                alert("Оберіть хоча б по одній галочці ПК для початку та кінця ділянки!"); return;
+                alert("Оберіть хоча б по одній галочці ПК!"); return;
             }
 
             const fullPdName = "ПД-" + pdNum;
@@ -395,7 +400,6 @@
             
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
             
-            // Визначаємо межі відповідно до встановлених галочок
             const finalStartPk = Math.min(...selectedStartPks);
             const finalEndPk = Math.max(...selectedEndPks);
 
