@@ -329,9 +329,21 @@
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
                     
-                    // Зміна: Замість зашитих координат, підсвічуємо рядок сірим автоматично, якщо це станція з конфігурації бази даних
+                    // Динамічне визначення меж станції на основі даних з lines_config
                     if (stationConfig) {
-                        nodeRow.classList.add('station-piket-row');
+                        const sKm = parseInt(stationConfig.start_km);
+                        const sPk = parseInt(stationConfig.start_pk);
+                        const eKm = parseInt(stationConfig.end_km);
+                        const ePk = parseInt(stationConfig.end_pk);
+
+                        // Переводимо координати у метричний абсолютний вираз для точного порівняння меж
+                        const currentAbs = km * 10 + pk;
+                        const startAbs = sKm * 10 + sPk;
+                        const endAbs = eKm * 10 + ePk;
+
+                        if (currentAbs >= startAbs && currentAbs <= endAbs) {
+                            nodeRow.classList.add('station-piket-row');
+                        }
                     }
  
                     const leftMargin = document.createElement('div');
