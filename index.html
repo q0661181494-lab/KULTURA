@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📊 Двоколійна залізнична діаграма (Матча)</title>
     <style>
-        /* Фирменное легкое фисташковое тло */
+        /* Фірмове легке фісташкове тло */
         body { font-family: -apple-system, sans-serif; background-color: #f0fdf4; margin: 0; padding: 12px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 580px; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        /* Навигационное меню у шавлієвих тонах */
+        /* Навігаційне меню у шавлієвих тонах */
         .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 12px; display: flex; gap: 6px; box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); width: 100%; box-sizing: border-box; align-items: center; border: 1px solid #d1fae5; }
         .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #115e59; text-decoration: none; border-radius: 8px; background: #f0fdf4; cursor: pointer; }
         .nav-link.active { background-color: #115e59; color: white; }
@@ -59,10 +59,10 @@
         /* Рядок пікета */
         .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; border-radius: 6px; transition: background-color 0.2s; }
         
-        /* Стиль для пікетів, що входять в межі станції (визначається динамічно) */
+        /* Стиль для пікетів, що входять в межі станції */
         .station-piket-row { background-color: #f1f5f9 !important; border-left: 3px solid #0d9488; border-right: 3px solid #0d9488; }
         
-        /* Зміна кольору центрального кубика пікета, якщо він знаходиться в межах станції */
+        /* Зміна кольору центрального кубика пікета в межах станції */
         .station-piket-row .piket-center-core {
             background: #0d9488 !important;   /* Темно-бірюзове тло */
             color: white !important;         /* Білий колір цифри */
@@ -85,10 +85,13 @@
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
         }
         
-        /* Бокові поля для майбутньої інформації / світлофорів */
+        /* Бокові поля для світлофорів */
         .info-margin { width: 50px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: bold; color: #0f766e; box-sizing: border-box; }
         .margin-left { justify-content: flex-end; padding-right: 6px; }
         .margin-right { justify-content: flex-start; padding-left: 6px; }
+
+        /* Стиль плашки світлофора */
+        .signal-badge { background-color: #1e293b; color: #f8fafc; padding: 3px 6px; border-radius: 5px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); border: 1px solid #475569; }
 
         /* Зони обкошування (Брівки узбіччя) */
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; }
@@ -161,6 +164,7 @@
  
         let tracksData = []; 
         let mowingData = [];
+        let signalsData = []; // Масив для зберігання світлофорів з БД
         let currentMode = 'pd';
  
         function logSys(text, status = 'info') {
@@ -188,8 +192,12 @@
  
                 const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?select=*`, { headers });
                 mowingData = await resMowing.json();
+
+                // Завантаження даних про світлофори
+                const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals?select=*`, { headers });
+                signalsData = await resSignals.json();
  
-                logSys(`Синхронізовано з хмарою. Записів конфігурації: ${tracksData.length}`, 'success');
+                logSys(`Синхронізовано з хмарою. Ліній: ${tracksData.length}, Світлофорів: ${signalsData.length}`, 'success');
                 document.getElementById('diagram-render-zone').innerHTML = "<p style='color:gray; text-align:center; padding:20px;'>Будь ласка, введіть номер ПД для відображення інформації.</p>";
             } catch (e) {
                 logSys("Помилка завантаження: " + e.message, 'error');
@@ -354,20 +362,17 @@
                     
                     let isLastPiketOfStation = false;
 
-                    // Динамічне визначення меж станції на основі даних з lines_config
                     if (stationConfig) {
                         const sKm = parseInt(stationConfig.start_km);
                         const sPk = parseInt(stationConfig.start_pk);
                         const eKm = parseInt(stationConfig.end_km);
                         const ePk = parseInt(stationConfig.end_pk);
 
-                        // Переводимо координати у метричний абсолютний вираз для точного порівняння меж
                         const currentAbs = km * 10 + pk;
                         const startAbs = sKm * 10 + sPk;
                         const endAbs = eKm * 10 + ePk;
 
                         if (currentAbs >= startAbs && currentAbs <= endAbs) {
-                            /* Однакова плашка назви на початку станційної зони */
                             if (currentAbs === startAbs) {
                                 const delimiterStart = document.createElement('div');
                                 delimiterStart.className = 'station-boundary-delimiter';
@@ -383,8 +388,16 @@
                         }
                     }
  
+                    // Пошук світлофорів для поточних координат
+                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase() === 'непарна');
+                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase() === 'парна');
+
+                    // Ліве бокове поле (Непарна колія)
                     const leftMargin = document.createElement('div');
                     leftMargin.className = 'info-margin margin-left';
+                    if (leftSignal) {
+                        leftMargin.innerHTML = `<span class="signal-badge" title="${leftSignal.signal || ''}">${leftSignal.signal_name}</span>`;
+                    }
                     nodeRow.appendChild(leftMargin);
  
                     const leftBank = document.createElement('div');
@@ -414,13 +427,16 @@
                     rightBank.innerHTML = `<div>${rightSide.label}</div>${rightPdLabel}<div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
                     nodeRow.appendChild(rightBank);
                     
+                    // Праве бокове поле (Парна колія)
                     const rightMargin = document.createElement('div');
                     rightMargin.className = 'info-margin margin-right';
+                    if (rightSignal) {
+                        rightMargin.innerHTML = `<span class="signal-badge" title="${rightSignal.signal || ''}">${rightSignal.signal_name}</span>`;
+                    }
                     nodeRow.appendChild(rightMargin);
  
                     container.appendChild(nodeRow);
 
-                    /* Така сама плашка назви на виході зі станційної зони */
                     if (isLastPiketOfStation && stationConfig) {
                         const delimiterEnd = document.createElement('div');
                         delimiterEnd.className = 'station-boundary-delimiter';
