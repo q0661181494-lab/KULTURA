@@ -136,7 +136,7 @@
         const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
         const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
  
-        let tracksData = [];
+        let tracksData = []; // Сюди завантажуватиметься конфігурація з lines_config
         let mowingData = [];
         let currentMode = 'pd';
  
@@ -160,7 +160,8 @@
             logSys("Завантаження даних із Supabase...");
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
-                const resTracks = await fetch(`${baseDbUrl}/rest/v1/tracks?select=*`, { headers });
+                // Зміна №1: Робимо запит до нової таблиці lines_config замість старої tracks
+                const resTracks = await fetch(`${baseDbUrl}/rest/v1/lines_config?select=*`, { headers });
                 tracksData = await resTracks.json();
  
                 const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?select=*`, { headers });
@@ -187,8 +188,9 @@
             tabsBlock.style.display = 'block';
             const fullPdName = "ПД-" + pdNum;
 
+            // Зміна №2: Адаптовано фільтрацію під нові поля (замість t.peregon використовуємо t.name)
             const filtered = tracksData.filter(t => t.pd === fullPdName && !t.track_type.includes('станція'));
-            const uniquePeregons = [...new Set(filtered.map(t => t.peregon))].sort();
+            const uniquePeregons = [...new Set(filtered.map(t => t.name))].sort();
             
             const checkboxGroup = document.getElementById('peregon-checkbox-group');
             checkboxGroup.innerHTML = "";
@@ -224,9 +226,15 @@
             drawDoubleTrackDiagram();
         }
  
-        function getPiketAnalysis(peregon, trackType, km, pk) {
+        // Зміна №3: Оновлено логіку аналізу. Параметр peregon тепер порівнюється з object_name з таблиці mowing
+        function getPiketAnalysis(peregonName, trackType, km, pk) {
+            // Перевіряємо, чи взагалі є якісь записи в mowing
+            if (!mowingData || mowingData.length === 0) {
+                return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+            }
+
             const cloudRecord = mowingData.find(m => 
-                m.peregon === peregon && m.track_type === trackType &&
+                m.object_name === peregonName && m.track_type === trackType &&
                 parseInt(m.km) === km && parseInt(m.piket) === pk
             );
  
@@ -246,7 +254,6 @@
             return { colorClass: 'status-clear-green', label: 'Обкошено', days: `${diffDays} дн.` };
         }
 
-        // 🆕 Зміна: Функція визначення приналежності до ст. Кошари (64км ПК4 - 66км ПК2)
         function isInsideStation(km, pk) {
             const currentAbs = km * 10 + pk;
             const startAbs = 64 * 10 + 4; // 644
@@ -275,13 +282,14 @@
                     return;
                 }
 
-                segmentsToRender = tracksData.filter(t => selectedPeregons.includes(t.peregon));
+                // Зміна №4: Використовуємо поле t.name замість старого t.peregon
+                segmentsToRender = tracksData.filter(t => selectedPeregons.includes(t.name));
 
                 selectedPeregons.forEach(peregon => {
                     const stationsTokens = peregon.split('-').map(s => s.trim().toLowerCase());
                     tracksData.forEach(t => {
                         if (t.track_type.includes('станція')) {
-                            const isDotichna = stationsTokens.some(token => t.peregon.toLowerCase().includes(token));
+                            const isDotichna = stationsTokens.some(token => t.name.toLowerCase().includes(token));
                             if (isDotichna && !segmentsToRender.some(added => added.id === t.id)) {
                                 segmentsToRender.push(t);
                             }
@@ -295,10 +303,11 @@
                 return;
             }
 
-            const minKm = Math.min(...segmentsToRender.map(s => s.start_km));
-            const maxKm = Math.max(...segmentsToRender.map(s => s.end_km));
+            // Зміна №5: Читаємо межі кілометрів з нових полів start_km та end_km з lines_config
+            const minKm = Math.min(...segmentsToRender.map(s => parseInt(s.start_km)));
+            const maxKm = Math.max(...segmentsToRender.map(s => parseInt(s.end_km)));
 
-            const objectNames = [...new Set(segmentsToRender.map(s => s.peregon))].join(' / ');
+            const objectNames = [...new Set(segmentsToRender.map(s => s.name))].join(' / ');
             logSys(`Будується суцільний графік для: ${objectNames}`);
  
             for (let km = minKm; km <= maxKm; km++) {
@@ -308,77 +317,68 @@
                 kmSign.innerText = `Кілометр ${km}`;
                 container.appendChild(kmSign);
  
-                // Зміни: Розширено шапку для урахування нових бокових полів
                 const headersRow = document.createElement('div');
                 headersRow.className = 'track-headers-row';
                 headersRow.innerHTML = `
                     <div class="header-margin-space"></div>
                     <div class="header-left-track">ПАРНА</div>
-                    <div class="header-center-space">ПК</div>
+                    <div class="header-center-space"></div>
                     <div class="header-right-track">НЕПАРНА</div>
                     <div class="header-margin-space"></div>
                 `;
                 container.appendChild(headersRow);
  
                 for (let pk = 1; pk <= 10; pk++) {
-                    const leftConfig = segmentsToRender.find(s => km >= s.start_km && km <= s.end_km && s.track_type.includes('парна'));
-                    const rightConfig = segmentsToRender.find(s => km >= s.start_km && km <= s.end_km && s.track_type.includes('непарна'));
-                    const stationConfig = segmentsToRender.find(s => km >= s.start_km && km <= s.end_km && s.track_type.includes('станція'));
+                    const leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('непарна')); // На залізниці ліва зазвичай непарна, або за вашою логікою
+                    const rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('парна'));
+                    const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('станція'));
 
                     const finalLeftConfig = stationConfig || leftConfig;
                     const finalRightConfig = stationConfig || rightConfig;
 
-                    const leftSide = finalLeftConfig ? getPiketAnalysis(finalLeftConfig.peregon, finalLeftConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обслуг.', days: '—' };
-                    const rightSide = finalRightConfig ? getPiketAnalysis(finalRightConfig.peregon, finalRightConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обслуг.', days: '—' };
+                    // Зміна №6: Передаємо правильне ім'я об'єкта (finalLeftConfig.name) для аналізу обкошування
+                    const leftSide = finalLeftConfig ? getPiketAnalysis(finalLeftConfig.name, finalLeftConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+                    const rightSide = finalRightConfig ? getPiketAnalysis(finalRightConfig.name, finalRightConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
  
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
                     
-                    // 🆕 Зміна: Якщо поточний ПК знаходиться всередині ст. Кошари, додаємо клас підсвічування
                     if (isInsideStation(km, pk)) {
                         nodeRow.classList.add('station-piket-row');
                     }
  
-                    // 🆕 1. Ліве інформаційне поле (для майбутніх світлофорів парної колії)
                     const leftMargin = document.createElement('div');
                     leftMargin.className = 'info-margin margin-left';
-                    // Тут тимчасово пустий текст, або заглушка. Для тесту початку станції додамо мітку:
                     if (km === 64 && pk === 4) leftMargin.innerText = "Вхід.➡";
                     nodeRow.appendChild(leftMargin);
  
-                    // 2. Ліве узбіччя (ПАРНА)
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
                     const leftPdLabel = (currentMode === 'peregon' && finalLeftConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalLeftConfig.pd}</div>` : '';
                     leftBank.innerHTML = `<div>${leftSide.label}</div>${leftPdLabel}<div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
                     nodeRow.appendChild(leftBank);
  
-                    // 3. Ліва рейкова нитка
                     const leftTrackVisual = document.createElement('div');
                     leftTrackVisual.className = 'rail-line-visual';
                     leftTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(leftTrackVisual);
  
-                    // 4. Central ПК
                     const centerPiket = document.createElement('div');
                     centerPiket.className = 'piket-center-core';
                     centerPiket.innerText = pk;
                     nodeRow.appendChild(centerPiket);
  
-                    // 5. Права рейкова нитка
                     const rightTrackVisual = document.createElement('div');
                     rightTrackVisual.className = 'rail-line-visual';
                     rightTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(rightTrackVisual);
  
-                    // 6. Праве узбіччя (НЕПАРНА)
                     const rightBank = document.createElement('div');
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
                     const rightPdLabel = (currentMode === 'peregon' && finalRightConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalRightConfig.pd}</div>` : '';
                     rightBank.innerHTML = `<div>${rightSide.label}</div>${rightPdLabel}<div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
                     nodeRow.appendChild(rightBank);
                     
-                    // 🆕 7. Праве інформаційне поле (для майбутніх світлофорів непарної колії)
                     const rightMargin = document.createElement('div');
                     rightMargin.className = 'info-margin margin-right';
                     if (km === 66 && pk === 2) rightMargin.innerText = "⬅Вихід.";
