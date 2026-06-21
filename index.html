@@ -7,14 +7,14 @@
     <style>
         /* Фірмове легке фісташкове тло */
         body { font-family: -apple-system, sans-serif; background-color: #f0fdf4; margin: 0; padding: 12px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 480px; box-sizing: border-box; display: flex; flex-direction: column; }
+        .container { width: 100%; max-width: 580px; box-sizing: border-box; display: flex; flex-direction: column; }
         
         /* Навігаційне меню у шавлієвих тонах */
         .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 12px; display: flex; gap: 6px; box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); width: 100%; box-sizing: border-box; align-items: center; border: 1px solid #d1fae5; }
         .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #115e59; text-decoration: none; border-radius: 8px; background: #f0fdf4; cursor: pointer; }
         .nav-link.active { background-color: #115e59; color: white; }
         
-        /* Кругла кнопка налаштувань - тепер веде на admin.html */
+        /* Кругла кнопка налаштувань */
         .admin-menu-btn { width: 42px; height: 42px; background-color: #f0fdf4; color: #115e59; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: 1px solid #a7f3d0; flex-shrink: 0; text-decoration: none; }
         
         /* Головна картка з м'якою шавлієвою рамкою */
@@ -32,7 +32,7 @@
         .pd-prefix { font-size: 16px; font-weight: bold; color: #115e59; }
         .pd-number-box { width: 80px !important; margin-bottom: 0 !important; text-align: center; }
 
-        /* Стильні Кнопки-Таби для вибору режимів */
+        /* Стильні Кнопки-Таби */
         .mode-tabs { display: flex; gap: 8px; margin-bottom: 12px; background: #f0fdf4; padding: 4px; border-radius: 10px; border: 1px solid #c2e7d9; }
         .tab-btn { flex: 1; padding: 9px; border: none; background: transparent; border-radius: 7px; color: #115e59; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; }
         .tab-btn.active { background: #0d9488; color: white; }
@@ -45,21 +45,30 @@
         /* 🚂 ДВОКОЛІЙНА ВЕРТИКАЛЬНА ПЛАТФОРМА */
         .railway-canvas { display: flex; flex-direction: column; width: 100%; margin-top: 8px; }
         
-        /* Залізничний знак кілометра в хвойних тонах */
+        /* Залізничний знак кілометра */
         .km-signboard { background: #e6f4ea; border: 2px solid #115e59; border-radius: 8px; padding: 8px; margin: 18px 0 8px 0; text-align: center; font-weight: 900; font-size: 14px; color: #115e59; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 2px 5px rgba(17,94,89,0.05); }
         .km-signboard:first-child { margin-top: 0; }
         
-        /* Заголовки стовпчиків колій */
+        /* Заголовки стовпчиків колій з урахуванням бокових полів */
         .track-headers-row { display: flex; width: 100%; margin-bottom: 6px; font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; text-align: center; opacity: 0.8; }
+        .header-margin-space { width: 50px; } /* Простір над полями світлофорів */
         .header-left-track { flex: 1; padding-right: 16px; }
         .header-center-space { width: 42px; }
         .header-right-track { flex: 1; padding-left: 16px; }
  
         /* Рядок пікета */
-        .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; }
+        .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; border-radius: 6px; transition: background-color 0.2s; }
         
+        /* 🆕 Зміна: Стиль для пікетів, що входять в межі станції */
+        .station-piket-row { background-color: #f1f5f9 !important; border-left: 3px solid #0d9488; border-right: 3px solid #0d9488; }
+        
+        /* 🆕 Зміна: Бокові поля для майбутньої інформації / світлофорів */
+        .info-margin { width: 50px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: bold; color: #0f766e; box-sizing: border-box; }
+        .margin-left { justify-content: flex-end; padding-right: 6px; }
+        .margin-right { justify-content: flex-start; padding-left: 6px; }
+
         /* Зони обкошування (Брівки узбіччя) */
-        .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); }
+        .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; }
         
         /* Центральний ПК маркер */
         .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
@@ -72,9 +81,9 @@
         .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
  
         /* Світлофорна палітра для брівок */
-        .status-clear-green { background-color: #22c55e; color: white; }
-        .status-warn-yellow { background-color: #eab308; color: #1f2937; }
-        .status-overgrown-red { background-color: #ef4444; color: white; }
+        .status-clear-green { background-color: #22c55e !important; color: white; }
+        .status-warn-yellow { background-color: #eab308 !important; color: #1f2937; }
+        .status-overgrown-red { background-color: #ef4444 !important; color: white; }
         
         /* Монітор самоаудиту */
         .debug-panel { margin-top: 8px; padding: 12px; background-color: #e6f4ea; border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(11,94,89,0.02); }
@@ -93,7 +102,7 @@
  
         <div class="screen" id="screen-charts">
             <h2>📊 Двоколійна діаграма</h2>
-            <p>Стан обкошування брівок парної (лівої) та непарної (правої) колій</p>
+            <p>Стан обкошування брівок парної та непарної колій</p>
             
             <label class="track-label">Околоток (ПД):</label>
             <div class="pd-input-row">
@@ -236,6 +245,14 @@
             if (diffDays >= 30) return { colorClass: 'status-warn-yellow', label: 'Увага', days: `${diffDays} дн.` };
             return { colorClass: 'status-clear-green', label: 'Обкошено', days: `${diffDays} дн.` };
         }
+
+        // 🆕 Зміна: Функція визначення приналежності до ст. Кошари (64км ПК4 - 66км ПК2)
+        function isInsideStation(km, pk) {
+            const currentAbs = km * 10 + pk;
+            const startAbs = 64 * 10 + 4; // 644
+            const endAbs = 66 * 10 + 2;   // 662
+            return currentAbs >= startAbs && currentAbs <= endAbs;
+        }
  
         function drawDoubleTrackDiagram() {
             const pdNum = document.getElementById('filter-pd-input').value.trim();
@@ -291,18 +308,19 @@
                 kmSign.innerText = `Кілометр ${km}`;
                 container.appendChild(kmSign);
  
-                // Зміни: Оновлено назви колонок у шапці: ПАРНА зліва, НЕПАРНА справа
+                // Зміни: Розширено шапку для урахування нових бокових полів
                 const headersRow = document.createElement('div');
                 headersRow.className = 'track-headers-row';
                 headersRow.innerHTML = `
+                    <div class="header-margin-space"></div>
                     <div class="header-left-track">ПАРНА</div>
                     <div class="header-center-space">ПК</div>
                     <div class="header-right-track">НЕПАРНА</div>
+                    <div class="header-margin-space"></div>
                 `;
                 container.appendChild(headersRow);
  
                 for (let pk = 1; pk <= 10; pk++) {
-                    // Зміни в логіці: тепер ліва сторона шукає "парна", а права сторона шукає "непарна"
                     const leftConfig = segmentsToRender.find(s => km >= s.start_km && km <= s.end_km && s.track_type.includes('парна'));
                     const rightConfig = segmentsToRender.find(s => km >= s.start_km && km <= s.end_km && s.track_type.includes('непарна'));
                     const stationConfig = segmentsToRender.find(s => km >= s.start_km && km <= s.end_km && s.track_type.includes('станція'));
@@ -315,38 +333,56 @@
  
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
+                    
+                    // 🆕 Зміна: Якщо поточний ПК знаходиться всередині ст. Кошари, додаємо клас підсвічування
+                    if (isInsideStation(km, pk)) {
+                        nodeRow.classList.add('station-piket-row');
+                    }
  
-                    // 1. Ліве узбіччя (Тепер тут відображається ПАРНА колія)
+                    // 🆕 1. Ліве інформаційне поле (для майбутніх світлофорів парної колії)
+                    const leftMargin = document.createElement('div');
+                    leftMargin.className = 'info-margin margin-left';
+                    // Тут тимчасово пустий текст, або заглушка. Для тесту початку станції додамо мітку:
+                    if (km === 64 && pk === 4) leftMargin.innerText = "Вхід.➡";
+                    nodeRow.appendChild(leftMargin);
+ 
+                    // 2. Ліве узбіччя (ПАРНА)
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
                     const leftPdLabel = (currentMode === 'peregon' && finalLeftConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalLeftConfig.pd}</div>` : '';
                     leftBank.innerHTML = `<div>${leftSide.label}</div>${leftPdLabel}<div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
                     nodeRow.appendChild(leftBank);
  
-                    // 2. Ліва рейкова нитка
+                    // 3. Ліва рейкова нитка
                     const leftTrackVisual = document.createElement('div');
                     leftTrackVisual.className = 'rail-line-visual';
                     leftTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(leftTrackVisual);
  
-                    // 3. Central ПК
+                    // 4. Central ПК
                     const centerPiket = document.createElement('div');
                     centerPiket.className = 'piket-center-core';
                     centerPiket.innerText = pk;
                     nodeRow.appendChild(centerPiket);
  
-                    // 4. Права рейкова нитка
+                    // 5. Права рейкова нитка
                     const rightTrackVisual = document.createElement('div');
                     rightTrackVisual.className = 'rail-line-visual';
                     rightTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(rightTrackVisual);
  
-                    // 5. Праве узбіччя (Тепер тут відображається НЕПАРНА колія)
+                    // 6. Праве узбіччя (НЕПАРНА)
                     const rightBank = document.createElement('div');
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
                     const rightPdLabel = (currentMode === 'peregon' && finalRightConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalRightConfig.pd}</div>` : '';
                     rightBank.innerHTML = `<div>${rightSide.label}</div>${rightPdLabel}<div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
                     nodeRow.appendChild(rightBank);
+                    
+                    // 🆕 7. Праве інформаційне поле (для майбутніх світлофорів непарної колії)
+                    const rightMargin = document.createElement('div');
+                    rightMargin.className = 'info-margin margin-right';
+                    if (km === 66 && pk === 2) rightMargin.innerText = "⬅Вихід.";
+                    nodeRow.appendChild(rightMargin);
  
                     container.appendChild(nodeRow);
                 }
