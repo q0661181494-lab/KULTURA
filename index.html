@@ -62,6 +62,13 @@
         /* Стиль для пікетів, що входять в межі станції (визначається динамічно) */
         .station-piket-row { background-color: #f1f5f9 !important; border-left: 3px solid #0d9488; border-right: 3px solid #0d9488; }
         
+        /* Зміна кольору центрального кубика пікета, якщо він знаходиться в межах станції */
+        .station-piket-row .piket-center-core {
+            background: #0d9488 !important;   /* Темно-бірюзове тло */
+            color: white !important;         /* Білий колір цифри */
+            border-color: #0f766e !important; /* Темніша рамка кубика */
+        }
+        
         /* Бокові поля для майбутньої інформації / світлофорів */
         .info-margin { width: 50px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: bold; color: #0f766e; box-sizing: border-box; }
         .margin-left { justify-content: flex-end; padding-right: 6px; }
