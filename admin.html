@@ -20,7 +20,6 @@
         h2 { margin: 0; font-size: 19px; color: #115e59; font-weight: 800; text-align: center; flex: 1; }
         p { color: #0f766e; font-size: 13px; margin-top: 0; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
-        /* Кнопка перегляду бази */
         .btn-view-db { background: #115e59; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
         /* Поля введення */
@@ -28,19 +27,22 @@
         .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
         .track-label { font-size: 11px; font-weight: 700; color: #115e59; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
         
+        /* Рядок ПД */
+        .pd-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+        .pd-prefix { font-size: 16px; font-weight: bold; color: #115e59; }
+        .pd-number-box { width: 80px !important; margin-bottom: 0 !important; text-align: center; }
+
         /* Перемикач типу об'єкта */
-        .type-toggle-group { display: flex; gap: 8px; margin-bottom: 14px; }
+        .type-toggle-group { display: flex; gap: 8px; margin-bottom: 12px; }
         .type-toggle-btn { flex: 1; padding: 10px; border: 1px solid #a7f3d0; background: white; border-radius: 10px; color: #115e59; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; }
         .type-toggle-btn.active { background: #0d9488; color: white; border-color: #0d9488; }
 
-        /* Блок розподіленого вибору ПД по коліях */
-        .track-pd-selection { background: #f0fdf4; border: 1px solid #c2e7d9; border-radius: 12px; padding: 12px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 10px; }
-        .track-pd-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-        .track-pd-left { display: flex; align-items: center; gap: 8px; color: #115e59; font-weight: 600; font-size: 14px; }
-        .track-pd-left input[type="checkbox"] { width: 18px; height: 18px; accent-color: #0d9488; cursor: pointer; }
-        .track-pd-right { display: flex; align-items: center; gap: 4px; }
+        /* Блок вибору колій */
+        .track-checkbox-group { background: #f0fdf4; border: 1px solid #c2e7d9; border-radius: 12px; padding: 12px; margin-bottom: 14px; display: flex; gap: 16px; justify-content: flex-start; }
+        .track-checkbox-item { display: flex; align-items: center; gap: 6px; color: #115e59; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .track-checkbox-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #0d9488; cursor: pointer; }
 
-        /* Горизонтальний рядок для КМ + ПК в один ряд */
+        /* КМ + ПК в один ряд */
         .km-section { display: flex; flex-direction: column; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
         .km-pk-row { display: flex; gap: 10px; width: 100%; align-items: flex-end; }
         .km-col { flex: 1; min-width: 0; }
@@ -64,7 +66,7 @@
         .auth-box { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
         .section-divider { height: 1px; background: #e2e8f0; margin: 24px 0; border: none; }
 
-        /* Стилі модального вікна бази даних */
+        /* Модальне вікно */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 5e, 59, 0.5); z-index: 100; justify-content: center; align-items: center; padding: 12px; box-sizing: border-box; }
         .modal-window { background: white; width: 100%; max-width: 440px; height: 85vh; border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: hidden; border: 1px solid #d1fae5; }
         .modal-header { background: #115e59; color: white; padding: 14px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
@@ -72,7 +74,6 @@
         .modal-filter-bar { padding: 10px 14px; background: #f0fdf4; border-bottom: 1px solid #c2e7d9; display: flex; align-items: center; gap: 10px; }
         .modal-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: #f8fafc; }
         
-        /* Картки об'єктів у модальному вікні */
         .db-card { background: white; border: 1px solid #e2e8f0; padding: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .db-card-top { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; margin-bottom: 4px; }
         .badge-pd { background: #e6f4ea; color: #115e59; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
@@ -111,60 +112,45 @@
                 <h2>⚙️ Конфігурація</h2>
                 <button class="btn-view-db" onclick="openDatabaseModal()">📋 База даних</button>
             </div>
-            <p>Створення меж для перегонів та станцій</p>
+            <p>Налаштування інфраструктури залізничних ділянок</p>
             
-            <label class="track-label">Тип об'єкта інфраструктури:</label>
+            <label class="track-label">1. Введіть околоток:</label>
+            <div class="pd-input-row">
+                <span class="pd-prefix">ПД-</span>
+                <input type="number" id="admin-pd-num" class="input-field pd-number-box">
+            </div>
+
+            <label class="track-label">2. Оберіть тип та назву об'єкта:</label>
             <div class="type-toggle-group">
                 <button id="type-btn-peregon" class="type-toggle-btn active" onclick="setObjectType('peregon')">Перегін</button>
                 <button id="type-btn-station" class="type-toggle-btn" onclick="setObjectType('station')">Станція</button>
             </div>
+            <input type="text" id="admin-peregon" class="input-field" placeholder="Назва перегону">
 
-            <div id="pd-selection-container">
-                <label class="track-label">Прив'язка околотків до колій:</label>
-                <div class="track-pd-selection">
-                    <div class="track-pd-row" id="row-neparna">
-                        <div class="track-pd-left">
-                            <input type="checkbox" id="chk-neparna" checked onchange="toggleTrackRow('neparna')">
-                            <span>Непарна колія</span>
-                        </div>
-                        <div class="track-pd-right">
-                            <span style="font-weight:bold; color:#115e59;">ПД-</span>
-                            <input type="number" id="pd-num-neparna" class="input-field" style="width:60px; margin-bottom:0; padding:6px; text-align:center;">
-                        </div>
-                    </div>
-                    <div class="track-pd-row" id="row-parna">
-                        <div class="track-pd-left">
-                            <input type="checkbox" id="chk-parna" checked onchange="toggleTrackRow('parna')">
-                            <span>Парна колія</span>
-                        </div>
-                        <div class="track-pd-right">
-                            <span style="font-weight:bold; color:#115e59;">ПД-</span>
-                            <input type="number" id="pd-num-parna" class="input-field" style="width:60px; margin-bottom:0; padding:6px; text-align:center;">
-                        </div>
-                    </div>
+            <div id="track-type-container">
+                <label class="track-label">3. Оберіть колію:</label>
+                <div class="track-checkbox-group">
+                    <label class="track-checkbox-item">
+                        <input type="checkbox" id="chk-neparna" checked>
+                        <span>Непарна</span>
+                    </label>
+                    <label class="track-checkbox-item">
+                        <input type="checkbox" id="chk-parna" checked>
+                        <span>Парна</span>
+                    </label>
                 </div>
             </div>
 
-            <div id="station-pd-container" style="display:none;">
-                <label class="track-label">Введіть околоток станції:</label>
-                <div class="pd-input-row">
-                    <span class="pd-prefix">ПД-</span>
-                    <input type="number" id="admin-pd-num" class="input-field pd-number-box">
-                </div>
-            </div>
-
-            <label class="track-label" id="label-name">Назва перегону:</label>
-            <input type="text" id="admin-peregon" class="input-field">
-
+            <label class="track-label" id="label-limits-title">4. Визначте лінійні межі:</label>
+            
             <div class="km-section">
-                <label class="track-label">Початок ділянки:</label>
                 <div class="km-pk-row">
                     <div class="km-col">
-                        <span class="sub-heading">Кілометр</span>
+                        <span class="sub-heading">Початок (КМ)</span>
                         <input type="number" id="admin-start-km" class="input-field" style="margin-bottom:0;">
                     </div>
                     <div class="pk-col">
-                        <span class="sub-heading">Виберіть ПК (галочка)</span>
+                        <span class="sub-heading">Початок (ПК)</span>
                         <div class="multiselect-dropdown">
                             <div class="multiselect-header" onclick="toggleDropdown('start-pk-options')">
                                 <span id="start-pk-label">1</span>
@@ -177,14 +163,13 @@
             </div>
 
             <div class="km-section">
-                <label class="track-label">Кінець ділянки:</label>
                 <div class="km-pk-row">
                     <div class="km-col">
-                        <span class="sub-heading">Кілометр</span>
+                        <span class="sub-heading">Кінець (КМ)</span>
                         <input type="number" id="admin-end-km" class="input-field" style="margin-bottom:0;">
                     </div>
                     <div class="pk-col">
-                        <span class="sub-heading">Виберіть ПК (галочка)</span>
+                        <span class="sub-heading">Кінець (ПК)</span>
                         <div class="multiselect-dropdown">
                             <div class="multiselect-header" onclick="toggleDropdown('end-pk-options')">
                                 <span id="end-pk-label">10</span>
@@ -233,8 +218,7 @@
                     <option value="all">Всі ПД</option>
                 </select>
             </div>
-            <div class="modal-body" id="modal-db-cards-container">
-                </div>
+            <div class="modal-body" id="modal-db-cards-container"></div>
         </div>
     </div>
 
@@ -244,7 +228,7 @@
 
         let tracksData = [];
         let selectedPds = [];
-        let currentObjectType = 'peregon'; // 'peregon' або 'station'
+        let currentObjectType = 'peregon'; 
 
         let selectedStartPks = [1];
         let selectedEndPks = [10];
@@ -260,32 +244,21 @@
             con.scrollTop = con.scrollHeight;
         }
 
-        // Перемикач типу об'єкта (Уніфікація станцій)
+        // Динамічна зміна підказок залежно від типу об'єкта (вибір колії тепер завжди активний)
         function setObjectType(type) {
             currentObjectType = type;
             document.getElementById('type-btn-peregon').classList.toggle('active', type === 'peregon');
             document.getElementById('type-btn-station').classList.toggle('active', type === 'station');
             
-            const lblName = document.getElementById('label-name');
-            const pdsContainer = document.getElementById('pd-selection-container');
-            const stationPdContainer = document.getElementById('station-pd-container');
+            const txtInput = document.getElementById('admin-peregon');
 
             if (type === 'station') {
-                lblName.innerText = "Назва станції:";
-                pdsContainer.style.display = 'none'; // Ховаємо вибір по коліях
-                stationPdContainer.style.display = 'block'; // Показуємо один спільний ПД
-                logSys("Змінено тип об'єкта: Станція");
+                txtInput.placeholder = "Назва станції (наприклад: ст. Ворожба)";
+                logSys("Обрано об'єкт: Станція.");
             } else {
-                lblName.innerText = "Назва перегону:";
-                pdsContainer.style.display = 'block';
-                stationPdContainer.style.display = 'none';
-                logSys("Змінено тип об'єкта: Перегін");
+                txtInput.placeholder = "Назва перегону (наприклад: Ворожба - Білопілля)";
+                logSys("Обрано об'єкт: Перегін.");
             }
-        }
-
-        function toggleTrackRow(track) {
-            const isChecked = document.getElementById(`chk-${track}`).checked;
-            document.getElementById(`pd-num-${track}`).disabled = !isChecked;
         }
 
         function initPkDropdowns() {
@@ -360,7 +333,6 @@
             }
         }
 
-        // Функції для модального вікна перегляду всієї бази даних
         async function openDatabaseModal() {
             document.getElementById('db-modal').style.display = 'flex';
             const container = document.getElementById('modal-db-cards-container');
@@ -370,10 +342,8 @@
             try {
                 const res = await fetch(`${baseDbUrl}/rest/v1/tracks?select=*`, { headers });
                 const data = await res.json();
-                // Сортуємо по імені ПД, потім по КМ
                 data.sort((a,b) => a.pd.localeCompare(b.pd) || a.start_km - b.start_km);
                 
-                // Заповнюємо фільтр унікальними ПД
                 const filterSelect = document.getElementById('modal-pd-filter');
                 filterSelect.innerHTML = '<option value="all">Всі ПД</option>';
                 const uniquePds = [...new Set(data.map(item => item.pd))].sort();
@@ -404,10 +374,14 @@
                 card.className = 'db-card';
                 card.setAttribute('data-pd', item.pd);
 
-                const isStation = (item.track_type === 'станція');
-                const typeBadge = isStation 
-                    ? `<span class="badge-station">Станція</span>`
-                    : `<span class="badge-type">${item.track_type} колія</span>`;
+                const isStationText = item.peregon.toLowerCase().includes('ст.') || item.track_type.includes('станція');
+                let typeBadge = `<span class="badge-type">${item.track_type} колія</span>`;
+                
+                if (item.track_type.includes('станція')) {
+                    typeBadge = `<span class="badge-station">${item.track_type}</span>`;
+                } else if (isStationText) {
+                    typeBadge = `<span class="badge-station">станція (${item.track_type})</span>`;
+                }
 
                 card.innerHTML = `
                     <div class="db-card-top">
@@ -496,63 +470,49 @@
         }
 
         async function saveNewTrackToCloud() {
+            const pdNum = document.getElementById('admin-pd-num').value.trim();
             const peregon = document.getElementById('admin-peregon').value.trim();
             const startKm = parseInt(document.getElementById('admin-start-km').value);
             const endKm = parseInt(document.getElementById('admin-end-km').value);
 
-            if (!peregon || isNaN(startKm) || isNaN(endKm)) { alert("Заповніть усі поля!"); return; }
+            if (!pdNum || !peregon || isNaN(startKm) || isNaN(endKm)) { alert("Заповніть усі поля форми!"); return; }
             if (selectedStartPks.length === 0 || selectedEndPks.length === 0) { alert("Оберіть початкові та кінцеві ПК!"); return; }
 
+            const chkNeparna = document.getElementById('chk-neparna').checked;
+            const chkParna = document.getElementById('chk-parna').checked;
+            if (!chkNeparna && !chkParna) { alert("Оберіть хоча б одну колію (Парну або Непарну)!"); return; }
+
+            const fullPdName = "ПД-" + pdNum;
             const finalStartPk = Math.min(...selectedStartPks);
             const finalEndPk = Math.max(...selectedEndPks);
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
 
             try {
-                if (currentObjectType === 'station') {
-                    // Уніфікація станцій: записуємо один рядок з типом об'єкта "станція"
-                    const pdNumStation = document.getElementById('admin-pd-num').value.trim();
-                    if (!pdNumStation) { alert("Введіть номер ПД для станції!"); return; }
-                    
+                // Визначаємо текстові мітки для збереження типу колії в базі даних
+                const labelNeparna = (currentObjectType === 'station') ? 'станція (непарна)' : 'непарна';
+                const labelParna = (currentObjectType === 'station') ? 'станція (парна)' : 'парна';
+
+                if (chkNeparna) {
                     await fetch(`${baseDbUrl}/rest/v1/tracks`, {
                         method: 'POST', headers, body: JSON.stringify({ 
-                            pd: "ПД-" + pdNumStation, peregon, track_type: 'станція', 
+                            pd: fullPdName, peregon, track_type: labelNeparna, 
                             start_km: startKm, start_piket: finalStartPk, 
                             end_km: endKm, end_piket: finalEndPk 
                         })
                     });
-                } else {
-                    // Роздільний вибір колій за допомогою галочок для перегону
-                    const chkNeparna = document.getElementById('chk-neparna').checked;
-                    const chkParna = document.getElementById('chk-parna').checked;
-                    const pdNeparna = document.getElementById('pd-num-neparna').value.trim();
-                    const pdParna = document.getElementById('pd-num-parna').value.trim();
-
-                    if (!chkNeparna && !chkParna) { alert("Оберіть хоча б одну колію для збереження перегону!"); return; }
-
-                    if (chkNeparna) {
-                        if (!pdNeparna) { alert("Введіть ПД для непарної колії!"); return; }
-                        await fetch(`${baseDbUrl}/rest/v1/tracks`, {
-                            method: 'POST', headers, body: JSON.stringify({ 
-                                pd: "ПД-" + pdNeparna, peregon, track_type: 'непарна', 
-                                start_km: startKm, start_piket: finalStartPk, 
-                                end_km: endKm, end_piket: finalEndPk 
-                            })
-                        });
-                    }
-
-                    if (chkParna) {
-                        if (!pdParna) { alert("Введіть ПД для парної колії!"); return; }
-                        await fetch(`${baseDbUrl}/rest/v1/tracks`, {
-                            method: 'POST', headers, body: JSON.stringify({ 
-                                pd: "ПД-" + pdParna, peregon, track_type: 'парна', 
-                                start_km: startKm, start_piket: finalStartPk, 
-                                end_km: endKm, end_piket: finalEndPk 
-                            })
-                        });
-                    }
                 }
 
-                logSys("Запис успішно збережено в хмару!", "success");
+                if (chkParna) {
+                    await fetch(`${baseDbUrl}/rest/v1/tracks`, {
+                        method: 'POST', headers, body: JSON.stringify({ 
+                            pd: fullPdName, peregon, track_type: labelParna, 
+                            start_km: startKm, start_piket: finalStartPk, 
+                            end_km: endKm, end_piket: finalEndPk 
+                        })
+                    });
+                }
+
+                logSys(`Дані успішно збережено в хмару!`, "success");
                 alert("Збережено!");
                 window.location.href = "index.html";
             } catch(e) {
