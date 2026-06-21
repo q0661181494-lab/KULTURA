@@ -69,13 +69,13 @@
             border-color: #0f766e !important; /* Темніша рамка кубика */
         }
 
-        /* Стиль для плашки-розриву назви станції (Варіант 1) */
+        /* Стиль для плашки-розриву назви станції */
         .station-boundary-delimiter {
             background: #f0fdf4;
             border: 2px dashed #0d9488;
             border-radius: 8px;
             padding: 6px;
-            margin: 12px 0 6px 0;
+            margin: 12px 0 12px 0;
             text-align: center;
             font-weight: 800;
             font-size: 12px;
@@ -352,6 +352,8 @@
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
                     
+                    let isLastPiketOfStation = false;
+
                     // Динамічне визначення меж станції на основі даних з lines_config
                     if (stationConfig) {
                         const sKm = parseInt(stationConfig.start_km);
@@ -365,15 +367,19 @@
                         const endAbs = eKm * 10 + ePk;
 
                         if (currentAbs >= startAbs && currentAbs <= endAbs) {
-                            /* ВСТАВКА РОЗДІЛЮВАЧА (Варіант 1): Якщо це самий початок станційної зони */
+                            /* Однакова плашка назви на початку станційної зони */
                             if (currentAbs === startAbs) {
-                                const delimiter = document.createElement('div');
-                                delimiter.className = 'station-boundary-delimiter';
-                                delimiter.innerText = `🚉 Станція ${stationConfig.name}`;
-                                container.appendChild(delimiter);
+                                const delimiterStart = document.createElement('div');
+                                delimiterStart.className = 'station-boundary-delimiter';
+                                delimiterStart.innerText = `🚉 Станція ${stationConfig.name}`;
+                                container.appendChild(delimiterStart);
                             }
                             
                             nodeRow.classList.add('station-piket-row');
+
+                            if (currentAbs === endAbs) {
+                                isLastPiketOfStation = true;
+                            }
                         }
                     }
  
@@ -413,6 +419,14 @@
                     nodeRow.appendChild(rightMargin);
  
                     container.appendChild(nodeRow);
+
+                    /* Така сама плашка назви на виході зі станційної зони */
+                    if (isLastPiketOfStation && stationConfig) {
+                        const delimiterEnd = document.createElement('div');
+                        delimiterEnd.className = 'station-boundary-delimiter';
+                        delimiterEnd.innerText = `🚉 Станція ${stationConfig.name}`;
+                        container.appendChild(delimiterEnd);
+                    }
                 }
             }
             logSys(`Діаграму оновлено успішно.`, 'info');
