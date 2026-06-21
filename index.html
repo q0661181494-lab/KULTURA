@@ -164,7 +164,7 @@
  
         let tracksData = []; 
         let mowingData = [];
-        let signalsData = []; // Масив для зберігання світлофорів з БД
+        let signalsData = [];
         let currentMode = 'pd';
  
         function logSys(text, status = 'info') {
@@ -193,7 +193,6 @@
                 const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?select=*`, { headers });
                 mowingData = await resMowing.json();
 
-                // Завантаження даних про світлофори
                 const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals?select=*`, { headers });
                 signalsData = await resSignals.json();
  
@@ -325,9 +324,6 @@
             const minKm = Math.min(...segmentsToRender.map(s => parseInt(s.start_km)));
             const maxKm = Math.max(...segmentsToRender.map(s => parseInt(s.end_km)));
 
-            const objectNames = [...new Set(segmentsToRender.map(s => s.name))].join(' / ');
-            logSys(`Будується суцільний графік для: ${objectNames}`);
- 
             for (let km = minKm; km <= maxKm; km++) {
                 
                 const kmSign = document.createElement('div');
@@ -339,9 +335,9 @@
                 headersRow.className = 'track-headers-row';
                 headersRow.innerHTML = `
                     <div class="header-margin-space"></div>
-                    <div class="header-left-track">ПАРНА</div>
+                    <div class="header-left-track">НЕПАРНА</div>
                     <div class="header-center-space"></div>
-                    <div class="header-right-track">НЕПАРНА</div>
+                    <div class="header-right-track">ПАРНА</div>
                     <div class="header-margin-space"></div>
                 `;
                 container.appendChild(headersRow);
@@ -388,9 +384,9 @@
                         }
                     }
  
-                    // Пошук світлофорів для поточних координат
-                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase() === 'непарна');
-                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase() === 'парна');
+                    // Пошук світлофорів із використанням .includes() для гнучкості
+                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().includes('непарна'));
+                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().includes('парна'));
 
                     // Ліве бокове поле (Непарна колія)
                     const leftMargin = document.createElement('div');
