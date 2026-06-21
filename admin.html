@@ -45,7 +45,7 @@
         /* Блок вибору колій */
         .track-checkbox-group { background: #f0fdf4; border: 1px solid #c2e7d9; border-radius: 12px; padding: 12px; margin-bottom: 14px; display: flex; gap: 16px; justify-content: flex-start; }
         .track-checkbox-item { display: flex; align-items: center; gap: 6px; color: #115e59; font-weight: 600; font-size: 14px; cursor: pointer; }
-        .track-checkbox-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #0d9488; cursor: pointer; }
+        .track-checkbox-item input[type="checkbox"], .track-checkbox-item input[type="radio"] { width: 18px; height: 18px; accent-color: #0d9488; cursor: pointer; margin: 0; }
  
         /* КМ + ПК в один ряд */
         .km-section { display: flex; flex-direction: column; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
@@ -203,11 +203,11 @@
                 <label class="track-label">3. Колія світлофора:</label>
                 <div class="track-checkbox-group">
                     <label class="track-checkbox-item">
-                        <input type="radio" name="sig-track-radio" id="sig-chk-neparna" checked style="accent-color:#0d9488; width:18px; height:18px;">
+                        <input type="radio" name="sig-track-radio" id="sig-chk-neparna" checked>
                         <span>Непарна</span>
                     </label>
                     <label class="track-checkbox-item">
-                        <input type="radio" name="sig-track-radio" id="sig-chk-parna" style="accent-color:#0d9488; width:18px; height:18px;">
+                        <input type="radio" name="sig-track-radio" id="sig-chk-parna">
                         <span>Парна</span>
                     </label>
                 </div>
@@ -307,7 +307,7 @@
             con.scrollTop = con.scrollHeight;
         }
  
-        // Перемикання режимів: Дільниці або Світлофори
+        // Перемикаться режимів: Дільниці або Світлофори
         function switchAdminMode(mode) {
             currentAdminMode = mode;
             document.getElementById('form-lines-block').style.display = (mode === 'lines') ? 'block' : 'none';
@@ -387,9 +387,10 @@
  
         function toggleDropdown(id) {
             ['start-pk-options', 'end-pk-options', 'dropdown-options'].forEach(optId => {
-                if(optId !== id) document.getElementById(optId).classList.remove('show');
+                if(optId !== id && document.getElementById(optId)) document.getElementById(optId).classList.remove('show');
             });
-            document.getElementById(id).classList.toggle('show');
+            const drop = document.getElementById(id);
+            if(drop) drop.classList.toggle('show');
         }
  
         function verifyAdminPassword() {
@@ -428,16 +429,16 @@
                 
                 // Сортування
                 if(table === 'lines_config') {
-                    data.sort((a,b) => a.pd.localeCompare(b.pd) || a.start_km - b.start_km);
+                    data.sort((a,b) => String(a.pd).localeCompare(String(b.pd)) || a.start_km - b.start_km);
                 } else {
-                    data.sort((a,b) => a.pd.localeCompare(b.pd) || a.km - b.km);
+                    data.sort((a,b) => String(a.pd).localeCompare(String(b.pd)) || a.km - b.km);
                 }
  
                 const filterSelect = document.getElementById('modal-pd-filter');
                 filterSelect.innerHTML = '<option value="all">Всі ПД</option>';
-                const uniquePds = [...new Set(data.map(item => item.pd))].sort();
+                const uniquePds = [...new Set(data.map(item => item.pd))].sort((a,b)=>a-b);
                 uniquePds.forEach(pd => {
-                    filterSelect.innerHTML += `<option value="${pd}">${pd}</option>`;
+                    filterSelect.innerHTML += `<option value="${pd}">ПД-${pd}</option>`;
                 });
  
                 renderModalCards(data, table);
@@ -449,7 +450,7 @@
         function renderModalCards(data, table) {
             const container = document.getElementById('modal-db-cards-container');
             container.innerHTML = "";
-            if (data.length === 0) {
+            if (!data || data.length === 0) {
                 container.innerHTML = "<div style='color:gray;text-align:center;padding:20px;'>Таблиця порожня</div>";
                 return;
             }
@@ -469,7 +470,7 @@
                     cardContent = `
                         <div class="db-card-content">
                             <div class="db-card-top">
-                                <span class="badge-pd">${item.pd}</span>
+                                <span class="badge-pd">ПД-${item.pd}</span>
                                 ${typeBadge}
                             </div>
                             <div class="db-card-name">${item.name}</div>
@@ -483,8 +484,8 @@
                     cardContent = `
                         <div class="db-card-content">
                             <div class="db-card-top">
-                                <span class="badge-pd">${item.pd}</span>
-                                <span class="badge-signal">${item.signal_type}</span>
+                                <span class="badge-pd">ПД-${item.pd}</span>
+                                <span class="badge-signal">${item.signal_type || 'не вказано'}</span>
                                 <span class="badge-type" style="background:#0f766e;">${item.track_type}</span>
                             </div>
                             <div class="db-card-name">🚦 Світлофор ${item.signal_name}</div>
@@ -511,7 +512,7 @@
                 }
             });
         }
-
+ 
         // Поштучне видалення об'єкта з бази через модалку
         async function deleteSingleItem(table, id) {
             if(!confirm("Видалити цей запис безповоротно?")) return;
@@ -532,164 +533,220 @@
  
         // Динамічний збір унікальних ПД для блоку очищення
         async function loadPdsForCleaning() {
+            const dropdownOptions = document.getElementById('dropdown-options');
+            if(!dropdownOptions) return;
+            dropdownOptions.innerHTML = "<div style='color:gray; padding:8px; font-size:12px;'>Завантаження...</div>";
+
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
-                // Збираємо унікальні ПД з обох нових таблиць
-                const [resL, resS] = await Promise.all([
-                    fetch(`${baseDbUrl}/rest/v1/lines_config?select=pd`, { headers }),
-                    fetch(`${baseDbUrl}/rest/v1/signals?select=pd`, { headers })
-                ]);
-                const lines = await resL.json();
-                const signals = await resS.json();
-                
-                const allPds = [...lines.map(l=>l.pd), ...signals.map(s=>s.pd)];
-                const uniquePds = [...new Set(allPds)].sort();
-                renderMultiselect(uniquePds);
-            } catch (e) { logSys("Помилка завантаження списку ПД: " + e.message, 'error'); }
-        }
- 
-        function renderMultiselect(pds) {
-            const container = document.getElementById('dropdown-options');
-            container.innerHTML = ""; selectedPds = [];
-            updateDropdownLabel();
-            if (pds.length === 0) { container.innerHTML = "<div style='padding:8px; color:gray;'>Немає активних ПД</div>"; return; }
- 
-            pds.forEach(pd => {
-                const item = document.createElement('div'); item.className = 'multiselect-item';
-                const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = pd;
-                checkbox.onchange = (e) => {
-                    if (e.target.checked) { if (!selectedPds.includes(pd)) selectedPds.push(pd); }
-                    else { selectedPds = selectedPds.filter(item => item !== pd); }
-                    updateDropdownLabel();
-                };
-                const label = document.createElement('span'); label.innerText = pd;
-                item.appendChild(checkbox); item.appendChild(label);
-                item.onclick = (e) => { if (e.target !== checkbox) { checkbox.checked = !checkbox.checked; checkbox.dispatchEvent(new Event('change')); } };
-                container.appendChild(item);
-            });
-        }
- 
-        function updateDropdownLabel() {
-            const label = document.getElementById('dropdown-label');
-            if (selectedPds.length === 0) label.innerText = "Оберіть ПД...";
-            else if (selectedPds.length <= 2) label.innerText = selectedPds.join(', ');
-            else label.innerText = `Обрано: ${selectedPds.length}`;
-        }
- 
-        window.addEventListener('click', function(e) {
-            if (!e.target.closest('.multiselect-dropdown')) {
-                document.getElementById('start-pk-options').classList.remove('show');
-                document.getElementById('end-pk-options').classList.remove('show');
-                document.getElementById('dropdown-options').classList.remove('show');
+                // Збираємо унікальні ПД з lines_config
+                const res = await fetch(`${baseDbUrl}/rest/v1/lines_config?select=pd`, { headers });
+                const data = await res.json();
+                const uniquePds = [...new Set(data.map(item => item.pd))].sort((a,b)=>a-b);
+
+                dropdownOptions.innerHTML = "";
+                if(uniquePds.length === 0) {
+                    dropdownOptions.innerHTML = "<div style='color:gray; padding:8px; font-size:12px;'>Немає активних ПД</div>";
+                    document.getElementById('dropdown-label').innerText = "Оберіть ПД...";
+                    return;
+                }
+
+                uniquePds.forEach(pd => {
+                    const item = document.createElement('div');
+                    item.className = 'multiselect-item';
+                    
+                    const chk = document.createElement('input');
+                    chk.type = 'checkbox';
+                    chk.value = pd;
+                    chk.checked = selectedPds.includes(pd);
+                    chk.onchange = () => {
+                        if(chk.checked) {
+                            if(!selectedPds.includes(pd)) selectedPds.push(pd);
+                        } else {
+                            selectedPds = selectedPds.filter(p => p !== pd);
+                        }
+                        document.getElementById('dropdown-label').innerText = selectedPds.length === 0 ? "Оберіть ПД..." : `Обрано ПД: ${selectedPds.sort((a,b)=>a-b).join(', ')}`;
+                    };
+
+                    const span = document.createElement('span');
+                    span.innerText = `ПД-${pd}`;
+
+                    item.appendChild(chk);
+                    item.appendChild(span);
+                    item.onclick = (e) => { if(e.target !== chk) { chk.checked = !chk.checked; chk.dispatchEvent(new Event('change')); } };
+                    dropdownOptions.appendChild(item);
+                });
+            } catch(e) {
+                dropdownOptions.innerHTML = "<div style='color:red; padding:8px; font-size:12px;'>Помилка зчитування</div>";
             }
-        });
- 
-        // Групове очищення вибраних ПД з ОБОХ таблиць
-        async function clearSelectedPdTracks() {
-            if (selectedPds.length === 0) { alert("Виберіть хоча б один околоток!"); return; }
-            if (!confirm(`Видалити ВСІ дані (дільниці та світлофори) для околотків: ${selectedPds.join(', ')}?`)) return;
- 
-            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
-            try {
-                let successCount = 0;
-                for (const pd of selectedPds) {
-                    const encodedPd = encodeURIComponent(pd);
-                    // Чистимо і колії, і світлофори
-                    const [res1, res2] = await Promise.all([
-                        fetch(`${baseDbUrl}/rest/v1/lines_config?pd=eq.${encodedPd}`, { method: 'DELETE', headers }),
-                        fetch(`${baseDbUrl}/rest/v1/signals?pd=eq.${encodedPd}`, { method: 'DELETE', headers })
-                    ]);
-                    if (res1.ok || res2.ok) successCount++;
-                }
-                if (successCount > 0) { 
-                    alert(`Обрані околотки успішно очищені!`); 
-                    await loadPdsForCleaning(); 
-                }
-            } catch (e) { alert("Помилка очищення: " + e.message); }
         }
- 
-        // ЗАГАЛЬНА ФУНКЦІЯ ЗБЕРЕЖЕННЯ (Адаптована під режими та UPSERT)
+
+        // Групове очищення околотків
+        async function clearSelectedPdTracks() {
+            if(selectedPds.length === 0) {
+                alert("Будь ласка, оберіть хоча б один ПД!");
+                return;
+            }
+            if(!confirm(`Увага! Буде видалено ВСІ конфігурації дільниць для околотків: ${selectedPds.join(', ')}. Продовжити?`)) return;
+
+            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+            let successCount = 0;
+
+            for(let pd of selectedPds) {
+                try {
+                    logSys(`Очищення конфігурацій для ПД-${pd}...`);
+                    const res = await fetch(`${baseDbUrl}/rest/v1/lines_config?pd=eq.${pd}`, { method: 'DELETE', headers });
+                    if(res.ok) {
+                        successCount++;
+                    } else {
+                        logSys(`Не вдалося очистити ПД-${pd}`, 'error');
+                    }
+                } catch(e) {
+                    logSys(`Помилка під час видалення ПД-${pd}: ${e.message}`, 'error');
+                }
+            }
+
+            logSys(`Очищення завершено. Успішно оброблено околотків: ${successCount}`, 'success');
+            selectedPds = [];
+            document.getElementById('dropdown-label').innerText = "Оберіть ПД...";
+            loadPdsForCleaning();
+        }
+
+        // Універсальна функція збереження даних (Визначає режим і робить запис)
         async function saveDataToCloud() {
-            const pdNum = document.getElementById('admin-pd-num').value.trim();
-            if (!pdNum) { alert("Введіть номер околотку!"); return; }
-            const fullPdName = "ПД-" + pdNum;
+            const pdInput = document.getElementById('admin-pd-num').value.trim();
+            if(!pdInput) {
+                alert("Вкажіть номер околотку (ПД)!");
+                return;
+            }
+            const pdNum = parseInt(pdInput);
 
             const headers = { 
                 'apikey': fullKey, 
-                'authorization': 'Bearer ' + fullKey, 
+                'authorization': 'Bearer ' + fullKey,
                 'Content-Type': 'application/json',
-                'Prefer': 'resolution=merge-duplicates' // Режим розумного редагування при збігу унікальних полів
+                'Prefer': 'resolution=merge-duplicates'
             };
- 
-            try {
-                if (currentAdminMode === 'lines') {
-                    // Режим 1: Збереження дільниці / станції
-                    const name = document.getElementById('admin-peregon').value.trim();
-                    const startKm = parseInt(document.getElementById('admin-start-km').value);
-                    const endKm = parseInt(document.getElementById('admin-end-km').value);
-         
-                    if (!name || isNaN(startKm) || isNaN(endKm)) { alert("Заповніть усі поля форми дільниць!"); return; }
-                    if (selectedStartPks.length === 0 || selectedEndPks.length === 0) { alert("Оберіть початкові та кінцеві ПК!"); return; }
-         
-                    const chkNeparna = document.getElementById('chk-neparna').checked;
-                    const chkParna = document.getElementById('chk-parna').checked;
-                    if (!chkNeparna && !chkParna) { alert("Оберіть хоча б одну колію!"); return; }
-         
-                    const finalStartPk = Math.min(...selectedStartPks);
-                    const finalEndPk = Math.max(...selectedEndPks);
-                    const typeLabel = currentObjectType === 'station' ? 'станція' : 'перегін';
 
-                    logSys(`Збереження дільниці "${name}"...`);
+            // РЕЖИМ 1: ЗБЕРЕЖЕННЯ ДІЛЬНИЦЬ / СТАНЦІЙ
+            if (currentAdminMode === 'lines') {
+                const name = document.getElementById('admin-peregon').value.trim();
+                const startKm = parseInt(document.getElementById('admin-start-km').value);
+                const endKm = parseInt(document.getElementById('admin-end-km').value);
 
-                    if (chkNeparna) {
-                        await fetch(`${baseDbUrl}/rest/v1/lines_config`, {
-                            method: 'POST', headers, body: JSON.stringify({ 
-                                pd: fullPdName, type: typeLabel, name, track_type: 'непарна', 
-                                start_km: startKm, start_pk: finalStartPk, end_km: endKm, end_pk: finalEndPk 
-                            })
-                        });
-                    }
-         
-                    if (chkParna) {
-                        await fetch(`${baseDbUrl}/rest/v1/lines_config`, {
-                            method: 'POST', headers, body: JSON.stringify({ 
-                                pd: fullPdName, type: typeLabel, name, track_type: 'парна', 
-                                start_km: startKm, start_pk: finalStartPk, end_km: endKm, end_pk: finalEndPk 
-                            })
-                        });
-                    }
-         
-                } else {
-                    // Режим 2: Збереження світлофора
-                    const signal_name = document.getElementById('sig-name').value.trim();
-                    const km = parseInt(document.getElementById('sig-km').value);
-                    const piket = parseInt(document.getElementById('sig-pk').value);
-                    const signal_type = document.getElementById('sig-type').value;
-
-                    if (!signal_name || isNaN(km) || isNaN(piket)) { alert("Заповніть усі параметри світлофора!"); return; }
-
-                    const sigTrackType = document.getElementById('sig-chk-neparna').checked ? 'непарна' : 'парна';
-                    logSys(`Збереження світлофора ${signal_name}...`);
-
-                    await fetch(`${baseDbUrl}/rest/v1/signals`, {
-                        method: 'POST', headers, body: JSON.stringify({
-                            pd: fullPdName, signal_name, track_type: sigTrackType,
-                            km, piket, signal_type
-                        })
-                    });
+                if(!name || isNaN(startKm) || isNaN(endKm)) {
+                    alert("Будь ласка, заповніть усі поля для дільниці!");
+                    return;
                 }
- 
-                logSys(`Дані успішно синхронізовано в хмару!`, "success");
-                alert("Успішно збережено/відредаговано!");
-                window.location.href = "index.html";
-                
-            } catch(e) {
-                alert("Помилка: " + e.message);
-                logSys("Помилка Supabase: " + e.message, "error");
+
+                const chkNeparna = document.getElementById('chk-neparna').checked;
+                const chkBarna = document.getElementById('chk-parna').checked;
+
+                if(!chkNeparna && !chkBarna) {
+                    alert("Оберіть хоча б одну колію (Парна/Непарна)!");
+                    return;
+                }
+
+                // Визначаємо тип колії для збереження
+                let trackType = "одноколійна";
+                if(chkNeparna && chkBarna) trackType = "двоколійна";
+                else if(chkNeparna) trackType = "непарна";
+                else if(chkBarna) trackType = "парна";
+
+                // Перетворюємо масиви ПК в рядки, або беремо перші значення
+                const startPk = selectedStartPks.length > 0 ? selectedStartPks[0] : 1;
+                const endPk = selectedEndPks.length > 0 ? selectedEndPks[0] : 10;
+
+                const linePayload = {
+                    pd: pdNum,
+                    name: name,
+                    type: currentObjectType === 'station' ? 'станція' : 'перегін',
+                    track_type: trackType,
+                    start_km: startKm,
+                    start_pk: startPk,
+                    end_km: endKm,
+                    end_pk: endPk,
+                    updated_at: new Date().toISOString()
+                };
+
+                logSys(`Надсилання дільниці "${name}" в lines_config...`);
+
+                try {
+                    const res = await fetch(`${baseDbUrl}/rest/v1/lines_config`, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(linePayload)
+                    });
+                    if(res.ok) {
+                        logSys(`Дільницю "${name}" успішно додано!`, 'success');
+                        document.getElementById('admin-peregon').value = "";
+                    } else {
+                        const err = await res.text();
+                        logSys(`Помилка бази даних: ${err}`, 'error');
+                    }
+                } catch(e) {
+                    logSys(`Помилка мережі: ${e.message}`, 'error');
+                }
+
+            // РЕЖИМ 2: ЗБЕРЕЖЕННЯ СВІТЛОФОРІВ
+            } else if (currentAdminMode === 'signals') {
+                const sigName = document.getElementById('sig-name').value.trim();
+                const sigKm = parseInt(document.getElementById('sig-km').value);
+                const sigPk = parseInt(document.getElementById('sig-pk').value);
+                const sigType = document.getElementById('sig-type').value;
+
+                if(!sigName || isNaN(sigKm) || isNaN(sigPk)) {
+                    alert("Будь ласка, заповніть усі поля координат та назви світлофора!");
+                    return;
+                }
+
+                // Зчитуємо radio-кнопку колії
+                const isNeparna = document.getElementById('sig-chk-neparna').checked;
+                const sigTrackType = isNeparna ? "непарна" : "парна";
+
+                const signalPayload = {
+                    pd: pdNum,
+                    signal_name: sigName,
+                    signal_type: sigType,
+                    track_type: sigTrackType,
+                    km: sigKm,
+                    piket: sigPk,
+                    updated_at: new Date().toISOString()
+                };
+
+                logSys(`Надсилання світлофора "${sigName}" на КМ ${sigKm} в signals...`);
+
+                try {
+                    const res = await fetch(`${baseDbUrl}/rest/v1/signals`, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(signalPayload)
+                    });
+                    if(res.ok) {
+                        logSys(`Світлофор "${sigName}" успішно записано в Supabase!`, 'success');
+                        document.getElementById('sig-name').value = "";
+                    } else {
+                        const err = await res.text();
+                        logSys(`Помилка бази даних світлофорів: ${err}`, 'error');
+                    }
+                } catch(e) {
+                    logSys(`Помилка мережі: ${e.message}`, 'error');
+                }
+            }
+
+            // Оновлюємо дані у списку видалення та модалці
+            loadPdsForCleaning();
+            if(document.getElementById('db-modal').style.display === 'flex') {
+                loadTableDataFromModal();
             }
         }
- 
-        window.onload = function() { logSys("Система безпеки активована. Очікування пароля..."); };
+
+        // Закриття випадних списків при кліку поза ними
+        window.onclick = function(event) {
+            if (!event.target.closest('.multiselect-dropdown')) {
+                document.querySelectorAll('.multiselect-options').forEach(opt => opt.classList.remove('show'));
+            }
+        };
     </script>
 </body>
 </html>
