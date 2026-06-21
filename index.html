@@ -68,6 +68,22 @@
             color: white !important;         /* Білий колір цифри */
             border-color: #0f766e !important; /* Темніша рамка кубика */
         }
+
+        /* Стиль для плашки-розриву назви станції (Варіант 1) */
+        .station-boundary-delimiter {
+            background: #f0fdf4;
+            border: 2px dashed #0d9488;
+            border-radius: 8px;
+            padding: 6px;
+            margin: 12px 0 6px 0;
+            text-align: center;
+            font-weight: 800;
+            font-size: 12px;
+            color: #0d9488;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+        }
         
         /* Бокові поля для майбутньої інформації / світлофорів */
         .info-margin { width: 50px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: bold; color: #0f766e; box-sizing: border-box; }
@@ -283,7 +299,6 @@
                 selectedPeregons.forEach(peregon => {
                     const stationsTokens = peregon.split('-').map(s => s.trim().toLowerCase());
                     tracksData.forEach(t => {
-                        /* ЗМІНЕНО: перевірка робиться по полю .type з Supabase */
                         if (t.type.includes('станція')) {
                             const isDotichna = stationsTokens.some(token => t.name.toLowerCase().includes(token));
                             if (isDotichna && !segmentsToRender.some(added => added.id === t.id)) {
@@ -326,7 +341,6 @@
                 for (let pk = 1; pk <= 10; pk++) {
                     const leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('непарна')); 
                     const rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('парна'));
-                    /* ЗМІНЕНО: визначення конфігурації станції тепер шукає слово 'станція' в полі .type */
                     const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type.includes('станція'));
 
                     const finalLeftConfig = stationConfig || leftConfig;
@@ -351,6 +365,14 @@
                         const endAbs = eKm * 10 + ePk;
 
                         if (currentAbs >= startAbs && currentAbs <= endAbs) {
+                            /* ВСТАВКА РОЗДІЛЮВАЧА (Варіант 1): Якщо це самий початок станційної зони */
+                            if (currentAbs === startAbs) {
+                                const delimiter = document.createElement('div');
+                                delimiter.className = 'station-boundary-delimiter';
+                                delimiter.innerText = `🚉 Станція ${stationConfig.name}`;
+                                container.appendChild(delimiter);
+                            }
+                            
                             nodeRow.classList.add('station-piket-row');
                         }
                     }
