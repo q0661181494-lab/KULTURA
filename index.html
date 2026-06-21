@@ -3,293 +3,496 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📊 Моніторинг ділянок (Матча)</title>
+    <title>📊 Двоколійна залізнична діаграма (Матча)</title>
     <style>
-        /* Фірмовий стиль програми */
-        body { font-family: -apple-system, sans-serif; background-color: #f0fdf4; margin: 0; padding: 12px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 480px; box-sizing: border-box; display: flex; flex-direction: column; }
+        /* Фірмове легке фісташкове тло */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f0fdf4;
+            margin: 0;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
         
-        /* Навігація */
-        .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 12px; display: flex; gap: 6px; box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); width: 100%; box-sizing: border-box; align-items: center; border: 1px solid #d1fae5; }
-        .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #115e59; text-decoration: none; border-radius: 8px; background: #f0fdf4; cursor: pointer; }
-        .nav-link.active { background: #115e59; color: white; pointer-events: none; }
-        .admin-btn { width: 42px; height: 42px; background-color: white; color: #115e59; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid #a7f3d0; cursor: pointer; text-decoration: none; flex-shrink: 0; }
-
-        /* Картка фільтрів */
-        .screen { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); width: 100%; box-sizing: border-box; margin-bottom: 12px; border: 1px solid #d1fae5; }
-        h2 { margin: 0 0 4px 0; font-size: 19px; color: #115e59; font-weight: 800; text-align: center; }
-        p { color: #0f766e; font-size: 13px; margin-top: 0; margin-bottom: 14px; text-align: center; opacity: 0.8; }
-
-        .input-field { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; }
-        .track-label { font-size: 11px; font-weight: 700; color: #115e59; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+        /* Навігаційне меню у шавлієвих тонах */
+        .nav-menu {
+            background: white;
+            border-radius: 12px;
+            padding: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06);
+            width: 100%;
+            box-sizing: border-box;
+            align-items: center;
+            border: 1px solid #d1fae5;
+        }
+        .nav-link {
+            flex: 1;
+            padding: 12px 4px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: #115e59;
+            text-decoration: none;
+            border-radius: 8px;
+            background: #f0fdf4;
+            cursor: pointer;
+        }
+        .nav-link.active {
+            background-color: #115e59;
+            color: white;
+        }
         
-        /* Поле ПД */
-        .pd-search-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .pd-prefix { font-size: 16px; font-weight: bold; color: #115e59; }
-        .pd-input-box { width: 90px !important; margin-bottom: 0 !important; text-align: center; }
-
-        /* Таби вибору режиму графіків */
-        .mode-tabs { display: flex; gap: 8px; margin-bottom: 12px; background: #f0fdf4; padding: 4px; border-radius: 10px; border: 1px solid #c2e7d9; }
-        .tab-btn { flex: 1; padding: 8px; border: none; background: transparent; border-radius: 7px; color: #115e59; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; }
-        .tab-btn.active { background: #0d9488; color: white; }
-
-        /* Графічний контейнер */
-        .graph-container { background: white; padding: 14px; border-radius: 16px; box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); width: 100%; box-sizing: border-box; margin-bottom: 12px; border: 1px solid #d1fae5; display: flex; flex-direction: column; gap: 20px; }
-        .track-visual-block { display: flex; flex-direction: column; }
-        .track-title-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #0f766e; margin-bottom: 6px; }
-        .diagram-line-wrapper { position: relative; width: 100%; height: 38px; background: #f1f5f9; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; overflow: hidden; }
+        /* Кругла кнопка налаштувань */
+        .admin-menu-btn {
+            width: 42px;
+            height: 42px;
+            background-color: #f0fdf4;
+            color: #115e59;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            border: 1px solid #a7f3d0;
+            flex-shrink: 0;
+            text-decoration: none;
+        }
         
-        .segment-bar { position: absolute; height: 100%; top: 0; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold; box-sizing: border-box; text-shadow: 0 1px 2px rgba(0,0,0,0.3); border-right: 1px dashed rgba(255,255,255,0.4); border-left: 1px dashed rgba(255,255,255,0.4); }
-        .segment-bar.station-mode { background: repeating-linear-strippable-colors; background: linear-gradient(45deg, #6366f1 25%, #4f46e5 25%, #4f46e5 50%, #6366f1 50%, #6366f1 75%, #4f46e5 75%, #4f46e5 100%); background-size: 14px 14px; }
-        .segment-bar.line-mode { background: #0d9488; }
-
-        /* Шкала кілометрів під лінією */
-        .scale-row { position: relative; width: 100%; height: 16px; margin-top: 2px; }
-        .scale-tick { position: absolute; top: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
-        .scale-tick::before { content: ''; width: 1px; height: 4px; background: #64748b; }
-        .scale-text { font-size: 9px; color: #64748b; font-weight: bold; margin-top: 1px; }
-
-        /* Повідомлення про пустий стан */
-        .empty-state { text-align: center; color: #64748b; padding: 30px 10px; font-size: 14px; font-weight: 500; }
+        /* Головна картка з м'якою шавлієвою рамкою */
+        .screen {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05);
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+            border: 1px solid #d1fae5;
+        }
+        h2 {
+            margin-top: 0;
+            margin-bottom: 4px;
+            font-size: 19px;
+            color: #115e59;
+            font-weight: 800;
+            text-align: center;
+        }
+        p {
+            color: #0f766e;
+            font-size: 13px;
+            margin-top: 0;
+            margin-bottom: 16px;
+            text-align: center;
+            opacity: 0.8;
+        }
+        
+        /* Поля введення у стилі Матча */
+        .input-field {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background-color: white;
+            color: #115e59;
+            font-weight: 500;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #0d9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+        }
+        .track-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #115e59;
+            margin-bottom: 4px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+ 
+        /* 🚂 ДВОКОЛІЙНА ВЕРТИКАЛЬНА ПЛАТФОРМА */
+        .railway-canvas {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 8px;
+        }
+        
+        /* Залізничний знак кілометра в хвойних тонах */
+        .km-signboard {
+            background: #e6f4ea;
+            border: 2px solid #115e59;
+            border-radius: 8px;
+            padding: 8px;
+            margin: 24px 0 8px 0;
+            text-align: center;
+            font-weight: 900;
+            font-size: 14px;
+            color: #115e59;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 5px rgba(17,94,89,0.05);
+        }
+        .km-signboard:first-child {
+            margin-top: 0;
+        }
+        
+        /* Заголовки стовпчиків колій */
+        .track-headers-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #0f766e;
+            text-transform: uppercase;
+            text-align: center;
+            opacity: 0.8;
+        }
+        .header-left-track {
+            flex: 1;
+            text-align: center;
+        }
+        .header-center-space {
+            width: 42px;
+            margin: 0 6px;
+            text-align: center;
+        }
+        .header-right-track {
+            flex: 1;
+            text-align: center;
+        }
+ 
+        /* Рядок пікета */
+        .piket-rail-node {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            height: 44px;
+            position: relative;
+            width: 100%;
+        }
+        
+        /* Зони обкошування (Брівки узбіччя) */
+        .mowing-bank-zone {
+            flex: 1;
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            box-sizing: border-box;
+            border: 1px solid rgba(0,0,0,0.04);
+            padding: 0 4px;
+            text-align: center;
+            line-height: 1.2;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1);
+        }
+        
+        /* Центральний ПК маркер */
+        .piket-center-core {
+            width: 42px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 13px;
+            color: #115e59;
+            background: #e6f4ea;
+            border-radius: 5px;
+            margin: 0 6px;
+            z-index: 2;
+            border: 1px solid #a7f3d0;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+        
+        /* Візуалізація рейкової нитки */
+        .rail-line-visual {
+            width: 12px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            background: #cbd5e1;
+            flex-shrink: 0;
+        }
+        .rail-line-visual::before, .rail-line-visual::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: #475569;
+        }
+        .rail-line-visual::before { left: 1px; }
+        .rail-line-visual::after { right: 1px; }
+        
+        .rail-line-visual span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background: #64748b;
+            margin: 2px 0;
+        }
+ 
+        /* Світлофорна палітра для брівок */
+        .status-clear-green { background-color: #22c55e; color: white; }
+        .status-warn-yellow { background-color: #eab308; color: #1f2937; }
+        .status-overgrown-red { background-color: #ef4444; color: white; }
+        
+        /* Монітор самоаудиту */
+        .debug-panel {
+            margin-top: 8px;
+            padding: 12px;
+            background-color: #e6f4ea;
+            border: 1px solid #c2e7d9;
+            color: #115e59;
+            border-radius: 12px;
+            font-size: 11px;
+            font-family: monospace;
+            box-shadow: 0 2px 4px rgba(11,94,89,0.02);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .debug-title {
+            font-weight: bold;
+            color: #0f766e;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #c2e7d9;
+            padding-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .debug-scroll {
+            max-height: 90px;
+            overflow-y: auto;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
-
+ 
     <div class="container">
         <div class="nav-menu">
-            <button class="nav-link active">📊 Графіки</button>
-            <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
-            <a href="admin.html" class="admin-btn">⚙️</a>
+            <a href="#" class="nav-link active" id="nav-btn-charts">📊 Графіки</a>
+            <a href="master.html" class="nav-link" id="nav-btn-master">🧑‍🔧 Майстер</a>
+            <a href="admin.html" class="admin-menu-btn" id="nav-btn-admin">⚙️</a>
         </div>
-
-        <div class="screen">
-            <h2>📊 Моніторинг ліній</h2>
-            <p>Візуалізація меж обслуговування інфраструктури</p>
+ 
+        <div class="screen" id="screen-charts">
+            <h2>📊 Двоколійна діаграма</h2>
+            <p>Стан обкошування брівок непарної (лівої) та парної (правої) колій</p>
             
-            <label class="track-label">1. Введіть номер околотку:</label>
-            <div class="pd-search-row">
-                <span class="pd-prefix">ПД-</span>
-                <input type="number" id="search-pd-num" class="input-field pd-input-box" placeholder="№" oninput="handlePdInput()">
-            </div>
-
-            <div id="filter-controls-block" style="display: none;">
-                <label class="track-label">2. Оберіть режим відображення:</label>
-                <div class="mode-tabs">
-                    <button id="tab-mode-pd" class="tab-btn active" onclick="switchDisplayMode('pd')">по ПД</button>
-                    <button id="tab-mode-peregon" class="tab-btn" onclick="switchDisplayMode('peregon')">по перегону</button>
-                </div>
-
-                <div id="peregon-select-container" style="display: none;">
-                    <label class="track-label">3. Оберіть конкретний перегін:</label>
-                    <select id="peregon-dropdown" class="input-field" onchange="buildVisualGraphics()"></select>
-                </div>
-            </div>
+            <label class="track-label">Околоток (ПД):</label>
+            <select id="filter-pd" class="input-field" onchange="handlePdChange()"></select>
+ 
+            <label class="track-label">Перегін:</label>
+            <select id="filter-peregon" class="input-field" onchange="drawDoubleTrackDiagram()"></select>
+ 
+            <div id="diagram-render-zone" class="railway-canvas"></div>
         </div>
-
-        <div class="graph-container" id="graphics-main-box">
-            <div class="empty-state">Будь ласка, введіть номер ПД для відображення графіків ліній</div>
+ 
+        <div class="debug-panel">
+            <div class="debug-title">🖥️ Монітор системи</div>
+            <div id="debug-console" class="debug-scroll"></div>
         </div>
     </div>
-
+ 
     <script>
         const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
         const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
-
-        let allCloudTracks = []; // Усі ділянки з хмари
-        let currentDisplayMode = 'pd'; // 'pd' або 'peregon'
-
-        // Завантаження бази даних при старті
-        async function loadInfrastructureData() {
+ 
+        let tracksData = [];
+        let mowingData = [];
+ 
+        function logSys(text, status = 'info') {
+            const con = document.getElementById('debug-console');
+            if(!con) return;
+            const div = document.createElement('div');
+            if(status === 'success') div.style.color = '#16a34a';
+            if(status === 'error') div.style.color = '#dc2626';
+            div.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
+            con.appendChild(div);
+            con.scrollTop = con.scrollHeight;
+        }
+ 
+        async function initApp() {
+            logSys("Запуск рейкової платформи...");
+            await reloadDataFromCloud();
+        }
+ 
+        async function reloadDataFromCloud() {
+            logSys("Завантаження даних із Supabase...");
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
-                const res = await fetch(`${baseDbUrl}/rest/v1/tracks?select=*`, { headers });
-                allCloudTracks = await res.json();
-                console.log("Дані успішно оновлено з Supabase. Записів:", allCloudTracks.length);
+                const resTracks = await fetch(`${baseDbUrl}/rest/v1/tracks?select=*`, { headers });
+                tracksData = await resTracks.json();
+ 
+                const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?select=*`, { headers });
+                mowingData = await resMowing.json();
+ 
+                logSys(`Завантажено перегонів: ${tracksData.length}`, 'success');
+                populatePdDropdown();
             } catch (e) {
-                console.error("Помилка синхронізації з базою даних:", e.message);
+                logSys("Помилка завантаження: " + e.message, 'error');
             }
         }
-
-        // Обробка введення ПД
-        function handlePdInput() {
-            const pdNum = document.getElementById('search-pd-num').value.trim();
-            const controlsBlock = document.getElementById('filter-controls-block');
-            const mainBox = document.getElementById('graphics-main-box');
-
-            if (!pdNum) {
-                controlsBlock.style.display = 'none';
-                mainBox.innerHTML = '<div class="empty-state">Будь ласка, введіть номер ПД для відображення графіків ліній</div>';
-                return;
-            }
-
-            controlsBlock.style.display = 'block';
-            
-            // Оновлюємо випадаючий список перегонів суто для цього ПД
-            const fullPdName = "ПД-" + pdNum;
-            const pdTracks = allCloudTracks.filter(t => t.pd === fullPdName && !t.track_type.includes('станція'));
-            const uniquePeregons = [...new Set(pdTracks.map(t => t.peregon))].sort();
-
-            const dropdown = document.getElementById('peregon-dropdown');
-            dropdown.innerHTML = "";
-            
-            if (uniquePeregons.length === 0) {
-                dropdown.innerHTML = "<option value=''>Немає перегонів у цього ПД</option>";
-            } else {
-                uniquePeregons.forEach(p => {
-                    dropdown.innerHTML += `<option value="${p}">${p}</option>`;
-                });
-            }
-
-            buildVisualGraphics();
-        }
-
-        // Перемикання табів
-        function switchDisplayMode(mode) {
-            currentDisplayMode = mode;
-            document.getElementById('tab-mode-pd').classList.toggle('active', mode === 'pd');
-            document.getElementById('tab-mode-peregon').classList.toggle('active', mode === 'peregon');
-            
-            document.getElementById('peregon-select-container').style.display = (mode === 'peregon') ? 'block' : 'none';
-            
-            buildVisualGraphics();
-        }
-
-        // Генерація графіків ліній
-        function buildVisualGraphics() {
-            const pdNum = document.getElementById('search-pd-num').value.trim();
-            const mainBox = document.getElementById('graphics-main-box');
-            if (!pdNum) return;
-
-            const fullPdName = "ПД-" + pdNum;
-            let tracksToRender = [];
-
-            if (currentDisplayMode === 'pd') {
-                // ВАРІАНТ 1: Відображаємо тільки те, що належить конкретному ПД
-                tracksToRender = allCloudTracks.filter(t => t.pd === fullPdName);
-            } else {
-                // ВАРІАНТ 2: Відображаємо по перегону + підтягуємо суміжні ПД та дотичні станції
-                const selectedPeregon = document.getElementById('peregon-dropdown').value;
-                if (!selectedPeregon) {
-                    mainBox.innerHTML = '<div class="empty-state">Перегони відсутні для конфігурації даного ПД</div>';
-                    return;
-                }
-
-                // 1. Витягуємо вибраний перегін по ВСІЙ базі даних (автоматично беремо суміжні ПД)
-                const lineSegments = allCloudTracks.filter(t => t.peregon === selectedPeregon);
-                tracksToRender = [...lineSegments];
-
-                // 2. Автоматично підтягуємо дотичні станції
-                // Розбиваємо назву перегону (наприклад, "Ворожба - Білопілля") на окремі станції
-                const stationNames = selectedPeregon.split('-').map(name => name.trim().toLowerCase());
-                
-                allCloudTracks.forEach(t => {
-                    if (t.track_type.includes('станція')) {
-                        // Перевіряємо, чи міститься назва станції в назві обраного перегону
-                        const isDotichna = stationNames.some(stName => t.peregon.toLowerCase().includes(stName));
-                        if (isDotichna) {
-                            // Уникаємо дублів станцій у масиві рендерингу
-                            if (!tracksToRender.some(added => added.id === t.id)) {
-                                tracksToRender.push(t);
-                            }
-                        }
-                    }
-                });
-            }
-
-            if (tracksToRender.length === 0) {
-                mainBox.innerHTML = `<div class="empty-state">Немає збережених конфігурацій ділянок для відображення</div>`;
-                return;
-            }
-
-            mainBox.innerHTML = ""; // Очищаємо екран перед побудовою
-
-            // Поділ на Парний та Непарний напрямки
-            const neparniTracks = tracksToRender.filter(t => t.track_type.includes('непарна'));
-            const parniTracks = tracksToRender.filter(t => t.track_type.includes('парна'));
-
-            if (neparniTracks.length > 0) {
-                mainBox.appendChild(createDirectionTrackBlock("НЕПАРНА КОЛІЯ (Напрямок)", neparniTracks));
-            }
-            if (parniTracks.length > 0) {
-                mainBox.appendChild(createDirectionTrackBlock("ПАРНА КОЛІЯ (Напрямок)", parniTracks));
-            }
-            
-            if (neparniTracks.length === 0 && parniTracks.length === 0) {
-                mainBox.innerHTML = `<div class="empty-state">Ділянки знайдені, але тип колії не розпізнано</div>`;
-            }
-        }
-
-        // Побудова окремого графічного блоку колії
-        function createDirectionTrackBlock(title, segments) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'track-visual-block';
-
-            // Розрахунок глобальних лінійних меж для шкали
-            const minKm = Math.min(...segments.map(s => s.start_km));
-            const maxKm = Math.max(...segments.map(s => s.end_km));
-            const totalKmRange = (maxKm - minKm) || 1;
-
-            const titleRow = document.createElement('div');
-            titleRow.className = 'track-title-row';
-            titleRow.innerHTML = `<span>${title}</span><span>Межі ділянки: ${minKm} - ${maxKm} КМ</span>`;
-            wrapper.appendChild(titleRow);
-
-            const diagramWrapper = document.createElement('div');
-            diagramWrapper.className = 'diagram-line-wrapper';
-
-            // Рендеринг відрізків ділянок на лінії
-            segments.forEach(seg => {
-                const bar = document.createElement('div');
-                const isStation = seg.track_type.includes('станція');
-                bar.className = 'segment-bar ' + (isStation ? 'station-mode' : 'line-mode');
-
-                // Перерахунок лінійної позиції у відсотках
-                const leftPercent = ((seg.start_km - minKm) / totalKmRange) * 100;
-                const widthPercent = ((seg.end_km - seg.start_km) / totalKmRange) * 100;
-
-                bar.style.left = leftPercent + "%";
-                bar.style.width = widthPercent + "%";
-                
-                // Текст всередині відрізка: показуємо назву об'єкта та ПД, що його обслуговує
-                bar.innerText = `${seg.peregon} (${seg.pd})`;
-                bar.title = `${seg.peregon} [${seg.pd}]\nМежі: ${seg.start_km}км (пк-${seg.start_piket}) - ${seg.end_km}км (пк-${seg.end_piket})`;
-
-                diagramWrapper.appendChild(bar);
+ 
+        function populatePdDropdown() {
+            const select = document.getElementById('filter-pd');
+            select.innerHTML = "";
+            const uniquePds = [...new Set(tracksData.map(t => t.pd))].sort();
+            uniquePds.forEach(pd => {
+                const opt = document.createElement('option');
+                opt.value = pd;
+                opt.innerText = pd;
+                select.appendChild(opt);
             });
-
-            wrapper.appendChild(diagramWrapper);
-
-            // Будуємо шкалу кілометрів під колією
-            const scaleRow = document.createElement('div');
-            scaleRow.className = 'scale-row';
-            
-            const step = totalKmRange <= 5 ? 1 : Math.ceil(totalKmRange / 6);
-            for (let km = minKm; km <= maxKm; km += step) {
-                const tick = document.createElement('div');
-                tick.className = 'scale-tick';
-                const pos = ((km - minKm) / totalKmRange) * 100;
-                tick.style.left = pos + "%";
-                tick.innerHTML = `<span class="scale-text">${km}</span>`;
-                scaleRow.appendChild(tick);
-            }
-            
-            // Додатково завжди додаємо кінцеву мітку шкали, якщо вона пропущена кроком
-            if ((maxKm - minKm) % step !== 0) {
-                const finalTick = document.createElement('div');
-                finalTick.className = 'scale-tick';
-                finalTick.style.left = "100%";
-                finalTick.innerHTML = `<span class="scale-text">${maxKm}</span>`;
-                scaleRow.appendChild(finalTick);
-            }
-
-            wrapper.appendChild(scaleRow);
-            return wrapper;
+            if(uniquePds.length > 0) handlePdChange();
         }
-
-        // Первинне завантаження при старті
-        window.onload = async function() {
-            await loadInfrastructureData();
-        };
+ 
+        function handlePdChange() {
+            const pd = document.getElementById('filter-pd').value;
+            const select = document.getElementById('filter-peregon');
+            select.innerHTML = "";
+            const filtered = tracksData.filter(t => t.pd === pd);
+            const uniquePeregons = [...new Set(filtered.map(t => t.peregon))].sort();
+            uniquePeregons.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p;
+                opt.innerText = p;
+                select.appendChild(opt);
+            });
+            if(uniquePeregons.length > 0) drawDoubleTrackDiagram();
+        }
+ 
+        function getPiketAnalysis(peregon, trackType, km, pk) {
+            const cloudRecord = mowingData.find(m => 
+                m.peregon === peregon && 
+                m.track_type.toLowerCase() === trackType.toLowerCase() && 
+                parseInt(m.km) === km && 
+                parseInt(m.piket) === pk
+            );
+ 
+            if (!cloudRecord || cloudRecord.status !== 'green') {
+                return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+            }
+            if (!cloudRecord.date) {
+                return { colorClass: 'status-clear-green', label: 'Обкошено', days: '0 дн.' };
+            }
+ 
+            const mowedDate = new Date(cloudRecord.date);
+            const today = new Date();
+            
+            // Скидаємо час до півночі для точного розрахунку днів
+            mowedDate.setHours(0,0,0,0);
+            today.setHours(0,0,0,0);
+            
+            const diffTime = today.getTime() - mowedDate.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+ 
+            if (diffDays >= 45) return { colorClass: 'status-overgrown-red', label: 'Критично', days: `${diffDays} дн.` };
+            if (diffDays >= 30) return { colorClass: 'status-warn-yellow', label: 'Увага', days: `${diffDays} дн.` };
+            return { colorClass: 'status-clear-green', label: 'Обкошено', days: `${diffDays} дн.` };
+        }
+ 
+        function drawDoubleTrackDiagram() {
+            const pd = document.getElementById('filter-pd').value;
+            const peregon = document.getElementById('filter-peregon').value;
+            const container = document.getElementById('diagram-render-zone');
+            
+            container.innerHTML = "";
+ 
+            const trackConfig = tracksData.find(t => t.pd === pd && t.peregon === peregon);
+            if (!trackConfig) {
+                container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію не знайдено.</p>";
+                return;
+            }
+ 
+            for (let km = trackConfig.start_km; km <= trackConfig.end_km; km++) {
+                
+                const kmSign = document.createElement('div');
+                kmSign.className = 'km-signboard';
+                kmSign.innerText = `Кілометр ${km}`;
+                container.appendChild(kmSign);
+ 
+                const headersRow = document.createElement('div');
+                headersRow.className = 'track-headers-row';
+                headersRow.innerHTML = `
+                    <div class="header-left-track">Непарна (Ліва)</div>
+                    <div class="header-center-space">ПК</div>
+                    <div class="header-right-track">Парна (Права)</div>
+                `;
+                container.appendChild(headersRow);
+ 
+                for (let pk = 1; pk <= 10; pk++) {
+                    const leftSide = getPiketAnalysis(peregon, 'непарна', km, pk);
+                    const rightSide = getPiketAnalysis(peregon, 'парна', km, pk);
+ 
+                    const nodeRow = document.createElement('div');
+                    nodeRow.className = 'piket-rail-node';
+ 
+                    // 1. Ліве узбіччя
+                    const leftBank = document.createElement('div');
+                    leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
+                    leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
+                    nodeRow.appendChild(leftBank);
+ 
+                    // 2. Ліва рейкова нитка
+                    const leftTrackVisual = document.createElement('div');
+                    leftTrackVisual.className = 'rail-line-visual';
+                    leftTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
+                    nodeRow.appendChild(leftTrackVisual);
+ 
+                    // 3. Центральний ПК
+                    const centerPiket = document.createElement('div');
+                    centerPiket.className = 'piket-center-core';
+                    centerPiket.innerText = pk;
+                    nodeRow.appendChild(centerPiket);
+ 
+                    // 4. Права рейкова нитка
+                    const rightTrackVisual = document.createElement('div');
+                    rightTrackVisual.className = 'rail-line-visual';
+                    rightTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
+                    nodeRow.appendChild(rightTrackVisual);
+ 
+                    // 5. Праве узбіччя
+                    const rightBank = document.createElement('div');
+                    rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
+                    rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
+                    nodeRow.appendChild(rightBank);
+ 
+                    container.appendChild(nodeRow);
+                }
+            }
+            logSys(`Діаграму оновлено.`, 'info');
+        }
+ 
+        window.onload = initApp;
     </script>
 </body>
 </html>
