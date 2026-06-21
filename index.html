@@ -37,7 +37,7 @@
         .tab-btn { flex: 1; padding: 9px; border: none; background: transparent; border-radius: 7px; color: #115e59; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; }
         .tab-btn.active { background: #0d9488; color: white; }
         
-        /* Зміни: Контейнер для списку чекбоксів перегонів */
+        /* Контейнер для списку чекбоксів перегонів */
         .checkbox-group-container { display: flex; flex-direction: column; gap: 6px; background: #fff; border: 1px solid #a7f3d0; border-radius: 10px; padding: 10px; max-height: 150px; overflow-y: auto; margin-bottom: 12px; box-sizing: border-box; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #115e59; font-weight: 500; cursor: pointer; padding: 4px 0; }
         .checkbox-item input { width: 16px; height: 16px; accent-color: #0d9488; cursor: pointer; }
@@ -93,7 +93,7 @@
  
         <div class="screen" id="screen-charts">
             <h2>📊 Двоколійна діаграма</h2>
-            <p>Стан обкошування брівок непарної (лівої) та парної (правої) колій</p>
+            <p>Стан обкошування брівок парної (лівої) та непарної (правої) колій</p>
             
             <label class="track-label">Околоток (ПД):</label>
             <div class="pd-input-row">
@@ -181,7 +181,6 @@
             const filtered = tracksData.filter(t => t.pd === fullPdName && !t.track_type.includes('станція'));
             const uniquePeregons = [...new Set(filtered.map(t => t.peregon))].sort();
             
-            // Зміни: Рендеринг списку чекбоксів замість option елементів
             const checkboxGroup = document.getElementById('peregon-checkbox-group');
             checkboxGroup.innerHTML = "";
 
@@ -195,7 +194,6 @@
                     const chk = document.createElement('input');
                     chk.type = 'checkbox';
                     chk.value = p;
-                    // Активуємо перший чекбокс за замовчуванням
                     if (index === 0) chk.checked = true; 
                     chk.onchange = drawDoubleTrackDiagram;
 
@@ -252,7 +250,6 @@
             if (currentMode === 'pd') {
                 segmentsToRender = tracksData.filter(t => t.pd === fullPdName);
             } else {
-                // Зміни: Отримуємо всі назви перегонів, де чекбокс відмічений
                 const checkedBoxes = document.querySelectorAll('#peregon-checkbox-group input[type="checkbox"]:checked');
                 const selectedPeregons = Array.from(checkedBoxes).map(cb => cb.value);
 
@@ -261,10 +258,8 @@
                     return;
                 }
 
-                // Збираємо конфігурацію по всіх обраних перегонах з усієї бази (суміжні ПД)
                 segmentsToRender = tracksData.filter(t => selectedPeregons.includes(t.peregon));
 
-                // Автоматичне підтягування дотичних станцій для кожного з вибраних перегонів
                 selectedPeregons.forEach(peregon => {
                     const stationsTokens = peregon.split('-').map(s => s.trim().toLowerCase());
                     tracksData.forEach(t => {
@@ -296,18 +291,20 @@
                 kmSign.innerText = `Кілометр ${km}`;
                 container.appendChild(kmSign);
  
+                // Зміни: Оновлено назви колонок у шапці: ПАРНА зліва, НЕПАРНА справа
                 const headersRow = document.createElement('div');
                 headersRow.className = 'track-headers-row';
                 headersRow.innerHTML = `
-                    <div class="header-left-track">Непарна (Ліва)</div>
+                    <div class="header-left-track">ПАРНА</div>
                     <div class="header-center-space">ПК</div>
-                    <div class="header-right-track">Парна (Права)</div>
+                    <div class="header-right-track">НЕПАРНА</div>
                 `;
                 container.appendChild(headersRow);
  
                 for (let pk = 1; pk <= 10; pk++) {
-                    const leftConfig = segmentsToRender.find(s => km >= s.start_km && km <= s.end_km && s.track_type.includes('непарна'));
-                    const rightConfig = segmentsToRender.find(s => km >= s.start_km && km <= s.end_km && s.track_type.includes('парна'));
+                    // Зміни в логіці: тепер ліва сторона шукає "парна", а права сторона шукає "непарна"
+                    const leftConfig = segmentsToRender.find(s => km >= s.start_km && km <= s.end_km && s.track_type.includes('парна'));
+                    const rightConfig = segmentsToRender.find(s => km >= s.start_km && km <= s.end_km && s.track_type.includes('непарна'));
                     const stationConfig = segmentsToRender.find(s => km >= s.start_km && km <= s.end_km && s.track_type.includes('станція'));
 
                     const finalLeftConfig = stationConfig || leftConfig;
@@ -319,7 +316,7 @@
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
  
-                    // 1. Ліве узбіччя
+                    // 1. Ліве узбіччя (Тепер тут відображається ПАРНА колія)
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
                     const leftPdLabel = (currentMode === 'peregon' && finalLeftConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalLeftConfig.pd}</div>` : '';
@@ -344,7 +341,7 @@
                     rightTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(rightTrackVisual);
  
-                    // 5. Праве узбіччя
+                    // 5. Праве узбіччя (Тепер тут відображається НЕПАРНА колія)
                     const rightBank = document.createElement('div');
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
                     const rightPdLabel = (currentMode === 'peregon' && finalRightConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalRightConfig.pd}</div>` : '';
