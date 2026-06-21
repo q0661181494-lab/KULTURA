@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📊 Двоколійна залізнична діаграма (Матча)</title>
     <style>
-        /* Фірмове легке фісташкове тло */
+        /* Фирменное легкое фисташковое тло */
         body { font-family: -apple-system, sans-serif; background-color: #f0fdf4; margin: 0; padding: 12px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 580px; box-sizing: border-box; display: flex; flex-direction: column; }
         
-        /* Навігаційне меню у шавлієвих тонах */
+        /* Навигационное меню у шавлієвих тонах */
         .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 12px; display: flex; gap: 6px; box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); width: 100%; box-sizing: border-box; align-items: center; border: 1px solid #d1fae5; }
         .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #115e59; text-decoration: none; border-radius: 8px; background: #f0fdf4; cursor: pointer; }
         .nav-link.active { background-color: #115e59; color: white; }
@@ -283,7 +283,8 @@
                 selectedPeregons.forEach(peregon => {
                     const stationsTokens = peregon.split('-').map(s => s.trim().toLowerCase());
                     tracksData.forEach(t => {
-                        if (t.track_type.includes('станція')) {
+                        /* ЗМІНЕНО: перевірка робиться по полю .type з Supabase */
+                        if (t.type.includes('станція')) {
                             const isDotichna = stationsTokens.some(token => t.name.toLowerCase().includes(token));
                             if (isDotichna && !segmentsToRender.some(added => added.id === t.id)) {
                                 segmentsToRender.push(t);
@@ -325,7 +326,8 @@
                 for (let pk = 1; pk <= 10; pk++) {
                     const leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('непарна')); 
                     const rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('парна'));
-                    const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('станція'));
+                    /* ЗМІНЕНО: визначення конфігурації станції тепер шукає слово 'станція' в полі .type */
+                    const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type.includes('станція'));
 
                     const finalLeftConfig = stationConfig || leftConfig;
                     const finalRightConfig = stationConfig || rightConfig;
