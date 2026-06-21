@@ -59,10 +59,10 @@
         /* Рядок пікета */
         .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; border-radius: 6px; transition: background-color 0.2s; }
         
-        /* 🆕 Зміна: Стиль для пікетів, що входять в межі станції */
+        /* Стиль для пікетів, що входять в межі станції (визначається динамічно) */
         .station-piket-row { background-color: #f1f5f9 !important; border-left: 3px solid #0d9488; border-right: 3px solid #0d9488; }
         
-        /* 🆕 Зміна: Бокові поля для майбутньої інформації / світлофорів */
+        /* Бокові поля для майбутньої інформації / світлофорів */
         .info-margin { width: 50px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: bold; color: #0f766e; box-sizing: border-box; }
         .margin-left { justify-content: flex-end; padding-right: 6px; }
         .margin-right { justify-content: flex-start; padding-left: 6px; }
@@ -136,7 +136,7 @@
         const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
         const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
  
-        let tracksData = []; // Сюди завантажуватиметься конфігурація з lines_config
+        let tracksData = []; 
         let mowingData = [];
         let currentMode = 'pd';
  
@@ -160,7 +160,6 @@
             logSys("Завантаження даних із Supabase...");
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
-                // Зміна №1: Робимо запит до нової таблиці lines_config замість старої tracks
                 const resTracks = await fetch(`${baseDbUrl}/rest/v1/lines_config?select=*`, { headers });
                 tracksData = await resTracks.json();
  
@@ -188,7 +187,6 @@
             tabsBlock.style.display = 'block';
             const fullPdName = "ПД-" + pdNum;
 
-            // Зміна №2: Адаптовано фільтрацію під нові поля (замість t.peregon використовуємо t.name)
             const filtered = tracksData.filter(t => t.pd === fullPdName && !t.track_type.includes('станція'));
             const uniquePeregons = [...new Set(filtered.map(t => t.name))].sort();
             
@@ -226,9 +224,7 @@
             drawDoubleTrackDiagram();
         }
  
-        // Зміна №3: Оновлено логіку аналізу. Параметр peregon тепер порівнюється з object_name з таблиці mowing
         function getPiketAnalysis(peregonName, trackType, km, pk) {
-            // Перевіряємо, чи взагалі є якісь записи в mowing
             if (!mowingData || mowingData.length === 0) {
                 return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
             }
@@ -253,13 +249,6 @@
             if (diffDays >= 30) return { colorClass: 'status-warn-yellow', label: 'Увага', days: `${diffDays} дн.` };
             return { colorClass: 'status-clear-green', label: 'Обкошено', days: `${diffDays} дн.` };
         }
-
-        function isInsideStation(km, pk) {
-            const currentAbs = km * 10 + pk;
-            const startAbs = 64 * 10 + 4; // 644
-            const endAbs = 66 * 10 + 2;   // 662
-            return currentAbs >= startAbs && currentAbs <= endAbs;
-        }
  
         function drawDoubleTrackDiagram() {
             const pdNum = document.getElementById('filter-pd-input').value.trim();
@@ -282,7 +271,6 @@
                     return;
                 }
 
-                // Зміна №4: Використовуємо поле t.name замість старого t.peregon
                 segmentsToRender = tracksData.filter(t => selectedPeregons.includes(t.name));
 
                 selectedPeregons.forEach(peregon => {
@@ -303,7 +291,6 @@
                 return;
             }
 
-            // Зміна №5: Читаємо межі кілометрів з нових полів start_km та end_km з lines_config
             const minKm = Math.min(...segmentsToRender.map(s => parseInt(s.start_km)));
             const maxKm = Math.max(...segmentsToRender.map(s => parseInt(s.end_km)));
 
@@ -329,27 +316,26 @@
                 container.appendChild(headersRow);
  
                 for (let pk = 1; pk <= 10; pk++) {
-                    const leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('непарна')); // На залізниці ліва зазвичай непарна, або за вашою логікою
+                    const leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('непарна')); 
                     const rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('парна'));
                     const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('станція'));
 
                     const finalLeftConfig = stationConfig || leftConfig;
                     const finalRightConfig = stationConfig || rightConfig;
 
-                    // Зміна №6: Передаємо правильне ім'я об'єкта (finalLeftConfig.name) для аналізу обкошування
                     const leftSide = finalLeftConfig ? getPiketAnalysis(finalLeftConfig.name, finalLeftConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
                     const rightSide = finalRightConfig ? getPiketAnalysis(finalRightConfig.name, finalRightConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
  
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
                     
-                    if (isInsideStation(km, pk)) {
+                    // Зміна: Замість зашитих координат, підсвічуємо рядок сірим автоматично, якщо це станція з конфігурації бази даних
+                    if (stationConfig) {
                         nodeRow.classList.add('station-piket-row');
                     }
  
                     const leftMargin = document.createElement('div');
                     leftMargin.className = 'info-margin margin-left';
-                    if (km === 64 && pk === 4) leftMargin.innerText = "Вхід.➡";
                     nodeRow.appendChild(leftMargin);
  
                     const leftBank = document.createElement('div');
@@ -381,7 +367,6 @@
                     
                     const rightMargin = document.createElement('div');
                     rightMargin.className = 'info-margin margin-right';
-                    if (km === 66 && pk === 2) rightMargin.innerText = "⬅Вихід.";
                     nodeRow.appendChild(rightMargin);
  
                     container.appendChild(nodeRow);
