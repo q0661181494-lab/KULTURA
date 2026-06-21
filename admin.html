@@ -22,6 +22,11 @@
         
         .btn-view-db { background: #115e59; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
         
+        /* Кнопки-вкладки всередині конфігурації */
+        .admin-tabs { display: flex; gap: 6px; margin-bottom: 16px; background: #f0fdf4; padding: 4px; border-radius: 10px; border: 1px solid #c2e7d9; }
+        .admin-tab-btn { flex: 1; padding: 10px 4px; border: none; background: transparent; border-radius: 8px; color: #115e59; font-weight: bold; font-size: 12px; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .admin-tab-btn.active { background: #0d9488; color: white; }
+
         /* Поля введення */
         .input-field { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; transition: border-color 0.2s, box-shadow 0.2s; }
         .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
@@ -31,24 +36,24 @@
         .pd-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
         .pd-prefix { font-size: 16px; font-weight: bold; color: #115e59; }
         .pd-number-box { width: 80px !important; margin-bottom: 0 !important; text-align: center; }
-
+ 
         /* Перемикач типу об'єкта */
         .type-toggle-group { display: flex; gap: 8px; margin-bottom: 12px; }
         .type-toggle-btn { flex: 1; padding: 10px; border: 1px solid #a7f3d0; background: white; border-radius: 10px; color: #115e59; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; }
         .type-toggle-btn.active { background: #0d9488; color: white; border-color: #0d9488; }
-
+ 
         /* Блок вибору колій */
         .track-checkbox-group { background: #f0fdf4; border: 1px solid #c2e7d9; border-radius: 12px; padding: 12px; margin-bottom: 14px; display: flex; gap: 16px; justify-content: flex-start; }
         .track-checkbox-item { display: flex; align-items: center; gap: 6px; color: #115e59; font-weight: 600; font-size: 14px; cursor: pointer; }
         .track-checkbox-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #0d9488; cursor: pointer; }
-
+ 
         /* КМ + ПК в один ряд */
         .km-section { display: flex; flex-direction: column; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
         .km-pk-row { display: flex; gap: 10px; width: 100%; align-items: flex-end; }
         .km-col { flex: 1; min-width: 0; }
         .pk-col { flex: 1.2; min-width: 0; }
         .sub-heading { font-size: 10px; color: #0f766e; font-weight: 600; margin-bottom: 4px; display: block; white-space: nowrap; }
-
+ 
         /* Списки, що розгортаються */
         .multiselect-dropdown { position: relative; width: 100%; box-sizing: border-box; }
         .multiselect-header { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; height: 41px; }
@@ -57,31 +62,35 @@
         .multiselect-item { display: flex; align-items: center; padding: 8px 12px; font-size: 14px; color: #115e59; font-weight: 500; cursor: pointer; border-radius: 6px; user-select: none; }
         .multiselect-item:hover { background: #f0fdf4; }
         .multiselect-item input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-color: #0d9488; cursor: pointer; }
-
+ 
         .btn-submit { width: 100%; background: #0d9488; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.15); transition: background 0.2s; }
         .btn-submit:hover { background: #0f766e; }
         .btn-danger { width: 100%; background: #ef4444; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15); transition: background 0.2s; }
         .btn-danger:hover { background: #b91c1c; }
-
+ 
         .auth-box { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
         .section-divider { height: 1px; background: #e2e8f0; margin: 24px 0; border: none; }
-
+ 
         /* Модальне вікно */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 5e, 59, 0.5); z-index: 100; justify-content: center; align-items: center; padding: 12px; box-sizing: border-box; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 94, 89, 0.5); z-index: 100; justify-content: center; align-items: center; padding: 12px; box-sizing: border-box; }
         .modal-window { background: white; width: 100%; max-width: 440px; height: 85vh; border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: hidden; border: 1px solid #d1fae5; }
         .modal-header { background: #115e59; color: white; padding: 14px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .modal-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; font-weight: bold; }
-        .modal-filter-bar { padding: 10px 14px; background: #f0fdf4; border-bottom: 1px solid #c2e7d9; display: flex; align-items: center; gap: 10px; }
+        .modal-filter-bar { padding: 10px 14px; background: #f0fdf4; border-bottom: 1px solid #c2e7d9; display: flex; align-items: center; gap: 10px; justify-content: space-between; }
         .modal-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: #f8fafc; }
         
-        .db-card { background: white; border: 1px solid #e2e8f0; padding: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .db-card-top { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; margin-bottom: 4px; }
+        .db-card { background: white; border: 1px solid #e2e8f0; padding: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; }
+        .db-card-content { flex: 1; }
+        .db-card-top { display: flex; gap: 6px; font-weight: bold; font-size: 13px; margin-bottom: 4px; }
         .badge-pd { background: #e6f4ea; color: #115e59; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
         .badge-type { background: #0d9488; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; text-transform: uppercase; }
         .badge-station { background: #6366f1; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; text-transform: uppercase; }
+        .badge-signal { background: #f59e0b; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; text-transform: uppercase; }
         .db-card-name { font-size: 14px; color: #1e293b; font-weight: 700; margin-bottom: 4px; }
         .db-card-limits { font-size: 12px; color: #64748b; }
-
+        .btn-card-delete { background: #fee2e2; color: #dc2626; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; margin-left: 8px; }
+        .btn-card-delete:hover { background: #fca5a5; }
+ 
         /* Монітор системи */
         .debug-panel { margin-top: 8px; padding: 12px; background-color: #e6f4ea; border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(11,94,89,0.02); width: 100%; box-sizing: border-box; }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -89,14 +98,14 @@
     </style>
 </head>
 <body>
-
+ 
     <div class="container">
         <div class="nav-menu">
             <a href="index.html" class="nav-link">📊 Графіки</a>
             <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
             <button class="admin-menu-btn">⚙️</button>
         </div>
-
+ 
         <div class="screen" id="screen-auth">
             <h2>🔒 Доступ обмежено</h2>
             <p>Для входу в панель адміністрування введіть пароль захисту</p>
@@ -106,7 +115,7 @@
                 <button class="btn-submit" onclick="verifyAdminPassword()">Підтвердити вхід</button>
             </div>
         </div>
-
+ 
         <div class="screen" id="screen-admin" style="display: none;">
             <div class="header-row">
                 <h2>⚙️ Конфігурація</h2>
@@ -114,80 +123,125 @@
             </div>
             <p>Налаштування інфраструктури залізничних ділянок</p>
             
+            <div class="admin-tabs">
+                <button id="mode-btn-lines" class="admin-tab-btn active" onclick="switchAdminMode('lines')">🗺️ Дільниці / Станції</button>
+                <button id="mode-btn-signals" class="admin-tab-btn" onclick="switchAdminMode('signals')">🚦 Світлофори</button>
+            </div>
+ 
             <label class="track-label">1. Введіть околоток:</label>
             <div class="pd-input-row">
                 <span class="pd-prefix">ПД-</span>
-                <input type="number" id="admin-pd-num" class="input-field pd-number-box">
+                <input type="number" id="admin-pd-num" class="input-field pd-number-box" placeholder="7">
+            </div>
+ 
+            <div id="form-lines-block">
+                <label class="track-label">2. Оберіть тип та назву об'єкта:</label>
+                <div class="type-toggle-group">
+                    <button id="type-btn-peregon" class="type-toggle-btn active" onclick="setObjectType('peregon')">Перегін</button>
+                    <button id="type-btn-station" class="type-toggle-btn" onclick="setObjectType('station')">Станція</button>
+                </div>
+                <input type="text" id="admin-peregon" class="input-field" placeholder="Назва перегону">
+     
+                <div id="track-type-container">
+                    <label class="track-label">3. Оберіть колію:</label>
+                    <div class="track-checkbox-group">
+                        <label class="track-checkbox-item">
+                            <input type="checkbox" id="chk-neparna" checked>
+                            <span>Непарна</span>
+                        </label>
+                        <label class="track-checkbox-item">
+                            <input type="checkbox" id="chk-parna" checked>
+                            <span>Парна</span>
+                        </label>
+                    </div>
+                </div>
+     
+                <label class="track-label">4. Визначте лінійні межі:</label>
+                <div class="km-section">
+                    <div class="km-pk-row">
+                        <div class="km-col">
+                            <span class="sub-heading">Початок (КМ)</span>
+                            <input type="number" id="admin-start-km" class="input-field" style="margin-bottom:0;" placeholder="64">
+                        </div>
+                        <div class="pk-col">
+                            <span class="sub-heading">Початок (ПК)</span>
+                            <div class="multiselect-dropdown">
+                                <div class="multiselect-header" onclick="toggleDropdown('start-pk-options')">
+                                    <span id="start-pk-label">1</span>
+                                    <span>▼</span>
+                                </div>
+                                <div class="multiselect-options" id="start-pk-options"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+     
+                <div class="km-section">
+                    <div class="km-pk-row">
+                        <div class="km-col">
+                            <span class="sub-heading">Кінець (КМ)</span>
+                            <input type="number" id="admin-end-km" class="input-field" style="margin-bottom:0;" placeholder="66">
+                        </div>
+                        <div class="pk-col">
+                            <span class="sub-heading">Кінець (ПК)</span>
+                            <div class="multiselect-dropdown">
+                                <div class="multiselect-header" onclick="toggleDropdown('end-pk-options')">
+                                    <span id="end-pk-label">10</span>
+                                    <span>▼</span>
+                                </div>
+                                <div class="multiselect-options" id="end-pk-options"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <label class="track-label">2. Оберіть тип та назву об'єкта:</label>
-            <div class="type-toggle-group">
-                <button id="type-btn-peregon" class="type-toggle-btn active" onclick="setObjectType('peregon')">Перегін</button>
-                <button id="type-btn-station" class="type-toggle-btn" onclick="setObjectType('station')">Станція</button>
-            </div>
-            <input type="text" id="admin-peregon" class="input-field" placeholder="Назва перегону">
+            <div id="form-signals-block" style="display: none;">
+                <label class="track-label">2. Літера світлофора:</label>
+                <input type="text" id="sig-name" class="input-field" placeholder="Наприклад: Ч, Н, ЧМ2">
 
-            <div id="track-type-container">
-                <label class="track-label">3. Оберіть колію:</label>
+                <label class="track-label">3. Колія світлофора:</label>
                 <div class="track-checkbox-group">
                     <label class="track-checkbox-item">
-                        <input type="checkbox" id="chk-neparna" checked>
+                        <input type="radio" name="sig-track-radio" id="sig-chk-neparna" checked style="accent-color:#0d9488; width:18px; height:18px;">
                         <span>Непарна</span>
                     </label>
                     <label class="track-checkbox-item">
-                        <input type="checkbox" id="chk-parna" checked>
+                        <input type="radio" name="sig-track-radio" id="sig-chk-parna" style="accent-color:#0d9488; width:18px; height:18px;">
                         <span>Парна</span>
                     </label>
                 </div>
-            </div>
 
-            <label class="track-label" id="label-limits-title">4. Визначте лінійні межі:</label>
-            
-            <div class="km-section">
-                <div class="km-pk-row">
-                    <div class="km-col">
-                        <span class="sub-heading">Початок (КМ)</span>
-                        <input type="number" id="admin-start-km" class="input-field" style="margin-bottom:0;">
-                    </div>
-                    <div class="pk-col">
-                        <span class="sub-heading">Початок (ПК)</span>
-                        <div class="multiselect-dropdown">
-                            <div class="multiselect-header" onclick="toggleDropdown('start-pk-options')">
-                                <span id="start-pk-label">1</span>
-                                <span>▼</span>
-                            </div>
-                            <div class="multiselect-options" id="start-pk-options"></div>
+                <label class="track-label">4. Координати встановлення:</label>
+                <div class="km-section">
+                    <div class="km-pk-row">
+                        <div class="km-col">
+                            <span class="sub-heading">Встановлений на КМ</span>
+                            <input type="number" id="sig-km" class="input-field" style="margin-bottom:0;" placeholder="64">
+                        </div>
+                        <div class="pk-col">
+                            <span class="sub-heading">Встановлений на ПК</span>
+                            <input type="number" id="sig-pk" class="input-field" style="margin-bottom:0;" placeholder="4" min="1" max="10">
                         </div>
                     </div>
                 </div>
+
+                <label class="track-label">5. Тип призначення світлофора:</label>
+                <select id="sig-type" class="input-field">
+                    <option value="вхідний">Вхідний</option>
+                    <option value="вихідний">Вихідний</option>
+                    <option value="прохідний">Прохідний</option>
+                    <option value="маневровий">Маневровий</option>
+                </select>
             </div>
-
-            <div class="km-section">
-                <div class="km-pk-row">
-                    <div class="km-col">
-                        <span class="sub-heading">Кінець (КМ)</span>
-                        <input type="number" id="admin-end-km" class="input-field" style="margin-bottom:0;">
-                    </div>
-                    <div class="pk-col">
-                        <span class="sub-heading">Кінець (ПК)</span>
-                        <div class="multiselect-dropdown">
-                            <div class="multiselect-header" onclick="toggleDropdown('end-pk-options')">
-                                <span id="end-pk-label">10</span>
-                                <span>▼</span>
-                            </div>
-                            <div class="multiselect-options" id="end-pk-options"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn-submit" onclick="saveNewTrackToCloud()">Зберегти в базу даних</button>
-
+ 
+            <button class="btn-submit" onclick="saveDataToCloud()">Зберегти в базу даних</button>
+ 
             <hr class="section-divider">
-
+ 
             <h2>🧹 Очищення околотків</h2>
             <p>Видалення конфігурацій для вибраних ПД</p>
-
+ 
             <label class="track-label">Виберіть ПД для очищення:</label>
             <div class="multiselect-dropdown">
                 <div class="multiselect-header" onclick="toggleDropdown('dropdown-options')">
@@ -196,16 +250,16 @@
                 </div>
                 <div class="multiselect-options" id="dropdown-options"></div>
             </div>
-
+ 
             <button class="btn-danger" onclick="clearSelectedPdTracks()">Очистити вибрані ПД</button>
         </div>
-
+ 
         <div class="debug-panel">
             <div class="debug-title">🖥️ Монітор системи</div>
             <div id="debug-console" class="debug-scroll"></div>
         </div>
     </div>
-
+ 
     <div class="modal-overlay" id="db-modal">
         <div class="modal-window">
             <div class="modal-header">
@@ -213,26 +267,35 @@
                 <button class="modal-close" onclick="closeDatabaseModal()">×</button>
             </div>
             <div class="modal-filter-bar">
-                <span style="font-size:12px; font-weight:bold; color:#115e59;">Фільтр ПД:</span>
-                <select id="modal-pd-filter" onchange="filterModalCards()" class="input-field" style="margin-bottom:0; padding:4px; font-size:12px; height:30px; width:120px;">
-                    <option value="all">Всі ПД</option>
-                </select>
+                <div>
+                    <span style="font-size:11px; font-weight:bold; color:#115e59; display:block;">Таблиця:</span>
+                    <select id="modal-table-select" onchange="loadTableDataFromModal()" class="input-field" style="margin-bottom:0; padding:2px; font-size:12px; height:28px; width:150px;">
+                        <option value="lines_config">🗺️ Дільниці (lines_config)</option>
+                        <option value="signals">🚦 Світлофори (signals)</option>
+                    </select>
+                </div>
+                <div>
+                    <span style="font-size:11px; font-weight:bold; color:#115e59; display:block;">Фільтр ПД:</span>
+                    <select id="modal-pd-filter" onchange="filterModalCards()" class="input-field" style="margin-bottom:0; padding:2px; font-size:12px; height:28px; width:90px;">
+                        <option value="all">Всі ПД</option>
+                    </select>
+                </div>
             </div>
             <div class="modal-body" id="modal-db-cards-container"></div>
         </div>
     </div>
-
+ 
     <script>
         const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
         const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
-
-        let tracksData = [];
+ 
+        let currentAdminMode = 'lines'; // 'lines' або 'signals'
         let selectedPds = [];
         let currentObjectType = 'peregon'; 
-
+ 
         let selectedStartPks = [1];
         let selectedEndPks = [10];
-
+ 
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
             if(!con) return;
@@ -243,29 +306,39 @@
             con.appendChild(div);
             con.scrollTop = con.scrollHeight;
         }
+ 
+        // Перемикання режимів: Дільниці або Світлофори
+        function switchAdminMode(mode) {
+            currentAdminMode = mode;
+            document.getElementById('form-lines-block').style.display = (mode === 'lines') ? 'block' : 'none';
+            document.getElementById('form-signals-block').style.display = (mode === 'signals') ? 'block' : 'none';
+            
+            document.getElementById('mode-btn-lines').classList.toggle('active', mode === 'lines');
+            document.getElementById('mode-btn-signals').classList.toggle('active', mode === 'signals');
+            logSys(`Перемкнуто режим на: ${mode === 'lines' ? 'Дільниці' : 'Світлофори'}`);
+        }
 
-        // Динамічна зміна підказок залежно від типу об'єкта (вибір колії тепер завжди активний)
+        // Динамічна зміна підказок для дільниць/станцій
         function setObjectType(type) {
             currentObjectType = type;
             document.getElementById('type-btn-peregon').classList.toggle('active', type === 'peregon');
             document.getElementById('type-btn-station').classList.toggle('active', type === 'station');
             
             const txtInput = document.getElementById('admin-peregon');
-
             if (type === 'station') {
-                txtInput.placeholder = "Назва станції (наприклад: ст. Ворожба)";
+                txtInput.placeholder = "Назва станції (наприклад: Кошари)";
                 logSys("Обрано об'єкт: Станція.");
             } else {
-                txtInput.placeholder = "Назва перегону (наприклад: Ворожба - Білопілля)";
+                txtInput.placeholder = "Назва перегону (наприклад: Ворожба - Кошари)";
                 logSys("Обрано об'єкт: Перегін.");
             }
         }
-
+ 
         function initPkDropdowns() {
             const startOptions = document.getElementById('start-pk-options');
             const endOptions = document.getElementById('end-pk-options');
             startOptions.innerHTML = ""; endOptions.innerHTML = "";
-
+ 
             for (let i = 1; i <= 10; i++) {
                 // Початок
                 const startItem = document.createElement('div');
@@ -278,7 +351,7 @@
                 startItem.appendChild(startChk); startItem.appendChild(startLabel);
                 startItem.onclick = (e) => { if (e.target !== startChk) { startChk.checked = !startChk.checked; startChk.dispatchEvent(new Event('change')); } };
                 startOptions.appendChild(startItem);
-
+ 
                 // Кінець
                 const endItem = document.createElement('div');
                 endItem.className = 'multiselect-item';
@@ -293,7 +366,7 @@
             }
             updatePkLabels();
         }
-
+ 
         function handlePkChange(type, val, isChecked) {
             if (type === 'start') {
                 if (isChecked) { if (!selectedStartPks.includes(val)) selectedStartPks.push(val); }
@@ -304,21 +377,21 @@
             }
             updatePkLabels();
         }
-
+ 
         function updatePkLabels() {
             const startLabel = document.getElementById('start-pk-label');
             const endLabel = document.getElementById('end-pk-label');
             startLabel.innerText = selectedStartPks.length === 0 ? "..." : selectedStartPks.sort((a,b)=>a-b).join(', ');
             endLabel.innerText = selectedEndPks.length === 0 ? "..." : selectedEndPks.sort((a,b)=>a-b).join(', ');
         }
-
+ 
         function toggleDropdown(id) {
             ['start-pk-options', 'end-pk-options', 'dropdown-options'].forEach(optId => {
                 if(optId !== id) document.getElementById(optId).classList.remove('show');
             });
             document.getElementById(id).classList.toggle('show');
         }
-
+ 
         function verifyAdminPassword() {
             const enteredPass = document.getElementById('admin-password-input').value;
             if (enteredPass === "1234") {
@@ -332,98 +405,155 @@
                 logSys("Спроба несанкціонованого входу", "error");
             }
         }
-
-        async function openDatabaseModal() {
+ 
+        function openDatabaseModal() {
             document.getElementById('db-modal').style.display = 'flex';
+            loadTableDataFromModal();
+        }
+ 
+        function closeDatabaseModal() {
+            document.getElementById('db-modal').style.display = 'none';
+        }
+ 
+        // Завантаження даних у вікно перегляду залежно від обраної таблиці
+        async function loadTableDataFromModal() {
+            const table = document.getElementById('modal-table-select').value;
             const container = document.getElementById('modal-db-cards-container');
-            container.innerHTML = "<div style='color:gray;text-align:center;padding:20px;'>Завантаження даних...</div>";
+            container.innerHTML = "<div style='color:gray;text-align:center;padding:20px;'>Завантаження...</div>";
             
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
-                const res = await fetch(`${baseDbUrl}/rest/v1/tracks?select=*`, { headers });
+                const res = await fetch(`${baseDbUrl}/rest/v1/${table}?select=*`, { headers });
                 const data = await res.json();
-                data.sort((a,b) => a.pd.localeCompare(b.pd) || a.start_km - b.start_km);
                 
+                // Сортування
+                if(table === 'lines_config') {
+                    data.sort((a,b) => a.pd.localeCompare(b.pd) || a.start_km - b.start_km);
+                } else {
+                    data.sort((a,b) => a.pd.localeCompare(b.pd) || a.km - b.km);
+                }
+ 
                 const filterSelect = document.getElementById('modal-pd-filter');
                 filterSelect.innerHTML = '<option value="all">Всі ПД</option>';
                 const uniquePds = [...new Set(data.map(item => item.pd))].sort();
                 uniquePds.forEach(pd => {
                     filterSelect.innerHTML += `<option value="${pd}">${pd}</option>`;
                 });
-
-                renderModalCards(data);
+ 
+                renderModalCards(data, table);
             } catch (e) {
                 container.innerHTML = `<div style='color:red;'>Помилка завантаження: ${e.message}</div>`;
             }
         }
-
-        function closeDatabaseModal() {
-            document.getElementById('db-modal').style.display = 'none';
-        }
-
-        function renderModalCards(data) {
+ 
+        function renderModalCards(data, table) {
             const container = document.getElementById('modal-db-cards-container');
             container.innerHTML = "";
             if (data.length === 0) {
-                container.innerHTML = "<div style='color:gray;text-align:center;'>База даних порожня</div>";
+                container.innerHTML = "<div style='color:gray;text-align:center;padding:20px;'>Таблиця порожня</div>";
                 return;
             }
-
+ 
             data.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'db-card';
                 card.setAttribute('data-pd', item.pd);
-
-                const isStationText = item.peregon.toLowerCase().includes('ст.') || item.track_type.includes('станція');
-                let typeBadge = `<span class="badge-type">${item.track_type} колія</span>`;
+ 
+                let cardContent = "";
                 
-                if (item.track_type.includes('станція')) {
-                    typeBadge = `<span class="badge-station">${item.track_type}</span>`;
-                } else if (isStationText) {
-                    typeBadge = `<span class="badge-station">станція (${item.track_type})</span>`;
+                if(table === 'lines_config') {
+                    const typeBadge = item.type === 'станція' ? 
+                        `<span class="badge-station">станція (${item.track_type})</span>` : 
+                        `<span class="badge-type">${item.track_type} колія</span>`;
+                        
+                    cardContent = `
+                        <div class="db-card-content">
+                            <div class="db-card-top">
+                                <span class="badge-pd">${item.pd}</span>
+                                ${typeBadge}
+                            </div>
+                            <div class="db-card-name">${item.name}</div>
+                            <div class="db-card-limits">
+                                Межі: <b>${item.start_km} КМ</b> (ПК-${item.start_pk}) → <b>${item.end_km} КМ</b> (ПК-${item.end_pk})
+                            </div>
+                        </div>
+                        <button class="btn-card-delete" onclick="deleteSingleItem('lines_config', ${item.id})">Видалити</button>
+                    `;
+                } else {
+                    cardContent = `
+                        <div class="db-card-content">
+                            <div class="db-card-top">
+                                <span class="badge-pd">${item.pd}</span>
+                                <span class="badge-signal">${item.signal_type}</span>
+                                <span class="badge-type" style="background:#0f766e;">${item.track_type}</span>
+                            </div>
+                            <div class="db-card-name">🚦 Світлофор ${item.signal_name}</div>
+                            <div class="db-card-limits">
+                                Координата: <b>${item.km} КМ</b>, ПК-<b>${item.piket}</b>
+                            </div>
+                        </div>
+                        <button class="btn-card-delete" onclick="deleteSingleItem('signals', ${item.id})">Видалити</button>
+                    `;
                 }
-
-                card.innerHTML = `
-                    <div class="db-card-top">
-                        <span class="badge-pd">${item.pd}</span>
-                        ${typeBadge}
-                    </div>
-                    <div class="db-card-name">${item.peregon}</div>
-                    <div class="db-card-limits">
-                        Межі: <b>${item.start_km} КМ</b> (ПК-${item.start_piket}) → <b>${item.end_km} КМ</b> (ПК-${item.end_piket})
-                    </div>
-                `;
+                card.innerHTML = cardContent;
                 container.appendChild(card);
             });
         }
-
+ 
         function filterModalCards() {
             const selectedVal = document.getElementById('modal-pd-filter').value;
             const cards = document.querySelectorAll('.db-card');
             cards.forEach(card => {
                 if (selectedVal === 'all' || card.getAttribute('data-pd') === selectedVal) {
-                    card.style.display = 'block';
+                    card.style.display = 'flex';
                 } else {
                     card.style.display = 'none';
                 }
             });
         }
 
+        // Поштучне видалення об'єкта з бази через модалку
+        async function deleteSingleItem(table, id) {
+            if(!confirm("Видалити цей запис безповоротно?")) return;
+            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+            try {
+                const res = await fetch(`${baseDbUrl}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers });
+                if(res.ok) {
+                    logSys(`Запис ID ${id} успішно видалено з таблиці ${table}`, 'info');
+                    loadTableDataFromModal();
+                    loadPdsForCleaning();
+                } else {
+                    alert("Не вдалося видалити запис.");
+                }
+            } catch(e) {
+                alert("Помилка: " + e.message);
+            }
+        }
+ 
+        // Динамічний збір унікальних ПД для блоку очищення
         async function loadPdsForCleaning() {
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
-                const resTracks = await fetch(`${baseDbUrl}/rest/v1/tracks?select=pd`, { headers });
-                tracksData = await resTracks.json();
-                const uniquePds = [...new Set(tracksData.map(t => t.pd))].sort();
+                // Збираємо унікальні ПД з обох нових таблиць
+                const [resL, resS] = await Promise.all([
+                    fetch(`${baseDbUrl}/rest/v1/lines_config?select=pd`, { headers }),
+                    fetch(`${baseDbUrl}/rest/v1/signals?select=pd`, { headers })
+                ]);
+                const lines = await resL.json();
+                const signals = await resS.json();
+                
+                const allPds = [...lines.map(l=>l.pd), ...signals.map(s=>s.pd)];
+                const uniquePds = [...new Set(allPds)].sort();
                 renderMultiselect(uniquePds);
-            } catch (e) { logSys("Помилка списку ПД: " + e.message, 'error'); }
+            } catch (e) { logSys("Помилка завантаження списку ПД: " + e.message, 'error'); }
         }
-
+ 
         function renderMultiselect(pds) {
             const container = document.getElementById('dropdown-options');
-            container.innerHTML = ""; selectedPds = []; updateDropdownLabel();
-            if (pds.length === 0) { container.innerHTML = "<div style='padding:8px; color:gray;'>Немає ПД</div>"; return; }
-
+            container.innerHTML = ""; selectedPds = [];
+            updateDropdownLabel();
+            if (pds.length === 0) { container.innerHTML = "<div style='padding:8px; color:gray;'>Немає активних ПД</div>"; return; }
+ 
             pds.forEach(pd => {
                 const item = document.createElement('div'); item.className = 'multiselect-item';
                 const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = pd;
@@ -438,14 +568,14 @@
                 container.appendChild(item);
             });
         }
-
+ 
         function updateDropdownLabel() {
             const label = document.getElementById('dropdown-label');
             if (selectedPds.length === 0) label.innerText = "Оберіть ПД...";
             else if (selectedPds.length <= 2) label.innerText = selectedPds.join(', ');
             else label.innerText = `Обрано: ${selectedPds.length}`;
         }
-
+ 
         window.addEventListener('click', function(e) {
             if (!e.target.closest('.multiselect-dropdown')) {
                 document.getElementById('start-pk-options').classList.remove('show');
@@ -453,74 +583,112 @@
                 document.getElementById('dropdown-options').classList.remove('show');
             }
         });
-
+ 
+        // Групове очищення вибраних ПД з ОБОХ таблиць
         async function clearSelectedPdTracks() {
             if (selectedPds.length === 0) { alert("Виберіть хоча б один околоток!"); return; }
-            if (!confirm(`Видалити конфігурації для околотків: ${selectedPds.join(', ')}?`)) return;
-
+            if (!confirm(`Видалити ВСІ дані (дільниці та світлофори) для околотків: ${selectedPds.join(', ')}?`)) return;
+ 
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
                 let successCount = 0;
                 for (const pd of selectedPds) {
-                    const response = await fetch(`${baseDbUrl}/rest/v1/tracks?pd=eq.${encodeURIComponent(pd)}`, { method: 'DELETE', headers });
-                    if (response.ok) successCount++;
+                    const encodedPd = encodeURIComponent(pd);
+                    // Чистимо і колії, і світлофори
+                    const [res1, res2] = await Promise.all([
+                        fetch(`${baseDbUrl}/rest/v1/lines_config?pd=eq.${encodedPd}`, { method: 'DELETE', headers }),
+                        fetch(`${baseDbUrl}/rest/v1/signals?pd=eq.${encodedPd}`, { method: 'DELETE', headers })
+                    ]);
+                    if (res1.ok || res2.ok) successCount++;
                 }
-                if (successCount > 0) { alert(`Дані очищено!`); await loadPdsForCleaning(); }
-            } catch (e) { alert("Помилка: " + e.message); }
+                if (successCount > 0) { 
+                    alert(`Обрані околотки успішно очищені!`); 
+                    await loadPdsForCleaning(); 
+                }
+            } catch (e) { alert("Помилка очищення: " + e.message); }
         }
-
-        async function saveNewTrackToCloud() {
+ 
+        // ЗАГАЛЬНА ФУНКЦІЯ ЗБЕРЕЖЕННЯ (Адаптована під режими та UPSERT)
+        async function saveDataToCloud() {
             const pdNum = document.getElementById('admin-pd-num').value.trim();
-            const peregon = document.getElementById('admin-peregon').value.trim();
-            const startKm = parseInt(document.getElementById('admin-start-km').value);
-            const endKm = parseInt(document.getElementById('admin-end-km').value);
-
-            if (!pdNum || !peregon || isNaN(startKm) || isNaN(endKm)) { alert("Заповніть усі поля форми!"); return; }
-            if (selectedStartPks.length === 0 || selectedEndPks.length === 0) { alert("Оберіть початкові та кінцеві ПК!"); return; }
-
-            const chkNeparna = document.getElementById('chk-neparna').checked;
-            const chkParna = document.getElementById('chk-parna').checked;
-            if (!chkNeparna && !chkParna) { alert("Оберіть хоча б одну колію (Парну або Непарну)!"); return; }
-
+            if (!pdNum) { alert("Введіть номер околотку!"); return; }
             const fullPdName = "ПД-" + pdNum;
-            const finalStartPk = Math.min(...selectedStartPks);
-            const finalEndPk = Math.max(...selectedEndPks);
-            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
 
+            const headers = { 
+                'apikey': fullKey, 
+                'authorization': 'Bearer ' + fullKey, 
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates' // Режим розумного редагування при збігу унікальних полів
+            };
+ 
             try {
-                // Визначаємо текстові мітки для збереження типу колії в базі даних
-                const labelNeparna = (currentObjectType === 'station') ? 'станція (непарна)' : 'непарна';
-                const labelParna = (currentObjectType === 'station') ? 'станція (парна)' : 'парна';
+                if (currentAdminMode === 'lines') {
+                    // Режим 1: Збереження дільниці / станції
+                    const name = document.getElementById('admin-peregon').value.trim();
+                    const startKm = parseInt(document.getElementById('admin-start-km').value);
+                    const endKm = parseInt(document.getElementById('admin-end-km').value);
+         
+                    if (!name || isNaN(startKm) || isNaN(endKm)) { alert("Заповніть усі поля форми дільниць!"); return; }
+                    if (selectedStartPks.length === 0 || selectedEndPks.length === 0) { alert("Оберіть початкові та кінцеві ПК!"); return; }
+         
+                    const chkNeparna = document.getElementById('chk-neparna').checked;
+                    const chkParna = document.getElementById('chk-parna').checked;
+                    if (!chkNeparna && !chkParna) { alert("Оберіть хоча б одну колію!"); return; }
+         
+                    const finalStartPk = Math.min(...selectedStartPks);
+                    const finalEndPk = Math.max(...selectedEndPks);
+                    const typeLabel = currentObjectType === 'station' ? 'станція' : 'перегін';
 
-                if (chkNeparna) {
-                    await fetch(`${baseDbUrl}/rest/v1/tracks`, {
-                        method: 'POST', headers, body: JSON.stringify({ 
-                            pd: fullPdName, peregon, track_type: labelNeparna, 
-                            start_km: startKm, start_piket: finalStartPk, 
-                            end_km: endKm, end_piket: finalEndPk 
+                    logSys(`Збереження дільниці "${name}"...`);
+
+                    if (chkNeparna) {
+                        await fetch(`${baseDbUrl}/rest/v1/lines_config`, {
+                            method: 'POST', headers, body: JSON.stringify({ 
+                                pd: fullPdName, type: typeLabel, name, track_type: 'непарна', 
+                                start_km: startKm, start_pk: finalStartPk, end_km: endKm, end_pk: finalEndPk 
+                            })
+                        });
+                    }
+         
+                    if (chkParna) {
+                        await fetch(`${baseDbUrl}/rest/v1/lines_config`, {
+                            method: 'POST', headers, body: JSON.stringify({ 
+                                pd: fullPdName, type: typeLabel, name, track_type: 'парна', 
+                                start_km: startKm, start_pk: finalStartPk, end_km: endKm, end_pk: finalEndPk 
+                            })
+                        });
+                    }
+         
+                } else {
+                    // Режим 2: Збереження світлофора
+                    const signal_name = document.getElementById('sig-name').value.trim();
+                    const km = parseInt(document.getElementById('sig-km').value);
+                    const piket = parseInt(document.getElementById('sig-pk').value);
+                    const signal_type = document.getElementById('sig-type').value;
+
+                    if (!signal_name || isNaN(km) || isNaN(piket)) { alert("Заповніть усі параметри світлофора!"); return; }
+
+                    const sigTrackType = document.getElementById('sig-chk-neparna').checked ? 'непарна' : 'парна';
+                    logSys(`Збереження світлофора ${signal_name}...`);
+
+                    await fetch(`${baseDbUrl}/rest/v1/signals`, {
+                        method: 'POST', headers, body: JSON.stringify({
+                            pd: fullPdName, signal_name, track_type: sigTrackType,
+                            km, piket, signal_type
                         })
                     });
                 }
-
-                if (chkParna) {
-                    await fetch(`${baseDbUrl}/rest/v1/tracks`, {
-                        method: 'POST', headers, body: JSON.stringify({ 
-                            pd: fullPdName, peregon, track_type: labelParna, 
-                            start_km: startKm, start_piket: finalStartPk, 
-                            end_km: endKm, end_piket: finalEndPk 
-                        })
-                    });
-                }
-
-                logSys(`Дані успішно збережено в хмару!`, "success");
-                alert("Збережено!");
+ 
+                logSys(`Дані успішно синхронізовано в хмару!`, "success");
+                alert("Успішно збережено/відредаговано!");
                 window.location.href = "index.html";
+                
             } catch(e) {
-                alert("Помилка збереження: " + e.message);
+                alert("Помилка: " + e.message);
                 logSys("Помилка Supabase: " + e.message, "error");
             }
         }
-
+ 
         window.onload = function() { logSys("Система безпеки активована. Очікування пароля..."); };
     </script>
 </body>
