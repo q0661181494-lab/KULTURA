@@ -13,38 +13,38 @@
  
         /* Фірмове легке фісташкове тло */
         body { 
-           font-family: -apple-system, sans-serif; 
-           background-color: #f0fdf4; 
+            font-family: -apple-system, sans-serif; 
+            background-color: #f0fdf4; 
             margin: 0;
             padding: 12px; 
             display: flex; 
-           flex-direction: column; 
-           align-items: center;
-           justify-content: space-between; 
+            flex-direction: column; 
+            align-items: center;
+            justify-content: space-between; 
             box-sizing: border-box;
         }
  
         .container { 
             width: 100%; 
             max-width: 580px; 
-           box-sizing: border-box; 
+            box-sizing: border-box; 
             display: flex; 
-           flex-direction: column;
+            flex-direction: column;
             flex-grow: 1; 
         }
         
         /* Навігаційне меню у шавлієвих тонах */
         .nav-menu { 
-           background: white; 
-           border-radius: 12px; 
+            background: white; 
+            border-radius: 12px; 
             padding: 6px; 
-           margin-bottom: 12px; 
+            margin-bottom: 12px; 
             display: flex; 
             gap: 6px; 
-           box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); 
+            box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); 
             width: 100%; 
-           box-sizing: border-box; 
-           align-items: center; 
+            box-sizing: border-box; 
+            align-items: center; 
             border: 1px solid #d1fae5; 
         }
         
@@ -52,115 +52,115 @@
             flex: 1; 
             height: 42px;
             display: flex;
-           align-items: center;
-           justify-content: center;
-           text-align: center; 
-           font-weight: bold; 
+            align-items: center;
+            justify-content: center;
+            text-align: center; 
+            font-weight: bold; 
             font-size: 14px; 
             color: #115e59; 
-           text-decoration: none; 
-           border-radius: 8px; 
-           background: #f0fdf4; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            background: #f0fdf4; 
             cursor: pointer; 
-           box-sizing: border-box;
+            box-sizing: border-box;
             border: none;
         }
         
         .admin-menu-btn { 
             width: 42px; 
             height: 42px; 
-           background-color: #f0fdf4; 
+            background-color: #f0fdf4; 
             color: #115e59; 
-           border-radius: 50%; 
+            border-radius: 50%; 
             display: flex; 
-           align-items: center; 
-           justify-content: center; 
+            align-items: center; 
+            justify-content: center; 
             font-size: 18px; 
             border: none; 
-           flex-shrink: 0; 
-           text-decoration: none; 
+            flex-shrink: 0; 
+            text-decoration: none; 
             cursor: pointer;
-           box-sizing: border-box;
+            box-sizing: border-box;
         }
  
-       .nav-link:hover, .admin-menu-btn:hover {
-           background-color: #e6f4ea;
+        .nav-link:hover, .admin-menu-btn:hover {
+            background-color: #e6f4ea;
         }
         
-       .nav-link.active, .admin-menu-btn.active { 
-           background-color: #115e59 !important; 
+        .nav-link.active, .admin-menu-btn.active { 
+            background-color: #115e59 !important; 
             color: white !important; 
-           pointer-events: none;
+            pointer-events: none;
         }
         
         /* Головна картка з м'якою шавлієвою рамкою */
         .screen { 
-           background: white; 
+            background: white; 
             padding: 20px; 
-           border-radius: 16px; 
-           box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); 
             width: 100%; 
             box-sizing: border-box; 
-           margin-bottom: 24px; 
+            margin-bottom: 24px; 
             border: 1px solid #d1fae5;
-           transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s;
         }
  
         /* Фіксоване верхнє положення блоку без стрибків вгору-вниз */
-       .screen.welcome-focus {
-           margin-top: 10px;
+        .screen.welcome-focus {
+            margin-top: 10px;
             transform: scale(1.02);
-           box-shadow: 0 20px 40px rgba(11, 94, 89, 0.12);
-           border-color: #a7f3d0;
+            box-shadow: 0 20px 40px rgba(11, 94, 89, 0.12);
+            border-color: #a7f3d0;
             padding: 30px 20px;
         }
  
         /* СОЛІДНИЙ ЗАГОЛОВОК ЗАГЛАВНИМИ ЛІТЕРАМИ */
         h2 { 
-           margin-top: 0; 
-           margin-bottom: 6px; 
+            margin-top: 0; 
+            margin-bottom: 6px; 
             font-size: 18px; 
             color: #115e59; 
-           font-weight: 800; 
-           text-align: center; 
-           text-transform: uppercase; 
-           letter-spacing: 1.8px; 
+            font-weight: 800; 
+            text-align: center; 
+            text-transform: uppercase; 
+            letter-spacing: 1.8px; 
         }
         p { color: #0f766e; font-size: 13px; margin-top: 0; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
         /* Поля введення */
         .input-field { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; transition: all 0.2s; }
-       .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2); }
+        .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2); }
         .track-label { font-size: 11px; font-weight: 700; color: #115e59; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
  
         /* КРЕАТИВНИЙ БЛОК ВВЕДЕННЯ ПД */
-       .pd-container-box {
-           transition: all 0.3s ease;
+        .pd-container-box {
+            transition: all 0.3s ease;
         }
         
         .welcome-focus .pd-container-box {
-           background: #f0fdf4;
+            background: #f0fdf4;
             padding: 24px;
-           border-radius: 14px;
+            border-radius: 14px;
             border: 1px dashed #0d9488;
-           margin-top: 10px;
+            margin-top: 10px;
             animation: pulse-border 2.5s infinite ease-in-out; 
         }
         
         /* Строге центрування поля введення */
         .pd-input-row { 
             display: flex; 
-           align-items: center; 
-           justify-content: center; 
+            align-items: center; 
+            justify-content: center; 
             position: relative;
             width: 180px;
             margin: 0 auto;
         }
         .pd-prefix { 
             font-size: 24px; 
-           font-weight: 900; 
+            font-weight: 900; 
             color: #115e59; 
-           letter-spacing: 1px; 
+            letter-spacing: 1px; 
             position: absolute;
             left: 0;
         }
@@ -170,121 +170,124 @@
             width: 100px !important; 
             height: 54px;
             font-size: 24px !important; 
-           margin-bottom: 0 !important; 
-           text-align: center; 
-           font-weight: 900;
-           border-radius: 12px;
+            margin-bottom: 0 !important; 
+            text-align: center; 
+            font-weight: 900;
+            border-radius: 12px;
             border: 2px solid #a7f3d0;
-           box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-           margin-left: auto;
-           margin-right: 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            margin-left: auto;
+            margin-right: 0;
         }
  
         /* Анімація пульсуючого кастомного плейсхолдера */
-       .pd-number-box::placeholder {
+        .pd-number-box::placeholder {
             color: #0d9488;
             opacity: 0.6;
-           font-weight: 300;
+            font-weight: 300;
             animation: blink-cursor 1.2s infinite steps(2);
         }
  
         /* Стильні Кнопки-Таби */
         .mode-tabs { display: flex; gap: 8px; margin-bottom: 12px; background: #f0fdf4; padding: 4px; border-radius: 10px; border: 1px solid #c2e7d9; }
         .tab-btn { flex: 1; padding: 9px; border: none; background: transparent; border-radius: 7px; color: #115e59; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; }
-       .tab-btn.active { background: #0d9488; color: white; }
+        .tab-btn.active { background: #0d9488; color: white; }
         
         /* Контейнер для списку чекбоксів перегонів */
-       .checkbox-group-container { display: flex; flex-direction: column; gap: 6px; background: #fff; border: 1px solid #a7f3d0; border-radius: 10px; padding: 10px; max-height: 150px; overflow-y: auto; margin-bottom: 12px; box-sizing: border-box; }
+        .checkbox-group-container { display: flex; flex-direction: column; gap: 6px; background: #fff; border: 1px solid #a7f3d0; border-radius: 10px; padding: 10px; max-height: 150px; overflow-y: auto; margin-bottom: 12px; box-sizing: border-box; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #115e59; font-weight: 500; cursor: pointer; padding: 4px 0; }
         .checkbox-item input { width: 16px; height: 16px; accent-color: #0d9488; cursor: pointer; }
  
         /* ДВОКОЛІЙНА ВЕРТИКАЛЬНА ПЛАТФОРМА */
-       .railway-canvas { display: flex; flex-direction: column; width: 100%; margin-top: 8px; }
+        .railway-canvas { display: flex; flex-direction: column; width: 100%; margin-top: 8px; }
         
         /* Залізничний знак кілометра */
         .km-signboard { background: #e6f4ea; border: 2px solid #115e59; border-radius: 8px; padding: 8px; margin: 18px 0 8px 0; text-align: center; font-weight: 900; font-size: 14px; color: #115e59; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 2px 5px rgba(17,94,89,0.05); }
-       .km-signboard:first-child { margin-top: 0; }
+        .km-signboard:first-child { margin-top: 0; }
         
         /* Заголовки стовпчиків колій */
-       .track-headers-row { display: flex; width: 100%; margin-bottom: 6px; font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; text-align: center; opacity: 0.8; }
-       .header-margin-space { width: 42px; } /* Змінено з 50px на 42px, щоб відповідати ширині пікету */
-       .header-left-track { flex: 1; padding-right: 16px; }
-       .header-center-space { width: 42px; }
-       .header-right-track { flex: 1; padding-left: 16px; }
+        .track-headers-row { display: flex; width: 100%; margin-bottom: 6px; font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; text-align: center; opacity: 0.8; }
+        
+        /* Змінено ширину з 50px на 80px для вміщення 5-8 літер */
+        .header-margin-space { width: 80px; flex-shrink: 0; }
+        .header-left-track { flex: 1; padding-right: 16px; }
+        .header-center-space { width: 42px; }
+        .header-right-track { flex: 1; padding-left: 16px; }
  
         /* Рядок пікета */
-       .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; border-radius: 6px; transition: background-color 0.2s; }
+        .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; border-radius: 6px; transition: background-color 0.2s; }
         .station-piket-row { background-color: #f1f5f9 !important; border-left: 3px solid #0d9488; border-right: 3px solid #0d9488; }
-       .station-piket-row .piket-center-core { background: #0d9488 !important; color: white !important; border-color: #0f766e !important; }
+        .station-piket-row .piket-center-core { background: #0d9488 !important; color: white !important; border-color: #0f766e !important; }
  
         /* Плашка-розрив назви станції */
-       .station-boundary-delimiter { background: #f0fdf4; border: 2px dashed #0d9488; border-radius: 8px; padding: 6px; margin: 12px 0 12px 0; text-align: center; font-weight: 800; font-size: 12px; color: #0d9488; letter-spacing: 0.5px; text-transform: uppercase; }
+        .station-boundary-delimiter { background: #f0fdf4; border: 2px dashed #0d9488; border-radius: 8px; padding: 6px; margin: 12px 0 12px 0; text-align: center; font-weight: 800; font-size: 12px; color: #0d9488; letter-spacing: 0.5px; text-transform: uppercase; }
         
-        /* ЗМІНЕНО: Нові параметри бічних полів під ширину пікету (42px) */
+        /* Змінено ширину бокових полів з 50px на 80px */
         .info-margin {
-            width: 42px; 
+            width: 80px; 
+            flex-shrink: 0;
             height: 100%; 
             display: flex; 
             align-items: center; 
-            font-size: 11px; 
+            font-size: 10px;
             font-weight: bold; 
-            color: #115e59; 
+            color: #0f766e; 
             box-sizing: border-box; 
         }
-        .margin-left { justify-content: flex-end; padding-right: 2px; }
-        .margin-right { justify-content: flex-start; padding-left: 2px; }
+        .margin-left { justify-content: flex-end; padding-right: 6px; }
+        .margin-right { justify-content: flex-start; padding-left: 6px; }
  
-        /* ЗМІНЕНО: Приваблива світла рама замість чорного фону, ідеально під розмір пікету */
+        /* Сигнальні плашки оптимізовані під довший текст (шрифт 12px та менші бічні відступи) */
         .signal-badge { 
             display: inline-flex; 
             align-items: center; 
-            justify-content: center; 
-            background: #ffffff; 
-            color: #115e59; 
-            border: 2px solid #0d9488;
-            padding: 0; 
-            border-radius: 6px; 
+            justify-content: center;
+            background: #0f172a; 
+            color: #f8fafc; 
+            padding: 4px 6px; 
+            border-radius: 6px;
             font-size: 12px; 
             font-weight: 900; 
             letter-spacing: 0.3px; 
-            box-shadow: 0 2px 5px rgba(13,148,136,0.1); 
-            width: 38px;
-            height: 38px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+            min-width: 50px; 
+            max-width: 74px;
             white-space: nowrap; 
-            box-sizing: border-box;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
  
         /* Зони обкошування */
-       .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; }
-       .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
+        .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; }
+        .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
         
         /* Рейкова нитка */
-       .rail-line-visual { width: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: #cbd5e1; }
-       .rail-line-visual::before, .rail-line-visual::after { content: ""; position: absolute; top: 0; width: 2px; height: 100%; background: #475569; }
-       .rail-line-visual::before { left: 1px; }
-       .rail-line-visual::after { right: 1px; }
-       .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
+        .rail-line-visual { width: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: #cbd5e1; }
+        .rail-line-visual::before, .rail-line-visual::after { content: ""; position: absolute; top: 0; width: 2px; height: 100%; background: #475569; }
+        .rail-line-visual::before { left: 1px; }
+        .rail-line-visual::after { right: 1px; }
+        .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
  
         /* Колірна палітра */
-       .status-clear-green { background-color: #22c55e !important; color: white; }
-       .status-warn-yellow { background-color: #eab308 !important; color: #1f2937; }
-       .status-overgrown-red { background-color: #ef4444 !important; color: white; }
+        .status-clear-green { background-color: #22c55e !important; color: white; }
+        .status-warn-yellow { background-color: #eab308 !important; color: #1f2937; }
+        .status-overgrown-red { background-color: #ef4444 !important; color: white; }
         
         /* МОНІТОР СИСТЕМИ */
         .debug-panel {
             width: 100%;
             max-width: 580px;
-           margin-top: 24px; 
+            margin-top: 24px; 
             padding: 10px; 
-           background-color: rgba(230, 244, 234, 0.8); 
-           backdrop-filter: blur(4px);
+            background-color: rgba(230, 244, 234, 0.8); 
+            backdrop-filter: blur(4px);
             border: 1px solid #c2e7d9; 
             color: #115e59; 
-           border-radius: 12px; 
+            border-radius: 12px; 
             font-size: 11px; 
-           font-family: monospace; 
-           box-shadow: 0 -2px 10px rgba(11,94,89,0.03);
-           box-sizing: border-box;
+            font-family: monospace; 
+            box-shadow: 0 -2px 10px rgba(11,94,89,0.03);
+            box-sizing: border-box;
         }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 60px; overflow-y: auto; text-align: left; }
@@ -313,26 +316,26 @@
             <p id="main-screen-desc">введіть номер околотка для формування лінійного графіка</p>
             
             <div class="pd-container-box">
-               <div class="pd-input-row">
-                   <span class="pd-prefix">ПД-</span>
-                   <input type="number" id="filter-pd-input" class="input-field pd-number-box" placeholder="|" oninput="handlePdInput()" autofocus>
-               </div>
-           </div>
+                <div class="pd-input-row">
+                    <span class="pd-prefix">ПД-</span>
+                    <input type="number" id="filter-pd-input" class="input-field pd-number-box" placeholder="|" oninput="handlePdInput()" autofocus>
+                </div>
+            </div>
  
             <div id="control-tabs-block" style="display: none; margin-top: 16px;">
-               <label class="track-label">Оберіть режим відображення:</label>
-               <div class="mode-tabs">
-                   <button id="tab-pd" class="tab-btn active" onclick="switchDisplayMode('pd')">по ПД</button>
-                   <button id="tab-peregon" class="tab-btn" onclick="switchDisplayMode('peregon')">по перегону</button>
-               </div>
+                <label class="track-label">Оберіть режим відображення:</label>
+                <div class="mode-tabs">
+                    <button id="tab-pd" class="tab-btn active" onclick="switchDisplayMode('pd')">по ПД</button>
+                    <button id="tab-peregon" class="tab-btn" onclick="switchDisplayMode('peregon')">по перегону</button>
+                </div>
  
-               <div id="peregon-select-container" style="display: none;">
-                   <label class="track-label">Оберіть перегін (векторний фільтр):</label>
-                   <div id="peregon-checkbox-group" class="checkbox-group-container"></div>
-               </div>
-           </div>
+                <div id="peregon-select-container" style="display: none;">
+                    <label class="track-label">Оберіть перегін (векторний фільтр):</label>
+                    <div id="peregon-checkbox-group" class="checkbox-group-container"></div>
+                </div>
+            </div>
  
-           <div id="diagram-render-zone" class="railway-canvas"></div>
+            <div id="diagram-render-zone" class="railway-canvas"></div>
         </div>
     </div>
  
@@ -356,33 +359,33 @@
             const div = document.createElement('div');
             if(status === 'success') div.style.color = '#16a34a';
             if(status === 'error') div.style.color = '#dc2626';
-           div.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
-           con.appendChild(div);
-           con.scrollTop = con.scrollHeight;
+            div.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
+            con.appendChild(div);
+            con.scrollTop = con.scrollHeight;
         }
  
         async function initApp() {
-           logSys("Запуск рейкової платформи...");
+            logSys("Запуск рейкової платформи...");
             await reloadDataFromCloud();
-           document.getElementById('filter-pd-input').focus();
+            document.getElementById('filter-pd-input').focus();
         }
  
         async function reloadDataFromCloud() {
-           logSys("Завантаження даних із Supabase...");
+            logSys("Завантаження даних із Supabase...");
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
                 const resTracks = await fetch(`${baseDbUrl}/rest/v1/lines_config?select=*`, { headers });
-               tracksData = await resTracks.json();
+                tracksData = await resTracks.json();
  
                 const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?select=*`, { headers });
-               mowingData = await resMowing.json();
+                mowingData = await resMowing.json();
  
                 const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals?select=*`, { headers });
-               signalsData = await resSignals.json();
+                signalsData = await resSignals.json();
  
-               logSys(`Синхронізовано з хмарою. Ліній: ${tracksData.length}, Світлофорів: ${signalsData.length}`, 'success');
+                logSys(`Синхронізовано з хмарою. Ліній: ${tracksData.length}, Світлофорів: ${signalsData.length}`, 'success');
             } catch (e) {
-               logSys("Помилка завантаження: " + e.message, 'error');
+                logSys("Помилка завантаження: " + e.message, 'error');
             }
         }
  
@@ -396,22 +399,22 @@
             const mainDesc = document.getElementById('main-screen-desc');
  
             if (!pdNum) {
-               screenCard.classList.add('welcome-focus');
-               tabsBlock.style.display = 'none';
-               mainTitle.innerText = "ВХІД У СИСТЕМУ ДІАГРАМ";
-               mainDesc.innerText = "введіть номер околотка для формування лінійного графіка";
-               container.innerHTML = "";
-               return;
+                screenCard.classList.add('welcome-focus');
+                tabsBlock.style.display = 'none';
+                mainTitle.innerText = "ВХІД У СИСТЕМУ ДІАГРАМ";
+                mainDesc.innerText = "введіть номер околотка для формування лінійного графіка";
+                container.innerHTML = "";
+                return;
             }
  
             if (pdNum.length > 2) {
-               inputEl.value = pdNum.slice(0, 2);
+                inputEl.value = pdNum.slice(0, 2);
             }
  
-           screenCard.classList.remove('welcome-focus');
-           tabsBlock.style.display = 'block';
-           mainTitle.innerText = "ДВОКОЛІЙНА ДІАГРАМА";
-           mainDesc.innerText = "Стан обкошування брівок парної та непарної колій";
+            screenCard.classList.remove('welcome-focus');
+            tabsBlock.style.display = 'block';
+            mainTitle.innerText = "ДВОКОЛІЙНА ДІАГРАМА";
+            mainDesc.innerText = "Стан обкошування брівок парної та непарної колій";
  
             const fullPdName = "ПД-" + inputEl.value.trim();
             const filtered = tracksData.filter(t => t.pd === fullPdName && !t.track_type.includes('станція'));
@@ -421,56 +424,56 @@
             checkboxGroup.innerHTML = "";
  
             if (uniquePeregons.length === 0) {
-               checkboxGroup.innerHTML = "<p style='color:gray; font-size:12px; margin:0;'>Немає перегонів у цього ПД</p>";
+                checkboxGroup.innerHTML = "<p style='color:gray; font-size:12px; margin:0;'>Немає перегонів у цього ПД</p>";
             } else {
-               uniquePeregons.forEach((p, index) => {
-                   const label = document.createElement('label');
-                   label.className = 'checkbox-item';
+                uniquePeregons.forEach((p, index) => {
+                    const label = document.createElement('label');
+                    label.className = 'checkbox-item';
                     
-                   const chk = document.createElement('input');
-                   chk.type = 'checkbox';
-                   chk.value = p;
+                    const chk = document.createElement('input');
+                    chk.type = 'checkbox';
+                    chk.value = p;
                     if (index === 0) chk.checked = true; 
-                   chk.onchange = drawDoubleTrackDiagram;
+                    chk.onchange = drawDoubleTrackDiagram;
  
-                   label.appendChild(chk);
-                   label.appendChild(document.createTextNode(p));
-                   checkboxGroup.appendChild(label);
+                    label.appendChild(chk);
+                    label.appendChild(document.createTextNode(p));
+                    checkboxGroup.appendChild(label);
                 });
             }
  
-           drawDoubleTrackDiagram();
+            drawDoubleTrackDiagram();
  
             if (inputEl.value.trim().length === 2) {
                 document.activeElement.blur(); 
-               logSys("Клавіатуру згорнуто автоматично.");
+                logSys("Клавіатуру згорнуто автоматично.");
             }
         }
  
         function switchDisplayMode(mode) {
-           currentMode = mode;
-           document.getElementById('tab-pd').classList.toggle('active', mode === 'pd');
-           document.getElementById('tab-peregon').classList.toggle('active', mode === 'peregon');
-           document.getElementById('peregon-select-container').style.display = (mode === 'peregon') ? 'block' : 'none';
+            currentMode = mode;
+            document.getElementById('tab-pd').classList.toggle('active', mode === 'pd');
+            document.getElementById('tab-peregon').classList.toggle('active', mode === 'peregon');
+            document.getElementById('peregon-select-container').style.display = (mode === 'peregon') ? 'block' : 'none';
              
-           drawDoubleTrackDiagram();
+            drawDoubleTrackDiagram();
         }
  
         function getPiketAnalysis(peregonName, trackType, km, pk) {
             if (!mowingData || mowingData.length === 0) {
-                 return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+                return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
             }
  
             const cloudRecord = mowingData.find(m => 
-               m.object_name === peregonName && m.track_type === trackType &&
-               parseInt(m.km) === km && parseInt(m.piket) === pk
+                m.object_name === peregonName && m.track_type === trackType &&
+                parseInt(m.km) === km && parseInt(m.piket) === pk
             );
  
             if (!cloudRecord || cloudRecord.status !== 'green') {
-                 return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+                return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
             }
             if (!cloudRecord.date) {
-                 return { colorClass: 'status-clear-green', label: 'Обкошено', days: '0 дн.' };
+                return { colorClass: 'status-clear-green', label: 'Обкошено', days: '0 дн.' };
             }
  
             const mowedDate = new Date(cloudRecord.date);
@@ -488,16 +491,16 @@
             if (!pdNum) return;
  
             const fullPdName = "ПД-" + pdNum;
-           container.innerHTML = "";
+            container.innerHTML = "";
             
             let segmentsToRender = [];
             let minKm, maxKm;
  
             if (currentMode === 'pd') {
-               segmentsToRender = tracksData.filter(t => t.pd === fullPdName);
+                segmentsToRender = tracksData.filter(t => t.pd === fullPdName);
                 if (segmentsToRender.length === 0) {
-                   container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію ділянок не знайдено.</p>";
-                   return;
+                    container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію ділянок не знайдено.</p>";
+                    return;
                 }
                 minKm = Math.min(...segmentsToRender.map(s => parseInt(s.start_km)));
                 maxKm = Math.max(...segmentsToRender.map(s => parseInt(s.end_km)));
@@ -506,155 +509,155 @@
                 const selectedPeregons = Array.from(checkedBoxes).map(cb => cb.value);
  
                 if (selectedPeregons.length === 0) {
-                   container.innerHTML = "<p style='color:gray; text-align:center; padding:10px;'>Оберіть хоча б один перегін.</p>";
-                   return;
+                    container.innerHTML = "<p style='color:gray; text-align:center; padding:10px;'>Оберіть хоча б один перегін.</p>";
+                    return;
                 }
  
                 const purePeregons = tracksData.filter(t => selectedPeregons.includes(t.name) && t.pd === fullPdName);
                 if (purePeregons.length === 0) {
-                   container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію перегону не знайдено.</p>";
-                   return;
+                    container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію перегону не знайдено.</p>";
+                    return;
                 }
  
                 minKm = Math.min(...purePeregons.map(s => parseInt(s.start_km)));
                 maxKm = Math.max(...purePeregons.map(s => parseInt(s.end_km)));
  
-               segmentsToRender = [...purePeregons];
+                segmentsToRender = [...purePeregons];
  
-               selectedPeregons.forEach(pName => {
-                   const stationTokens = pName.split('-').map(s => s.trim().toLowerCase());
-                   tracksData.forEach(t => {
-                       if (t.type && t.type.includes('станція')) {
-                           const isDotichna = stationTokens.some(token => t.name.toLowerCase().includes(token));
-                           if (isDotichna) {
-                               const sStart = parseInt(t.start_km);
-                               const sEnd = parseInt(t.end_km);
-                               const hasOverlap = (sStart <= maxKm && sEnd >= minKm);
+                selectedPeregons.forEach(pName => {
+                    const stationTokens = pName.split('-').map(s => s.trim().toLowerCase());
+                    tracksData.forEach(t => {
+                        if (t.type && t.type.includes('станція')) {
+                            const isDotichna = stationTokens.some(token => t.name.toLowerCase().includes(token));
+                            if (isDotichna) {
+                                const sStart = parseInt(t.start_km);
+                                const sEnd = parseInt(t.end_km);
+                                const hasOverlap = (sStart <= maxKm && sEnd >= minKm);
  
-                               if (hasOverlap && !segmentsToRender.some(added => added.id === t.id)) {
-                                   segmentsToRender.push(t);
-                               }
-                           }
-                       }
-                   });
+                                if (hasOverlap && !segmentsToRender.some(added => added.id === t.id)) {
+                                    segmentsToRender.push(t);
+                                }
+                            }
+                        }
+                    });
                 });
             }
  
             for (let km = minKm; km <= maxKm; km++) {
                  
                 const kmSign = document.createElement('div');
-               kmSign.className = 'km-signboard';
-               kmSign.innerText = `Кілометр ${km}`;
-               container.appendChild(kmSign);
+                kmSign.className = 'km-signboard';
+                kmSign.innerText = `Кілометр ${km}`;
+                container.appendChild(kmSign);
  
                 const headersRow = document.createElement('div');
-               headersRow.className = 'track-headers-row';
-               headersRow.innerHTML = `
-                   <div class="header-margin-space"></div>
-                   <div class="header-left-track">ПАРНА</div>
-                   <div class="header-center-space"></div>
-                   <div class="header-right-track">НЕПАРНА</div>
-                   <div class="header-margin-space"></div>
+                headersRow.className = 'track-headers-row';
+                headersRow.innerHTML = `
+                    <div class="header-margin-space"></div>
+                    <div class="header-left-track">ПАРНА</div>
+                    <div class="header-center-space"></div>
+                    <div class="header-right-track">НЕПАРНА</div>
+                    <div class="header-margin-space"></div>
                 `;
                 container.appendChild(headersRow);
  
                 for (let pk = 1; pk <= 10; pk++) {
-                   const leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('парна')); 
-                   const rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('непарна'));
-                   const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.includes('станція'));
+                    const leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('парна')); 
+                    const rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('непарна'));
+                    const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.includes('станція'));
  
-                   const finalLeftConfig = stationConfig || leftConfig;
-                   const finalRightConfig = stationConfig || rightConfig;
+                    const finalLeftConfig = stationConfig || leftConfig;
+                    const finalRightConfig = stationConfig || rightConfig;
  
-                   const leftSide = finalLeftConfig ? getPiketAnalysis(finalLeftConfig.name, finalLeftConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
-                   const rightSide = finalRightConfig ? getPiketAnalysis(finalRightConfig.name, finalRightConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+                    const leftSide = finalLeftConfig ? getPiketAnalysis(finalLeftConfig.name, finalLeftConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+                    const rightSide = finalRightConfig ? getPiketAnalysis(finalRightConfig.name, finalRightConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
  
-                   const nodeRow = document.createElement('div');
-                   nodeRow.className = 'piket-rail-node';
+                    const nodeRow = document.createElement('div');
+                    nodeRow.className = 'piket-rail-node';
                     
-                   let isLastPiketOfStation = false;
+                    let isLastPiketOfStation = false;
  
                     if (stationConfig) {
-                       const sKm = parseInt(stationConfig.start_km);
-                       const sPk = parseInt(stationConfig.start_pk);
-                       const eKm = parseInt(stationConfig.end_km);
-                       const ePk = parseInt(stationConfig.end_pk);
+                        const sKm = parseInt(stationConfig.start_km);
+                        const sPk = parseInt(stationConfig.start_pk);
+                        const eKm = parseInt(stationConfig.end_km);
+                        const ePk = parseInt(stationConfig.end_pk);
  
-                       const currentAbs = km * 10 + pk;
-                       const startAbs = sKm * 10 + sPk;
-                       const endAbs = eKm * 10 + ePk;
+                        const currentAbs = km * 10 + pk;
+                        const startAbs = sKm * 10 + sPk;
+                        const endAbs = eKm * 10 + ePk;
  
-                       if (currentAbs >= startAbs && currentAbs <= endAbs) {
-                           if (currentAbs === startAbs) {
-                               const delimiterStart = document.createElement('div');
-                               delimiterStart.className = 'station-boundary-delimiter';
-                               delimiterStart.innerText = `🚉 Станція ${stationConfig.name}`;
-                               container.appendChild(delimiterStart);
-                           }
-                           
-                           nodeRow.classList.add('station-piket-row');
+                        if (currentAbs >= startAbs && currentAbs <= endAbs) {
+                            if (currentAbs === startAbs) {
+                                const delimiterStart = document.createElement('div');
+                                delimiterStart.className = 'station-boundary-delimiter';
+                                delimiterStart.innerText = `🚉 Станція ${stationConfig.name}`;
+                                container.appendChild(delimiterStart);
+                            }
+                            
+                            nodeRow.classList.add('station-piket-row');
  
-                           if (currentAbs === endAbs) {
-                               isLastPiketOfStation = true;
-                           }
-                       }
+                            if (currentAbs === endAbs) {
+                                isLastPiketOfStation = true;
+                            }
+                        }
                     }
  
-                   const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'парна' && s.pd === fullPdName);
-                   const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'непарна' && s.pd === fullPdName);
+                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'парна' && s.pd === fullPdName);
+                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'непарна' && s.pd === fullPdName);
  
-                   const leftMargin = document.createElement('div');
-                   leftMargin.className = 'info-margin margin-left';
+                    const leftMargin = document.createElement('div');
+                    leftMargin.className = 'info-margin margin-left';
                     if (leftSignal) {
-                       leftMargin.innerHTML = `<span class="signal-badge" title="${leftSignal.signal || ''}">${leftSignal.signal_name}</span>`;
+                        leftMargin.innerHTML = `<span class="signal-badge" title="${leftSignal.signal || ''}">${leftSignal.signal_name}</span>`;
                     }
-                   nodeRow.appendChild(leftMargin);
+                    nodeRow.appendChild(leftMargin);
  
-                   const leftBank = document.createElement('div');
-                   leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
-                   const leftPdLabel = (currentMode === 'peregon' && finalLeftConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalLeftConfig.pd}</div>` : '';
-                   leftBank.innerHTML = `<div>${leftSide.label}</div>${leftPdLabel}<div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
-                   nodeRow.appendChild(leftBank);
+                    const leftBank = document.createElement('div');
+                    leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
+                    const leftPdLabel = (currentMode === 'peregon' && finalLeftConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalLeftConfig.pd}</div>` : '';
+                    leftBank.innerHTML = `<div>${leftSide.label}</div>${leftPdLabel}<div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
+                    nodeRow.appendChild(leftBank);
  
-                   const leftTrackVisual = document.createElement('div');
-                   leftTrackVisual.className = 'rail-line-visual';
-                   leftTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
-                   nodeRow.appendChild(leftTrackVisual);
+                    const leftTrackVisual = document.createElement('div');
+                    leftTrackVisual.className = 'rail-line-visual';
+                    leftTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
+                    nodeRow.appendChild(leftTrackVisual);
  
-                   const centerPiket = document.createElement('div');
-                   centerPiket.className = 'piket-center-core';
-                   centerPiket.innerText = pk;
-                   nodeRow.appendChild(centerPiket);
+                    const centerPiket = document.createElement('div');
+                    centerPiket.className = 'piket-center-core';
+                    centerPiket.innerText = pk;
+                    nodeRow.appendChild(centerPiket);
  
-                   const rightTrackVisual = document.createElement('div');
-                   rightTrackVisual.className = 'rail-line-visual';
-                   rightTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
-                   nodeRow.appendChild(rightTrackVisual);
+                    const rightTrackVisual = document.createElement('div');
+                    rightTrackVisual.className = 'rail-line-visual';
+                    rightTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
+                    nodeRow.appendChild(rightTrackVisual);
  
-                   const rightBank = document.createElement('div');
-                   rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
-                   const rightPdLabel = (currentMode === 'peregon' && finalRightConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalRightConfig.pd}</div>` : '';
-                   rightBank.innerHTML = `<div>${rightSide.label}</div>${rightPdLabel}<div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
-                   nodeRow.appendChild(rightBank);
+                    const rightBank = document.createElement('div');
+                    rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
+                    const rightPdLabel = (currentMode === 'peregon' && finalRightConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalRightConfig.pd}</div>` : '';
+                    rightBank.innerHTML = `<div>${rightSide.label}</div>${rightPdLabel}<div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
+                    nodeRow.appendChild(rightBank);
                     
-                   const rightMargin = document.createElement('div');
-                   rightMargin.className = 'info-margin margin-right';
+                    const rightMargin = document.createElement('div');
+                    rightMargin.className = 'info-margin margin-right';
                     if (rightSignal) {
-                       rightMargin.innerHTML = `<span class="signal-badge" title="${rightSignal.signal || ''}">${rightSignal.signal_name}</span>`;
+                        rightMargin.innerHTML = `<span class="signal-badge" title="${rightSignal.signal || ''}">${rightSignal.signal_name}</span>`;
                     }
-                   nodeRow.appendChild(rightMargin);
+                    nodeRow.appendChild(rightMargin);
  
-                   container.appendChild(nodeRow);
+                    container.appendChild(nodeRow);
  
                     if (isLastPiketOfStation && stationConfig) {
-                       const delimiterEnd = document.createElement('div');
-                       delimiterEnd.className = 'station-boundary-delimiter';
-                       delimiterEnd.innerText = `🚉 Станція ${stationConfig.name}`;
-                       container.appendChild(delimiterEnd);
+                        const delimiterEnd = document.createElement('div');
+                        delimiterEnd.className = 'station-boundary-delimiter';
+                        delimiterEnd.innerText = `🚉 Станція ${stationConfig.name}`;
+                        container.appendChild(delimiterEnd);
                     }
                 }
             }
-           logSys(`Діаграму оновлено успішно.`, 'info');
+            logSys(`Діаграму оновлено успішно.`, 'info');
         }
  
         window.onload = initApp;
