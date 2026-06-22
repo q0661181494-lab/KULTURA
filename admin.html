@@ -272,7 +272,7 @@
         const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
         const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
 
-        let currentAdminMode = 'lines'; // 'lines' або 'signals'
+        let currentAdminMode = 'lines'; 
         let selectedPds = [];
         let currentObjectType = 'peregon'; 
 
@@ -287,7 +287,6 @@
             con.scrollTop = con.scrollHeight;
         }
 
-        // 2. Функція очищення полів після збереження даних (вкладка залишається активною)
         function clearFormInputs() {
             document.getElementById('admin-pd-num').value = "";
             
@@ -321,6 +320,7 @@
             logSys(`Перемкнуто режим на: ${mode === 'lines' ? 'Дільниці' : 'Світлофори'}`);
         }
 
+        // ОНОВЛЕНА ФУНКЦІЯ: тепер створює окремий рядок на кожну вибрану колію!
         async function saveDataToCloud() {
             const pdRaw = document.getElementById('admin-pd-num').value.trim();
             if (!pdRaw) {
@@ -358,33 +358,40 @@
                 }
 
                 const typeUkr = currentObjectType === 'station' ? 'станція' : 'перегін';
-
-                const payload = {
-                    pd: pdNum,
-                    name: name,
-                    type: typeUkr,
-                    track_type: trackTypes.join(', '),
-                    start_km: startKm,
-                    start_pk: startPk,
-                    end_km: endKm,
-                    end_pk: endPk
-                };
+                logSys(`Ініціалізація збереження дільниці для ${pdNum}. Обрано колій: ${trackTypes.length}`);
 
                 try {
-                    logSys(`Надсилання дільниці для ${pdNum} до бази даних...`);
-                    const res = await fetch(`${baseDbUrl}/rest/v1/lines_config`, {
-                        method: 'POST',
-                        headers,
-                        body: JSON.stringify(payload)
-                    });
-                    if (res.ok) {
-                        logSys(`Дільницю «${name}» успішно додано!`, "success");
+                    let successCount = 0;
+                    
+                    // Цикл запису: створюємо окремий POST-запит для кожної колії
+                    for (const singleTrack of trackTypes) {
+                        const payload = {
+                            pd: pdNum,
+                            name: name,
+                            type: typeUkr,
+                            track_type: singleTrack, // Записуємо суто "непарна" або суто "парна"
+                            start_km: startKm,
+                            start_pk: startPk,
+                            end_km: endKm,
+                            end_pk: endPk
+                        };
+
+                        logSys(`Надсилання запису для колії: ${singleTrack}...`);
+                        const res = await fetch(`${baseDbUrl}/rest/v1/lines_config`, {
+                            method: 'POST',
+                            headers,
+                            body: JSON.stringify(payload)
+                        });
+                        if (res.ok) successCount++;
+                    }
+
+                    if (successCount === trackTypes.length) {
+                        logSys(`Усі записи дільниці (${successCount}) успішно додано!`, "success");
                         alert("Дані дільниці успішно збережено!");
-                        clearFormInputs(); // 2. Оновлення всіх полів
+                        clearFormInputs(); 
                         loadPdsForCleaning();
                     } else {
-                        const err = await res.json();
-                        logSys(`Помилка БД: ${JSON.stringify(err)}`, "error");
+                        logSys(`Помилка: збережено лише ${successCount} з ${trackTypes.length} записів.`, "error");
                     }
                 } catch (e) {
                     logSys(`Помилка мережі: ${e.message}`, "error");
@@ -409,30 +416,38 @@
                     return;
                 }
 
-                const payload = {
-                    pd: pdNum,
-                    signal_name: sigName,
-                    track_type: trackTypes.join(', '),
-                    km: km,
-                    piket: piket,
-                    signal_type: sigType || 'не вказано'
-                };
+                logSys(`Ініціалізація збереження світлофора ${sigName} для ${pdNum}. Обрано колій: ${trackTypes.length}`);
 
                 try {
-                    logSys(`Надсилання світлофора ${sigName} для ${pdNum} до бази даних...`);
-                    const res = await fetch(`${baseDbUrl}/rest/v1/signals`, {
-                        method: 'POST',
-                        headers,
-                        body: JSON.stringify(payload)
-                    });
-                    if (res.ok) {
-                        logSys(`Світлофор ${sigName} успішно додано на ${km} км!`, "success");
+                    let successCount = 0;
+
+                    // Цикл запису: створюємо окремий POST-запит для кожної колії світлофора
+                    for (const singleTrack of trackTypes) {
+                        const payload = {
+                            pd: pdNum,
+                            signal_name: sigName,
+                            track_type: singleTrack, // Записуємо суто "непарна" або суто "парна"
+                            km: km,
+                            piket: piket,
+                            signal_type: sigType || 'не вказано'
+                        };
+
+                        logSys(`Надсилання світлофора для колії: ${singleTrack}...`);
+                        const res = await fetch(`${baseDbUrl}/rest/v1/signals`, {
+                            method: 'POST',
+                            headers,
+                            body: JSON.stringify(payload)
+                        });
+                        if (res.ok) successCount++;
+                    }
+
+                    if (successCount === trackTypes.length) {
+                        logSys(`Усі записи світлофора (${successCount}) успішно додано!`, "success");
                         alert("Світлофор успішно збережено в базу!");
-                        clearFormInputs(); // 2. Оновлення всіх полів
+                        clearFormInputs(); 
                     } else {
-                        const err = await res.json();
-                        logSys(`Помилка БД (Світлофори): ${JSON.stringify(err)}`, "error");
-                        alert("Помилка збереження. Перевір монітор системи.");
+                        logSys(`Помилка: збережено лише ${successCount} з ${trackTypes.length} світлофорів.`, "error");
+                        alert("Часткова помилка збереження. Перевір монітор системи.");
                     }
                 } catch (e) {
                     logSys(`Помилка мережі: ${e.message}`, "error");
@@ -440,7 +455,6 @@
             }
         }
 
-        // 3. Видалено динамічне присвоєння placeholder для уникнення будь-яких підказок
         function setObjectType(type) {
             currentObjectType = type;
             document.getElementById('type-btn-peregon').classList.toggle('active', type === 'peregon');
