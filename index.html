@@ -96,7 +96,7 @@
         /* Головна картка з м'якою шавлієвою рамкою */
         .screen { 
             background: white; 
-            padding: 20px; 
+            padding: 16px; 
             border-radius: 16px; 
             box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); 
             width: 100%; 
@@ -106,7 +106,7 @@
             transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s;
         }
 
-        /* Фіксоване верхнє положення блоку без стрибків вгору-вниз */
+        /* Фіксоване верхнє положення блоку */
         .screen.welcome-focus {
             margin-top: 10px;
             transform: scale(1.02);
@@ -115,7 +115,6 @@
             padding: 30px 20px;
         }
 
-        /* СОЛІДНИЙ ЗАГОЛОВОК ЗАГЛАВНИМИ ЛІТЕРАМИ */
         h2 { 
             margin-top: 0; 
             margin-bottom: 6px; 
@@ -128,12 +127,10 @@
         }
         p { color: #0f766e; font-size: 13px; margin-top: 0; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
-        /* Поля введення */
         .input-field { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; transition: all 0.2s; }
         .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2); }
         .track-label { font-size: 11px; font-weight: 700; color: #115e59; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* КРЕАТИВНИЙ БЛОК ВВЕДЕННЯ ПД */
         .pd-container-box {
             transition: all 0.3s ease;
         }
@@ -147,7 +144,6 @@
             animation: pulse-border 2.5s infinite ease-in-out; 
         }
         
-        /* Строге центрування поля введення */
         .pd-input-row { 
             display: flex; 
             align-items: center; 
@@ -165,7 +161,6 @@
             left: 0;
         }
         
-        /* Поле вводу */
         .pd-number-box { 
             width: 100px !important; 
             height: 54px;
@@ -180,7 +175,6 @@
             margin-right: 0;
         }
 
-        /* Анімація пульсуючого кастомного плейсхолдера */
         .pd-number-box::placeholder {
             color: #0d9488;
             opacity: 0.6;
@@ -188,12 +182,10 @@
             animation: blink-cursor 1.2s infinite steps(2);
         }
 
-        /* Стильні Кнопки-Таби */
         .mode-tabs { display: flex; gap: 8px; margin-bottom: 12px; background: #f0fdf4; padding: 4px; border-radius: 10px; border: 1px solid #c2e7d9; }
         .tab-btn { flex: 1; padding: 9px; border: none; background: transparent; border-radius: 7px; color: #115e59; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; }
         .tab-btn.active { background: #0d9488; color: white; }
         
-        /* Контейнер для списку чекбоксів перегонів */
         .checkbox-group-container { display: flex; flex-direction: column; gap: 6px; background: #fff; border: 1px solid #a7f3d0; border-radius: 10px; padding: 10px; max-height: 150px; overflow-y: auto; margin-bottom: 12px; box-sizing: border-box; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #115e59; font-weight: 500; cursor: pointer; padding: 4px 0; }
         .checkbox-item input { width: 16px; height: 16px; accent-color: #0d9488; cursor: pointer; }
@@ -201,45 +193,114 @@
         /* ДВОКОЛІЙНА ВЕРТИКАЛЬНА ПЛАТФОРМА */
         .railway-canvas { display: flex; flex-direction: column; width: 100%; margin-top: 8px; }
         
-        /* Залізничний знак кілометра */
         .km-signboard { background: #e6f4ea; border: 2px solid #115e59; border-radius: 8px; padding: 8px; margin: 18px 0 8px 0; text-align: center; font-weight: 900; font-size: 14px; color: #115e59; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 2px 5px rgba(17,94,89,0.05); }
         .km-signboard:first-child { margin-top: 0; }
         
-        /* Заголовки стовпчиків колій */
-        .track-headers-row { display: flex; width: 100%; margin-bottom: 6px; font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; text-align: center; opacity: 0.8; }
-        .header-margin-space { width: 50px; }
-        .header-left-track { flex: 1; padding-right: 16px; }
-        .header-center-space { width: 42px; }
-        .header-right-track { flex: 1; padding-left: 16px; }
+        /* Розподіл ширини колонок у заголовках (Повна симетрія) */
+        .track-headers-row { display: flex; width: 100%; margin-bottom: 6px; font-size: 10px; font-weight: 800; color: #0f766e; text-transform: uppercase; text-align: center; opacity: 0.8; }
+        .header-signal-space { width: 75px; }
+        .header-track-zone { flex: 1; }
+        .header-center-space { width: 42px; margin: 0 6px; }
  
         /* Рядок пікета */
-        .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; border-radius: 6px; transition: background-color 0.2s; }
-        .station-piket-row { background-color: #f1f5f9 !important; border-left: 3px solid #0d9488; border-right: 3px solid #0d9488; }
+        .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 46px; position: relative; border-radius: 6px; }
+        .station-piket-row { background-color: #f1f5f9 !important; border-left: 1px dashed #0d9488; border-right: 1px dashed #0d9488; }
         .station-piket-row .piket-center-core { background: #0d9488 !important; color: white !important; border-color: #0f766e !important; }
 
-        /* Плашка-розрив назви станції */
         .station-boundary-delimiter { background: #f0fdf4; border: 2px dashed #0d9488; border-radius: 8px; padding: 6px; margin: 12px 0 12px 0; text-align: center; font-weight: 800; font-size: 12px; color: #0d9488; letter-spacing: 0.5px; text-transform: uppercase; }
         
-        /* Бокові поля для світлофорів */
-        .info-margin { width: 50px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: bold; color: #0f766e; box-sizing: border-box; }
-        .margin-left { justify-content: flex-end; padding-right: 6px; }
-        .margin-right { justify-content: flex-start; padding-left: 6px; }
+        /* ОРИГІНАЛЬНІ БОКОВІ БЛОКИ СВІТЛОФОРІВ (Схожі на пікети, але технологічно виділені) */
+        .info-margin { 
+            width: 75px; 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            box-sizing: border-box; 
+            border-radius: 6px;
+            background: #f8fafc; /* Дуже легкий індустріальний сірий */
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            position: relative;
+        }
 
-        /* Сигнальні плашки */
-        .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #0f172a; color: #f8fafc; padding: 4px 10px; border-radius: 6px; font-size: 14px; font-weight: 900; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); min-width: 40px; white-space: nowrap; }
+        /* Якщо сигналу на цьому пікеті немає — робимо блок повністю прозорим */
+        .info-margin.empty-node {
+            background: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* Виділення лівого (парного) та правого (непарного) блоків */
+        .margin-left { 
+            justify-content: flex-start;
+            padding: 4px 6px;
+            box-shadow: inset -3px 0 0 #94a3b8; /* Сірий маркер зі сторони колії */
+        }
+        .margin-right { 
+            justify-content: flex-start;
+            padding: 4px 6px;
+            box-shadow: inset 3px 0 0 #94a3b8; /* Сірий маркер зі сторони колії */
+        }
+
+        /* Внутрішній вміст картки світлофора */
+        .signal-card-box {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .signal-info-texts {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            line-height: 1.1;
+        }
+
+        .signal-main-title {
+            font-size: 12px;
+            font-weight: 900;
+            color: #1e293b;
+            font-family: monospace;
+        }
+
+        .signal-sub-desc {
+            font-size: 8px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        /* Компактний круглий оптичний вогонь */
+        .signal-lens-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #cbd5e1;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.15);
+        }
+
+        /* Ефект неонового світіння лінз */
+        .lens-green { background-color: #22c55e; box-shadow: 0 0 5px #22c55e; }
+        .lens-red { background-color: #ef4444; box-shadow: 0 0 5px #ef4444; }
+        .lens-yellow { background-color: #eab308; box-shadow: 0 0 5px #eab308; }
+        .lens-blue { background-color: #3b82f6; box-shadow: 0 0 5px #3b82f6; }
 
         /* Зони обкошування */
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; }
-        .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
+        
+        /* Центральний пікет */
+        .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; flex-shrink: 0; }
         
         /* Рейкова нитка */
-        .rail-line-visual { width: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: #cbd5e1; }
+        .rail-line-visual { width: 10px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: #cbd5e1; flex-shrink: 0; }
         .rail-line-visual::before, .rail-line-visual::after { content: ""; position: absolute; top: 0; width: 2px; height: 100%; background: #475569; }
-        .rail-line-visual::before { left: 1px; }
-        .rail-line-visual::after { right: 1px; }
+        .rail-line-visual::before { left: 0px; }
+        .rail-line-visual::after { right: 0px; }
         .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
  
-        /* Колірна палітра */
+        /* Колірна палітра обкошування */
         .status-clear-green { background-color: #22c55e !important; color: white; }
         .status-warn-yellow { background-color: #eab308 !important; color: #1f2937; }
         .status-overgrown-red { background-color: #ef4444 !important; color: white; }
@@ -524,11 +585,11 @@
                 const headersRow = document.createElement('div');
                 headersRow.className = 'track-headers-row';
                 headersRow.innerHTML = `
-                    <div class="header-margin-space"></div>
-                    <div class="header-left-track">ПАРНА</div>
-                    <div class="header-center-space"></div>
-                    <div class="header-right-track">НЕПАРНА</div>
-                    <div class="header-margin-space"></div>
+                    <div class="header-signal-space">СИГНАЛ (П)</div>
+                    <div class="header-track-zone">ПАРНА КОЛІЯ</div>
+                    <div class="header-center-space">ПК</div>
+                    <div class="header-track-zone">НЕПАРНА КОЛІЯ</div>
+                    <div class="header-signal-space">СИГНАЛ (Н)</div>
                 `;
                 container.appendChild(headersRow);
  
@@ -577,13 +638,32 @@
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'парна' && s.pd === fullPdName);
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'непарна' && s.pd === fullPdName);
 
+                    // --- ПАРНИЙ СВІТЛОФОР (ЛІВОРУЧ) ---
                     const leftMargin = document.createElement('div');
-                    leftMargin.className = 'info-margin margin-left';
                     if (leftSignal) {
-                        leftMargin.innerHTML = `<span class="signal-badge" title="${leftSignal.signal || ''}">${leftSignal.signal_name}</span>`;
+                        leftMargin.className = 'info-margin margin-left';
+                        let lensColor = 'lens-green'; 
+                        const sigName = leftSignal.signal_name.toUpperCase();
+                        
+                        if (sigName.startsWith('Ч') || sigName.startsWith('Н')) {
+                            lensColor = (sigName.includes('М') || sigName.length > 2) ? 'lens-blue' : 'lens-red';
+                        }
+                        
+                        // Сюди у майбутньому можна додати будь-які змінні (наприклад, leftSignal.ordinate)
+                        leftMargin.innerHTML = `
+                            <div class="signal-card-box" title="${leftSignal.signal || ''}">
+                                <span class="signal-lens-dot ${lensColor}"></span>
+                                <div class="signal-info-texts">
+                                    <span class="signal-main-title">${leftSignal.signal_name}</span>
+                                    <span class="signal-sub-desc">ПК ${pk}</span>
+                                </div>
+                            </div>`;
+                    } else {
+                        leftMargin.className = 'info-margin margin-left empty-node';
                     }
                     nodeRow.appendChild(leftMargin);
  
+                    // --- ПАРНА КОЛІЯ ---
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
                     const leftPdLabel = (currentMode === 'peregon' && finalLeftConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalLeftConfig.pd}</div>` : '';
@@ -595,11 +675,13 @@
                     leftTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(leftTrackVisual);
  
+                    // --- ЦЕНТРАЛЬНИЙ ПІКЕТ ---
                     const centerPiket = document.createElement('div');
                     centerPiket.className = 'piket-center-core';
                     centerPiket.innerText = pk;
                     nodeRow.appendChild(centerPiket);
  
+                    // --- НЕПАРНА КОЛІЯ ---
                     const rightTrackVisual = document.createElement('div');
                     rightTrackVisual.className = 'rail-line-visual';
                     rightTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
@@ -611,10 +693,27 @@
                     rightBank.innerHTML = `<div>${rightSide.label}</div>${rightPdLabel}<div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
                     nodeRow.appendChild(rightBank);
                     
+                    // --- НЕПАРНИЙ СВІТЛОФОР (ПРАВОРУЧ) ---
                     const rightMargin = document.createElement('div');
-                    rightMargin.className = 'info-margin margin-right';
                     if (rightSignal) {
-                        rightMargin.innerHTML = `<span class="signal-badge" title="${rightSignal.signal || ''}">${rightSignal.signal_name}</span>`;
+                        rightMargin.className = 'info-margin margin-right';
+                        let lensColor = 'lens-green'; 
+                        const sigName = rightSignal.signal_name.toUpperCase();
+                        
+                        if (sigName.startsWith('Ч') || sigName.startsWith('Н')) {
+                            lensColor = (sigName.includes('М') || sigName.length > 2) ? 'lens-blue' : 'lens-red';
+                        }
+
+                        rightMargin.innerHTML = `
+                            <div class="signal-card-box" title="${rightSignal.signal || ''}">
+                                <span class="signal-lens-dot ${lensColor}"></span>
+                                <div class="signal-info-texts">
+                                    <span class="signal-main-title">${rightSignal.signal_name}</span>
+                                    <span class="signal-sub-desc">ПК ${pk}</span>
+                                </div>
+                            </div>`;
+                    } else {
+                        rightMargin.className = 'info-margin margin-right empty-node';
                     }
                     nodeRow.appendChild(rightMargin);
  
