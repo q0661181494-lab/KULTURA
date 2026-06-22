@@ -111,7 +111,7 @@
             <p>Для входу в панель адміністрування введіть пароль захисту</p>
             <div class="auth-box">
                 <label class="track-label">Пароль адміністратора:</label>
-                <input type="password" id="admin-password-input" class="input-field" value="1234" onkeydown="if(event.key==='Enter') verifyAdminPassword()">
+                <input type="password" id="admin-password-input" class="input-field" onkeydown="if(event.key==='Enter') verifyAdminPassword()">
                 <button class="btn-submit" onclick="verifyAdminPassword()">Підтвердити вхід</button>
             </div>
         </div>
@@ -140,7 +140,7 @@
                     <button id="type-btn-peregon" class="type-toggle-btn active" onclick="setObjectType('peregon')">Перегін</button>
                     <button id="type-btn-station" class="type-toggle-btn" onclick="setObjectType('station')">Станція</button>
                 </div>
-                <input type="text" id="admin-peregon" class="input-field" placeholder="Назва перегону">
+                <input type="text" id="admin-peregon" class="input-field">
      
                 <div id="track-type-container">
                     <label class="track-label">3. Оберіть колію:</label>
@@ -186,7 +186,7 @@
 
             <div id="form-signals-block" style="display: none;">
                 <label class="track-label">2. Літера світлофора:</label>
-                <input type="text" id="sig-name" class="input-field" placeholder="Наприклад: Ч, Н, ЧМ2">
+                <input type="text" id="sig-name" class="input-field">
 
                 <label class="track-label">3. Колія світлофора:</label>
                 <div class="track-checkbox-group">
@@ -215,7 +215,7 @@
                 </div>
 
                 <label class="track-label">5. Примітки (Тип сигналу):</label>
-                <input type="text" id="sig-type" class="input-field" placeholder="Наприклад: Вхідний, Вихідний, Прохідний">
+                <input type="text" id="sig-type" class="input-field">
             </div>
 
             <button class="btn-submit" onclick="saveDataToCloud()">Зберегти в базу даних</button>
@@ -287,7 +287,30 @@
             con.scrollTop = con.scrollHeight;
         }
 
-        // Перемикання режимів: Дільниці або Світлофори
+        // 2. Функція очищення полів після збереження даних (вкладка залишається активною)
+        function clearFormInputs() {
+            document.getElementById('admin-pd-num').value = "";
+            
+            // Поля дільниць
+            document.getElementById('admin-peregon').value = "";
+            document.getElementById('admin-start-km').value = "";
+            document.getElementById('admin-start-pk').value = "";
+            document.getElementById('admin-end-km').value = "";
+            document.getElementById('admin-end-pk').value = "";
+            document.getElementById('chk-neparna').checked = true;
+            document.getElementById('chk-parna').checked = true;
+            
+            // Поля світлофорів
+            document.getElementById('sig-name').value = "";
+            document.getElementById('sig-km').value = "";
+            document.getElementById('sig-pk').value = "";
+            document.getElementById('sig-type').value = "";
+            document.getElementById('sig-chk-neparna').checked = true;
+            document.getElementById('sig-chk-parna').checked = false;
+
+            logSys("Всі поля форми очищено.");
+        }
+
         function switchAdminMode(mode) {
             currentAdminMode = mode;
             document.getElementById('form-lines-block').style.display = (mode === 'lines') ? 'block' : 'none';
@@ -298,7 +321,6 @@
             logSys(`Перемкнуто режим на: ${mode === 'lines' ? 'Дільниці' : 'Світлофори'}`);
         }
 
-        // ОНОВЛЕНА ФУНКЦІЯ ЗБЕРЕЖЕННЯ (З ПРАВИЛЬНИМ ФОРМУВАННЯМ ПРЕФІКСУ ПД-)
         async function saveDataToCloud() {
             const pdRaw = document.getElementById('admin-pd-num').value.trim();
             if (!pdRaw) {
@@ -306,7 +328,6 @@
                 return;
             }
 
-            // Автоматично додаємо префікс "ПД-", якщо користувач ввів просто цифру (наприклад, 16 -> ПД-16)
             const pdNum = pdRaw.startsWith("ПД-") ? pdRaw : "ПД-" + pdRaw;
 
             const headers = { 
@@ -359,6 +380,7 @@
                     if (res.ok) {
                         logSys(`Дільницю «${name}» успішно додано!`, "success");
                         alert("Дані дільниці успішно збережено!");
+                        clearFormInputs(); // 2. Оновлення всіх полів
                         loadPdsForCleaning();
                     } else {
                         const err = await res.json();
@@ -406,6 +428,7 @@
                     if (res.ok) {
                         logSys(`Світлофор ${sigName} успішно додано на ${km} км!`, "success");
                         alert("Світлофор успішно збережено в базу!");
+                        clearFormInputs(); // 2. Оновлення всіх полів
                     } else {
                         const err = await res.json();
                         logSys(`Помилка БД (Світлофори): ${JSON.stringify(err)}`, "error");
@@ -417,17 +440,15 @@
             }
         }
 
+        // 3. Видалено динамічне присвоєння placeholder для уникнення будь-яких підказок
         function setObjectType(type) {
             currentObjectType = type;
             document.getElementById('type-btn-peregon').classList.toggle('active', type === 'peregon');
             document.getElementById('type-btn-station').classList.toggle('active', type === 'station');
             
-            const txtInput = document.getElementById('admin-peregon');
             if (type === 'station') {
-                txtInput.placeholder = "Назва станції (наприклад: Кошари)";
                 logSys("Обрано об'єкт: Станція.");
             } else {
-                txtInput.placeholder = "Назва перегону (наприклад: Ворожба - Кошари)";
                 logSys("Обрано об'єкт: Перегін.");
             }
         }
