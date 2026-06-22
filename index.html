@@ -292,6 +292,53 @@
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 60px; overflow-y: auto; text-align: left; }
  
+        /* Елегантний мобільний Toast-інформер для світлофорів */
+        .signal-toast {
+            position: fixed;
+            bottom: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 14px 20px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.3);
+            font-size: 14px;
+            z-index: 9999;
+            transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #475569;
+            width: calc(100% - 32px);
+            max-width: 450px;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .signal-toast.show {
+            bottom: 16px;
+            opacity: 1;
+        }
+
+        .signal-toast-accent {
+            background: #22c55e;
+            color: #1e293b;
+            font-weight: 900;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+        }
+
+        .signal-toast-text {
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
         @keyframes blink-cursor {
             0%, 100% { opacity: 0; }
             50% { opacity: 0.8; }
@@ -344,6 +391,11 @@
         <div id="debug-console" class="debug-scroll"></div>
     </div>
  
+    <div id="signal-toast" class="signal-toast" onclick="hideSignalToast()">
+        <span id="toast-signal-name" class="signal-toast-accent"></span>
+        <span id="toast-signal-type" class="signal-toast-text"></span>
+    </div>
+
     <script>
         const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
         const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
@@ -352,6 +404,7 @@
         let mowingData = [];
         let signalsData = [];
         let currentMode = 'pd';
+        let toastTimeout;
  
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
@@ -364,6 +417,27 @@
             con.scrollTop = con.scrollHeight;
         }
  
+        function showSignalToast(element) {
+            const name = element.getAttribute('data-name');
+            const type = element.getAttribute('data-type');
+            
+            const toast = document.getElementById('signal-toast');
+            document.getElementById('toast-signal-name').innerText = name;
+            document.getElementById('toast-signal-type').innerText = type;
+            
+            toast.classList.add('show');
+            
+            logSys(`Перегляд сигналу ${name}: ${type}`, 'info');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(hideSignalToast, 4000);
+        }
+
+        function hideSignalToast() {
+            const toast = document.getElementById('signal-toast');
+            if (toast) toast.classList.remove('show');
+        }
+
         async function initApp() {
             logSys("Запуск рейкової платформи...");
             await reloadDataFromCloud();
@@ -609,7 +683,15 @@
                     const leftMargin = document.createElement('div');
                     leftMargin.className = 'info-margin margin-left';
                     if (leftSignal) {
-                        leftMargin.innerHTML = `<span class="signal-badge" title="${leftSignal.signal || ''}">${leftSignal.signal_name}</span>`;
+                        const signalNote = leftSignal.signal_type || leftSignal.signal || 'Примітка відсутня';
+                        leftMargin.innerHTML = `
+                            <span class="signal-badge" 
+                                  style="cursor: pointer;" 
+                                  data-name="${leftSignal.signal_name}" 
+                                  data-type="${signalNote}" 
+                                  onclick="showSignalToast(this)">
+                                ${leftSignal.signal_name}
+                            </span>`;
                     }
                     nodeRow.appendChild(leftMargin);
  
@@ -643,7 +725,15 @@
                     const rightMargin = document.createElement('div');
                     rightMargin.className = 'info-margin margin-right';
                     if (rightSignal) {
-                        rightMargin.innerHTML = `<span class="signal-badge" title="${rightSignal.signal || ''}">${rightSignal.signal_name}</span>`;
+                        const signalNote = rightSignal.signal_type || rightSignal.signal || 'Примітка відсутня';
+                        rightMargin.innerHTML = `
+                            <span class="signal-badge" 
+                                  style="cursor: pointer;" 
+                                  data-name="${rightSignal.signal_name}" 
+                                  data-type="${signalNote}" 
+                                  onclick="showSignalToast(this)">
+                                ${rightSignal.signal_name}
+                            </span>`;
                     }
                     nodeRow.appendChild(rightMargin);
  
