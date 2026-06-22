@@ -36,24 +36,24 @@
         .pd-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
         .pd-prefix { font-size: 16px; font-weight: bold; color: #115e59; }
         .pd-number-box { width: 80px !important; margin-bottom: 0 !important; text-align: center; }
- 
+
         /* Перемикач типу об'єкта */
         .type-toggle-group { display: flex; gap: 8px; margin-bottom: 12px; }
         .type-toggle-btn { flex: 1; padding: 10px; border: 1px solid #a7f3d0; background: white; border-radius: 10px; color: #115e59; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.2s; text-align: center; }
         .type-toggle-btn.active { background: #0d9488; color: white; border-color: #0d9488; }
- 
+
         /* Блок вибору колій */
         .track-checkbox-group { background: #f0fdf4; border: 1px solid #c2e7d9; border-radius: 12px; padding: 12px; margin-bottom: 14px; display: flex; gap: 16px; justify-content: flex-start; }
         .track-checkbox-item { display: flex; align-items: center; gap: 6px; color: #115e59; font-weight: 600; font-size: 14px; cursor: pointer; }
         .track-checkbox-item input[type="checkbox"], .track-checkbox-item input[type="radio"] { width: 18px; height: 18px; accent-color: #0d9488; cursor: pointer; margin: 0; }
- 
+
         /* КМ + ПК в один ряд */
         .km-section { display: flex; flex-direction: column; margin-bottom: 16px; width: 100%; box-sizing: border-box; }
         .km-pk-row { display: flex; gap: 10px; width: 100%; align-items: flex-end; }
         .km-col { flex: 1; min-width: 0; }
         .pk-col { flex: 1.2; min-width: 0; }
         .sub-heading { font-size: 10px; color: #0f766e; font-weight: 600; margin-bottom: 4px; display: block; white-space: nowrap; }
- 
+
         /* Списки, що розгортаються */
         .multiselect-dropdown { position: relative; width: 100%; box-sizing: border-box; }
         .multiselect-header { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; height: 41px; }
@@ -62,15 +62,15 @@
         .multiselect-item { display: flex; align-items: center; padding: 8px 12px; font-size: 14px; color: #115e59; font-weight: 500; cursor: pointer; border-radius: 6px; user-select: none; }
         .multiselect-item:hover { background: #f0fdf4; }
         .multiselect-item input[type="checkbox"] { margin-right: 10px; width: 16px; height: 16px; accent-color: #0d9488; cursor: pointer; }
- 
+
         .btn-submit { width: 100%; background: #0d9488; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.15); transition: background 0.2s; }
         .btn-submit:hover { background: #0f766e; }
         .btn-danger { width: 100%; background: #ef4444; color: white; border: none; padding: 13px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 4px; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15); transition: background 0.2s; }
         .btn-danger:hover { background: #b91c1c; }
- 
+
         .auth-box { display: flex; flex-direction: column; align-items: center; margin-top: 10px; }
         .section-divider { height: 1px; background: #e2e8f0; margin: 24px 0; border: none; }
- 
+
         /* Модальне вікно */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 94, 89, 0.5); z-index: 100; justify-content: center; align-items: center; padding: 12px; box-sizing: border-box; }
         .modal-window { background: white; width: 100%; max-width: 440px; height: 85vh; border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: hidden; border: 1px solid #d1fae5; }
@@ -90,7 +90,7 @@
         .db-card-limits { font-size: 12px; color: #64748b; }
         .btn-card-delete { background: #fee2e2; color: #dc2626; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; margin-left: 8px; }
         .btn-card-delete:hover { background: #fca5a5; }
- 
+
         /* Монітор системи */
         .debug-panel { margin-top: 8px; padding: 12px; background-color: #e6f4ea; border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(11,94,89,0.02); width: 100%; box-sizing: border-box; }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -98,14 +98,14 @@
     </style>
 </head>
 <body>
- 
+
     <div class="container">
         <div class="nav-menu">
             <a href="index.html" class="nav-link">📊 Графіки</a>
             <a href="master.html" class="nav-link">🧑‍🔧 Майстер</a>
             <button class="admin-menu-btn">⚙️</button>
         </div>
- 
+
         <div class="screen" id="screen-auth">
             <h2>🔒 Доступ обмежено</h2>
             <p>Для входу в панель адміністрування введіть пароль захисту</p>
@@ -115,7 +115,7 @@
                 <button class="btn-submit" onclick="verifyAdminPassword()">Підтвердити вхід</button>
             </div>
         </div>
- 
+
         <div class="screen" id="screen-admin" style="display: none;">
             <div class="header-row">
                 <h2>⚙️ Конфігурація</h2>
@@ -127,13 +127,13 @@
                 <button id="mode-btn-lines" class="admin-tab-btn active" onclick="switchAdminMode('lines')">🗺️ Дільниці / Станції</button>
                 <button id="mode-btn-signals" class="admin-tab-btn" onclick="switchAdminMode('signals')">🚦 Світлофори</button>
             </div>
- 
+
             <label class="track-label">1. Введіть околоток:</label>
             <div class="pd-input-row">
                 <span class="pd-prefix">ПД-</span>
                 <input type="number" id="admin-pd-num" class="input-field pd-number-box">
             </div>
- 
+
             <div id="form-lines-block">
                 <label class="track-label">2. Оберіть тип та назву об'єкта:</label>
                 <div class="type-toggle-group">
@@ -191,12 +191,12 @@
                 <label class="track-label">3. Колія світлофора:</label>
                 <div class="track-checkbox-group">
                     <label class="track-checkbox-item">
-                        <input type="radio" name="sig-track-radio" id="sig-chk-neparna" checked>
+                        <input type="checkbox" id="sig-chk-neparna" checked>
                         <span>Непарна</span>
                     </label>
                     <label class="track-checkbox-item">
-                        <input type="radio" name="sig-track-radio" id="sig-chk-parna">
-                        <span>Pарна</span>
+                        <input type="checkbox" id="sig-chk-parna" checked>
+                        <span>Парна</span>
                     </label>
                 </div>
 
@@ -205,31 +205,26 @@
                     <div class="km-pk-row">
                         <div class="km-col">
                             <span class="sub-heading">Встановлений на КМ</span>
-                            <input type="number" id="sig-km" class="input-field" style="margin-bottom:0;" placeholder="64">
+                            <input type="number" id="sig-km" class="input-field" style="margin-bottom:0;">
                         </div>
                         <div class="pk-col">
                             <span class="sub-heading">Встановлений на ПК</span>
-                            <input type="number" id="sig-pk" class="input-field" style="margin-bottom:0;" placeholder="4" min="1" max="10">
+                            <input type="number" id="sig-pk" class="input-field" style="margin-bottom:0;" min="1" max="10">
                         </div>
                     </div>
                 </div>
 
-                <label class="track-label">5. Тип призначення світлофора:</label>
-                <select id="sig-type" class="input-field">
-                    <option value="вхідний">Вхідний</option>
-                    <option value="вихідний">Вихідний</option>
-                    <option value="прохідний">Прохідний</option>
-                    <option value="маневровий">Маневровий</option>
-                </select>
+                <label class="track-label">5. Примітки:</label>
+                <input type="text" id="sig-type" class="input-field" placeholder="Введіть додаткову інформацію">
             </div>
- 
+
             <button class="btn-submit" onclick="saveDataToCloud()">Зберегти в базу даних</button>
- 
+
             <hr class="section-divider">
- 
+
             <h2>🧹 Очищення околотків</h2>
             <p>Видалення конфігурацій для вибраних ПД</p>
- 
+
             <label class="track-label">Виберіть ПД для очищення:</label>
             <div class="multiselect-dropdown">
                 <div class="multiselect-header" onclick="toggleDropdown('dropdown-options')">
@@ -238,16 +233,16 @@
                 </div>
                 <div class="multiselect-options" id="dropdown-options"></div>
             </div>
- 
+
             <button class="btn-danger" onclick="clearSelectedPdTracks()">Очистити вибрані ПД</button>
         </div>
- 
+
         <div class="debug-panel">
             <div class="debug-title">🖥️ Монітор системи</div>
             <div id="debug-console" class="debug-scroll"></div>
         </div>
     </div>
- 
+
     <div class="modal-overlay" id="db-modal">
         <div class="modal-window">
             <div class="modal-header">
@@ -272,15 +267,15 @@
             <div class="modal-body" id="modal-db-cards-container"></div>
         </div>
     </div>
- 
+
     <script>
         const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
         const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
- 
+
         let currentAdminMode = 'lines'; // 'lines' або 'signals'
         let selectedPds = [];
         let currentObjectType = 'peregon'; 
- 
+
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
             if(!con) return;
@@ -291,7 +286,7 @@
             con.appendChild(div);
             con.scrollTop = con.scrollHeight;
         }
- 
+
         // Перемикаться режимів: Дільниці або Світлофори
         function switchAdminMode(mode) {
             currentAdminMode = mode;
@@ -318,7 +313,7 @@
                 logSys("Обрано об'єкт: Перегін.");
             }
         }
- 
+
         function toggleDropdown(id) {
             ['dropdown-options'].forEach(optId => {
                 if(optId !== id && document.getElementById(optId)) document.getElementById(optId).classList.remove('show');
@@ -326,7 +321,7 @@
             const drop = document.getElementById(id);
             if(drop) drop.classList.toggle('show');
         }
- 
+
         function verifyAdminPassword() {
             const enteredPass = document.getElementById('admin-password-input').value;
             if (enteredPass === "1234") {
@@ -339,16 +334,16 @@
                 logSys("Спроба несанкціонованого входу", "error");
             }
         }
- 
+
         function openDatabaseModal() {
             document.getElementById('db-modal').style.display = 'flex';
             loadTableDataFromModal();
         }
- 
+
         function closeDatabaseModal() {
             document.getElementById('db-modal').style.display = 'none';
         }
- 
+
         // Завантаження даних у вікно перегляду залежно від обраної таблиці
         async function loadTableDataFromModal() {
             const table = document.getElementById('modal-table-select').value;
@@ -366,7 +361,7 @@
                 } else {
                     data.sort((a,b) => String(a.pd).localeCompare(String(b.pd)) || a.km - b.km);
                 }
- 
+
                 const filterSelect = document.getElementById('modal-pd-filter');
                 filterSelect.innerHTML = '<option value="all">Всі ПД</option>';
                 const uniquePds = [...new Set(data.map(item => item.pd))].sort((a,b) => String(a).localeCompare(String(b)));
@@ -375,13 +370,13 @@
                     const cleanDisplay = String(pd).startsWith("ПД-") ? pd : `ПД-${pd}`;
                     filterSelect.innerHTML += `<option value="${pd}">${cleanDisplay}</option>`;
                 });
- 
+
                 renderModalCards(data, table);
             } catch (e) {
                 container.innerHTML = `<div style='color:red;'>Помилка завантаження: ${e.message}</div>`;
             }
         }
- 
+
         function renderModalCards(data, table) {
             const container = document.getElementById('modal-db-cards-container');
             container.innerHTML = "";
@@ -389,12 +384,12 @@
                 container.innerHTML = "<div style='color:gray;text-align:center;padding:20px;'>Таблиця порожня</div>";
                 return;
             }
- 
+
             data.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'db-card';
                 card.setAttribute('data-pd', item.pd);
- 
+
                 let cardContent = "";
                 const displayPd = String(item.pd).startsWith("ПД-") ? item.pd : `ПД-${item.pd}`;
                 
@@ -436,7 +431,7 @@
                 container.appendChild(card);
             });
         }
- 
+
         function filterModalCards() {
             const selectedVal = document.getElementById('modal-pd-filter').value;
             const cards = document.querySelectorAll('.db-card');
@@ -448,7 +443,7 @@
                 }
             });
         }
- 
+
         // Поштучне видалення об'єкта з бази через модалку
         async function deleteSingleItem(table, id) {
             if(!confirm("Видалити цей запис безповоротно?")) return;
@@ -466,7 +461,7 @@
                 alert("Помилка: " + e.message);
             }
         }
- 
+
         // Завантаження унікальних ПД для блоку Очищення околотків
         async function loadPdsForCleaning() {
             const optionsContainer = document.getElementById('dropdown-options');
@@ -481,12 +476,12 @@
                 optionsContainer.innerHTML = "";
                 selectedPds = [];
                 document.getElementById('dropdown-label').innerText = "Оберіть ПД...";
- 
+
                 if(pds.length === 0) {
                     optionsContainer.innerHTML = "<div style='color:gray;padding:8px;font-size:12px;'>Немає даних</div>";
                     return;
                 }
- 
+
                 pds.forEach(pd => {
                     const item = document.createElement('div');
                     item.className = 'multiselect-item';
@@ -515,7 +510,7 @@
                 optionsContainer.innerHTML = `<div style='color:red;padding:8px;'>Помилка: ${e.message}</div>`;
             }
         }
- 
+
         function handlePdSelectionChange(pd, isChecked) {
             if(isChecked) {
                 if(!selectedPds.includes(pd)) selectedPds.push(pd);
@@ -529,132 +524,33 @@
                 lbl.innerText = selectedPds.map(x => String(x).startsWith("ПД-") ? x : `ПД-${x}`).join(', ');
             }
         }
- 
+
         // Повне очищення обраних ПД з бази даних
         async function clearSelectedPdTracks() {
             if(selectedPds.length === 0) {
-                alert("Будь ласка, оберіть хоча б один околоток для очищення!");
+                alert("Будь ласка, оберіть хоча б один ПД для очищення.");
                 return;
             }
-            const displayNames = selectedPds.map(x => String(x).startsWith("ПД-") ? x : `ПД-${x}`).join(', ');
-            if(!confirm(`УВАГА! Ви дійсно бажаєте повністю видалити конфігурацію дільниць та світлофорів для: ${displayNames}?`)) return;
- 
-            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Prefer': 'return=minimal' };
-            let successCounter = 0;
             
-            for(let pd of selectedPds) {
-                try {
-                    // Видаляємо з lines_config
-                    const resLines = await fetch(`${baseDbUrl}/rest/v1/lines_config?pd=eq.${pd}`, { method: 'DELETE', headers });
-                    // Видаляємо зі signals
-                    const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals?pd=eq.${pd}`, { method: 'DELETE', headers });
-                    
-                    if(resLines.ok && resSignals.ok) {
-                        successCounter++;
-                    }
-                } catch(e) {
-                    logSys(`Помилка очищення для ПД ${pd}: ${e.message}`, 'error');
-                }
-            }
+            if(!confirm("Ви впевнені, що хочете видалити всі записи для вибраних ПД? Ця дія незворотна!")) return;
             
-            logSys(`Очищення завершено. Успішно видалено ПД: ${successCounter}`, 'success');
-            loadPdsForCleaning();
-        }
-
-        // НОВА ФУНКЦІЯ: Збереження даних із примусовим префіксом "ПД-"
-        async function saveDataToCloud() {
-            const pdInput = document.getElementById('admin-pd-num').value.trim();
-            if(!pdInput) {
-                alert("Будь ласка, вкажіть номер ПД!");
-                return;
-            }
-
-            // РІШЕННЯ ПРОБЛЕМИ: Формуємо значення "ПД-13" для запису в БД
-            const pdValueForDb = `ПД-${pdInput}`;
-            const headers = { 
-                'apikey': fullKey, 
-                'authorization': 'Bearer ' + fullKey, 
-                'Content-Type': 'application/json',
-                'Prefer': 'return=minimal'
-            };
-
-            if (currentAdminMode === 'lines') {
-                const name = document.getElementById('admin-peregon').value.trim();
-                const startKm = parseInt(document.getElementById('admin-start-km').value);
-                const startPk = parseInt(document.getElementById('admin-start-pk').value) || 1;
-                const endKm = parseInt(document.getElementById('admin-end-km').value);
-                const endPk = parseInt(document.getElementById('admin-end-pk').value) || 1;
+            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+            try {
+                const pdQuery = selectedPds.join(',');
                 
-                if(!name || isNaN(startKm) || isNaN(endKm)) {
-                    alert("Заповніть всі обов'язкові поля для дільниці!");
-                    return;
+                // Приклад логіки видалення з бази Supabase для вибраних ПД
+                const res = await fetch(`${baseDbUrl}/rest/v1/lines_config?pd=in.(${pdQuery})`, { method: 'DELETE', headers });
+                
+                if(res.ok) {
+                    logSys(`Успішно видалено конфігурації для: ${selectedPds.map(x => String(x).startsWith("ПД-") ? x : `ПД-${x}`).join(', ')}`, 'success');
+                    selectedPds = [];
+                    document.getElementById('dropdown-label').innerText = "Оберіть ПД...";
+                    loadPdsForCleaning(); // Оновлюємо список ПД
+                } else {
+                    logSys("Помилка під час видалення ПД", 'error');
                 }
-
-                // Збираємо типи колій (Парна / Непарна)
-                const tracks = [];
-                if(document.getElementById('chk-neparna').checked) tracks.push("Непарна");
-                if(document.getElementById('chk-parna').checked) tracks.push("Парна");
-
-                if(tracks.length === 0) {
-                    alert("Оберіть хоча б одну колію!");
-                    return;
-                }
-
-                // Відправляємо окремий запис для кожної обраної колії
-                try {
-                    for(let track of tracks) {
-                        const payload = {
-                            pd: pdValueForDb, // Записується як "ПД-13"
-                            type: currentObjectType === 'station' ? 'станція' : 'перегін',
-                            name: name,
-                            track_type: track,
-                            start_km: startKm,
-                            start_pk: startPk,
-                            end_km: endKm,
-                            end_pk: endPk
-                        };
-                        await fetch(`${baseDbUrl}/rest/v1/lines_config`, { method: 'POST', headers, body: JSON.stringify(payload) });
-                    }
-                    logSys(`Дільницю "${name}" успішно додано для ${pdValueForDb}`, 'success');
-                    alert("Дані дільниці успішно збережено!");
-                    loadPdsForCleaning();
-                } catch(e) {
-                    logSys(`Помилка запису дільниці: ${e.message}`, 'error');
-                }
-
-            } else if (currentAdminMode === 'signals') {
-                const sigName = document.getElementById('sig-name').value.trim();
-                const km = parseInt(document.getElementById('sig-km').value);
-                const pk = parseInt(document.getElementById('sig-pk').value) || 1;
-                const sigType = document.getElementById('sig-type').value;
-                const trackType = document.getElementById('sig-chk-neparna').checked ? "Непарна" : "Парна";
-
-                if(!sigName || isNaN(km)) {
-                    alert("Заповніть всі обов'язкові поля для світлофора!");
-                    return;
-                }
-
-                const payload = {
-                    pd: pdValueForDb, // Записується як "ПД-13"
-                    signal_name: sigName,
-                    track_type: trackType,
-                    km: km,
-                    piket: pk,
-                    signal_type: sigType
-                };
-
-                try {
-                    const res = await fetch(`${baseDbUrl}/rest/v1/signals`, { method: 'POST', headers, body: JSON.stringify(payload) });
-                    if(res.ok) {
-                        logSys(`Світлофор ${sigName} додано для ${pdValueForDb}`, 'success');
-                        alert("Дані світлофора успішно збережено!");
-                        loadPdsForCleaning();
-                    } else {
-                        alert("Не вдалося зберегти світлофор.");
-                    }
-                } catch(e) {
-                    logSys(`Помилка запису світлофора: ${e.message}`, 'error');
-                }
+            } catch(e) {
+                logSys("Помилка з'єднання: " + e.message, 'error');
             }
         }
     </script>
