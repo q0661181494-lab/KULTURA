@@ -5,32 +5,148 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📊 Двоколійна залізнична діаграма (Матча)</title>
     <style>
+        /* Фіксація скролбару та розтягування на весь екран для центрування */
+        html, body {
+            height: 100%;
+            overflow-y: scroll;
+        }
+
         /* Фірмове легке фісташкове тло */
-        body { font-family: -apple-system, sans-serif; background-color: #f0fdf4; margin: 0; padding: 12px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 580px; box-sizing: border-box; display: flex; flex-direction: column; }
+        body { 
+            font-family: -apple-system, sans-serif; 
+            background-color: #f0fdf4; 
+            margin: 0; 
+            padding: 12px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            justify-content: space-between; /* Рівномірно розподіляє контент, притискаючи підвал */
+            box-sizing: border-box;
+        }
+
+        .container { 
+            width: 100%; 
+            max-width: 580px; 
+            box-sizing: border-box; 
+            display: flex; 
+            flex-direction: column;
+            flex-grow: 1; /* Дозволяє контейнеру займати весь доступний простір */
+        }
         
         /* Навігаційне меню у шавлієвих тонах */
-        .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 12px; display: flex; gap: 6px; box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); width: 100%; box-sizing: border-box; align-items: center; border: 1px solid #d1fae5; }
-        .nav-link { flex: 1; padding: 12px 4px; text-align: center; font-weight: bold; font-size: 14px; color: #115e59; text-decoration: none; border-radius: 8px; background: #f0fdf4; cursor: pointer; }
-        .nav-link.active { background-color: #115e59; color: white; }
+        .nav-menu { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 6px; 
+            margin-bottom: 12px; 
+            display: flex; 
+            gap: 6px; 
+            box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); 
+            width: 100%; 
+            box-sizing: border-box; 
+            align-items: center; 
+            border: 1px solid #d1fae5; 
+        }
         
-        /* Кругла кнопка налаштувань */
-        .admin-menu-btn { width: 42px; height: 42px; background-color: #f0fdf4; color: #115e59; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: 1px solid #a7f3d0; flex-shrink: 0; text-decoration: none; }
+        .nav-link { 
+            flex: 1; 
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center; 
+            font-weight: bold; 
+            font-size: 14px; 
+            color: #115e59; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            background: #f0fdf4; 
+            cursor: pointer; 
+            box-sizing: border-box;
+            border: none;
+        }
         
-        /* Головна картка з м'якою шавлієвою рамкою */
-        .screen { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); width: 100%; box-sizing: border-box; margin-bottom: 12px; border: 1px solid #d1fae5; }
+        .admin-menu-btn { 
+            width: 42px; 
+            height: 42px; 
+            background-color: #f0fdf4; 
+            color: #115e59; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 18px; 
+            border: none; 
+            flex-shrink: 0; 
+            text-decoration: none; 
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .nav-link:hover, .admin-menu-btn:hover {
+            background-color: #e6f4ea;
+        }
+        
+        .nav-link.active, .admin-menu-btn.active { 
+            background-color: #115e59 !important; 
+            color: white !important; 
+            pointer-events: none;
+        }
+        
+        /* Головна картка з м'якою шавлієвою рамкою та плавною анімацією */
+        .screen { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); 
+            width: 100%; 
+            box-sizing: border-box; 
+            margin-bottom: 24px; 
+            border: 1px solid #d1fae5;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* Стан порожнього ПД: перетворюємо екран на креативне фокус-вікно по центру */
+        .screen.welcome-focus {
+            margin-top: auto;
+            margin-bottom: auto;
+            transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(11, 94, 89, 0.12);
+            border-color: #a7f3d0;
+            padding: 30px 20px;
+        }
+
         h2 { margin-top: 0; margin-bottom: 4px; font-size: 19px; color: #115e59; font-weight: 800; text-align: center; }
         p { color: #0f766e; font-size: 13px; margin-top: 0; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
-        /* Поля введення у стилі Матча */
-        .input-field { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; transition: border-color 0.2s, box-shadow 0.2s; }
-        .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
+        /* Поля введення */
+        .input-field { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; transition: all 0.2s; }
+        .input-field:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2); }
         .track-label { font-size: 11px; font-weight: 700; color: #115e59; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Рядок введення ПД з префіксом */
-        .pd-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .pd-prefix { font-size: 16px; font-weight: bold; color: #115e59; }
-        .pd-number-box { width: 80px !important; margin-bottom: 0 !important; text-align: center; }
+        /* КРЕАТИВНИЙ БЛОК ВВЕДЕННЯ ПД */
+        .welcome-focus .pd-container-box {
+            background: #f0fdf4;
+            padding: 20px;
+            border-radius: 14px;
+            border: 1px dashed #0d9488;
+            margin-top: 10px;
+        }
+        .pd-input-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0; }
+        .pd-prefix { font-size: 22px; font-weight: 900; color: #115e59; letter-spacing: 1px; }
+        
+        /* Збільшене поле вводу для фокус-режиму */
+        .pd-number-box { 
+            width: 100px !important; 
+            height: 50px;
+            font-size: 22px !important; 
+            margin-bottom: 0 !important; 
+            text-align: center; 
+            font-weight: 900;
+            border-radius: 12px;
+            border: 2px solid #a7f3d0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
 
         /* Стильні Кнопки-Таби */
         .mode-tabs { display: flex; gap: 8px; margin-bottom: 12px; background: #f0fdf4; padding: 4px; border-radius: 10px; border: 1px solid #c2e7d9; }
@@ -49,108 +165,90 @@
         .km-signboard { background: #e6f4ea; border: 2px solid #115e59; border-radius: 8px; padding: 8px; margin: 18px 0 8px 0; text-align: center; font-weight: 900; font-size: 14px; color: #115e59; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 2px 5px rgba(17,94,89,0.05); }
         .km-signboard:first-child { margin-top: 0; }
         
-        /* Заголовки стовпчиків колій з урахуванням бокових полів */
+        /* Заголовки стовпчиків колій */
         .track-headers-row { display: flex; width: 100%; margin-bottom: 6px; font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; text-align: center; opacity: 0.8; }
-        .header-margin-space { width: 50px; } /* Простір над полями світлофорів */
+        .header-margin-space { width: 50px; }
         .header-left-track { flex: 1; padding-right: 16px; }
         .header-center-space { width: 42px; }
         .header-right-track { flex: 1; padding-left: 16px; }
  
         /* Рядок пікета */
         .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; border-radius: 6px; transition: background-color 0.2s; }
-        
-        /* Стиль для пікетів, що входять в межі станції */
         .station-piket-row { background-color: #f1f5f9 !important; border-left: 3px solid #0d9488; border-right: 3px solid #0d9488; }
-        
-        /* Зміна кольору центрального кубика пікета в межах станції */
-        .station-piket-row .piket-center-core {
-            background: #0d9488 !important;   /* Темно-бірюзове тло */
-            color: white !important;         /* Білий колір цифри */
-            border-color: #0f766e !important; /* Темніша рамка кубика */
-        }
+        .station-piket-row .piket-center-core { background: #0d9488 !important; color: white !important; border-color: #0f766e !important; }
 
-        /* Стиль для плашки-розриву назви станції */
-        .station-boundary-delimiter {
-            background: #f0fdf4;
-            border: 2px dashed #0d9488;
-            border-radius: 8px;
-            padding: 6px;
-            margin: 12px 0 12px 0;
-            text-align: center;
-            font-weight: 800;
-            font-size: 12px;
-            color: #0d9488;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
-        }
+        /* Плашка-розрив назви станції */
+        .station-boundary-delimiter { background: #f0fdf4; border: 2px dashed #0d9488; border-radius: 8px; padding: 6px; margin: 12px 0 12px 0; text-align: center; font-weight: 800; font-size: 12px; color: #0d9488; letter-spacing: 0.5px; text-transform: uppercase; }
         
         /* Бокові поля для світлофорів */
         .info-margin { width: 50px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: bold; color: #0f766e; box-sizing: border-box; }
         .margin-left { justify-content: flex-end; padding-right: 6px; }
         .margin-right { justify-content: flex-start; padding-left: 6px; }
 
-        /* --- ВАРІАНТ 1: RAILWAY HEAVY --- */
-        .signal-badge { 
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: #0f172a; /* Темно-синій, майже чорний */
-            color: #f8fafc;      /* Яскраво-білий текст */
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 14px;     /* Збільшений шрифт */
-            font-weight: 900;    /* Максимальна жирність */
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            min-width: 40px;     /* Щоб плашка була помітною */
-            white-space: nowrap;
-        }
+        /* Сигнальні плашки */
+        .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #0f172a; color: #f8fafc; padding: 4px 10px; border-radius: 6px; font-size: 14px; font-weight: 900; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); min-width: 40px; white-space: nowrap; }
 
-        /* Зони обкошування (Брівки узбіччя) */
+        /* Зони обкошування */
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; }
-        
-        /* Центральний ПК маркер */
         .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
         
-        /* Візуалізація рейкової нитки */
+        /* Рейкова нитка */
         .rail-line-visual { width: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: #cbd5e1; }
         .rail-line-visual::before, .rail-line-visual::after { content: ""; position: absolute; top: 0; width: 2px; height: 100%; background: #475569; }
         .rail-line-visual::before { left: 1px; }
         .rail-line-visual::after { right: 1px; }
         .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
  
-        /* Світлофорна палітра для брівок */
+        /* Колірна палітра */
         .status-clear-green { background-color: #22c55e !important; color: white; }
         .status-warn-yellow { background-color: #eab308 !important; color: #1f2937; }
         .status-overgrown-red { background-color: #ef4444 !important; color: white; }
         
-        /* Монітор самоаудиту */
-        .debug-panel { margin-top: 8px; padding: 12px; background-color: #e6f4ea; border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(11,94,89,0.02); }
+        /* МОНІТОР СИСТЕМИ: МАКСИМАЛЬНО ОПУЩЕНИЙ ВНИЗ ТА АДАПТИВНИЙ */
+        .debug-panel { 
+            width: 100%;
+            max-width: 580px;
+            margin-top: auto; /* Штовхає панель до самого низу body */
+            padding: 10px; 
+            background-color: rgba(230, 244, 234, 0.8); 
+            backdrop-filter: blur(4px);
+            border: 1px solid #c2e7d9; 
+            color: #115e59; 
+            border-radius: 12px; 
+            font-size: 11px; 
+            font-family: monospace; 
+            box-shadow: 0 -2px 10px rgba(11,94,89,0.03);
+            box-sizing: border-box;
+        }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .debug-scroll { max-height: 90px; overflow-y: auto; text-align: left; }
+        .debug-scroll { max-height: 60px; overflow-y: auto; text-align: left; }
     </style>
 </head>
 <body>
  
     <div class="container">
+        <!-- Навігаційне меню -->
         <div class="nav-menu">
-            <a href="#" class="nav-link active" id="nav-btn-charts">📊 Графіки</a>
+            <a href="index.html" class="nav-link active" id="nav-btn-charts">📊 Графіки</a>
             <a href="master.html" class="nav-link" id="nav-btn-master">🧑‍🔧 Майстер</a>
             <a href="admin.html" class="admin-menu-btn" id="nav-btn-admin">⚙️</a>
         </div>
  
-        <div class="screen" id="screen-charts">
-            <h2>📊 Двоколійна діаграма</h2>
-            <p>Стан обкошування брівок парної та непарної колій</p>
+        <!-- Картка екрана з додатковим початковим класом центрування 'welcome-focus' -->
+        <div class="screen welcome-focus" id="screen-charts">
+            <h2 id="main-screen-title">🚂 Вхід у систему діаграм</h2>
+            <p id="main-screen-desc">Введіть номер вашого навколотка для формування лінійного графіка</p>
             
-            <label class="track-label">Околоток (ПД):</label>
-            <div class="pd-input-row">
-                <span class="pd-prefix">ПД-</span>
-                <input type="number" id="filter-pd-input" class="input-field pd-number-box" oninput="handlePdInput()">
+            <div class="pd-container-box">
+                <label class="track-label" style="text-align: center; margin-bottom: 6px;">Номер лінії (ПД):</label>
+                <div class="pd-input-row">
+                    <span class="pd-prefix">ПД-</span>
+                    <input type="number" id="filter-pd-input" class="input-field pd-number-box" placeholder="?" oninput="handlePdInput()">
+                </div>
             </div>
 
-            <div id="control-tabs-block" style="display: none;">
+            <!-- Блок управління табами та чекбоксами (з'являється після вводу ПД) -->
+            <div id="control-tabs-block" style="display: none; margin-top: 16px;">
                 <label class="track-label">Оберіть режим відображення:</label>
                 <div class="mode-tabs">
                     <button id="tab-pd" class="tab-btn active" onclick="switchDisplayMode('pd')">по ПД</button>
@@ -158,18 +256,20 @@
                 </div>
 
                 <div id="peregon-select-container" style="display: none;">
-                    <label class="track-label">Оберіть перегін (чекбокс):</label>
+                    <label class="track-label">Оберіть перегін (векторний фільтр):</label>
                     <div id="peregon-checkbox-group" class="checkbox-group-container"></div>
                 </div>
             </div>
  
+            <!-- Зона рендерингу діаграми -->
             <div id="diagram-render-zone" class="railway-canvas"></div>
         </div>
+    </div>
  
-        <div class="debug-panel">
-            <div class="debug-title">🖥️ Монітор системи</div>
-            <div id="debug-console" class="debug-scroll"></div>
-        </div>
+    <!-- Монітор системи тепер винесено окремо з контейнера, він завжди на дні екрана -->
+    <div class="debug-panel">
+        <div class="debug-title">🖥️ Монітор системи</div>
+        <div id="debug-console" class="debug-scroll"></div>
     </div>
  
     <script>
@@ -211,7 +311,6 @@
                 signalsData = await resSignals.json();
  
                 logSys(`Синхронізовано з хмарою. Ліній: ${tracksData.length}, Світлофорів: ${signalsData.length}`, 'success');
-                document.getElementById('diagram-render-zone').innerHTML = "<p style='color:gray; text-align:center; padding:20px;'>Будь ласка, введіть номер ПД для відображення інформації.</p>";
             } catch (e) {
                 logSys("Помилка завантаження: " + e.message, 'error');
             }
@@ -221,16 +320,27 @@
             const pdNum = document.getElementById('filter-pd-input').value.trim();
             const tabsBlock = document.getElementById('control-tabs-block');
             const container = document.getElementById('diagram-render-zone');
+            const screenCard = document.getElementById('screen-charts');
+            const mainTitle = document.getElementById('main-screen-title');
+            const mainDesc = document.getElementById('main-screen-desc');
 
             if (!pdNum) {
+                // Повертаємо стан фокусу по центру екрана
+                screenCard.classList.add('welcome-focus');
                 tabsBlock.style.display = 'none';
-                container.innerHTML = "<p style='color:gray; text-align:center; padding:20px;'>Будь ласка, введіть номер ПД для відображення інформації.</p>";
+                mainTitle.innerText = "🚂 Вхід у систему діаграм";
+                mainDesc.innerText = "Введіть номер вашого навколотка для формування лінійного графіка";
+                container.innerHTML = "";
                 return;
             }
 
+            // Користувач почав вводити дані: прибираємо фокус-центрування, розгортаємо інтерфейс
+            screenCard.classList.remove('welcome-focus');
             tabsBlock.style.display = 'block';
-            const fullPdName = "ПД-" + pdNum;
+            mainTitle.innerText = "📊 Двоколійна діаграма";
+            mainDesc.innerText = "Стан обкошування брівок парної та непарної колій";
 
+            const fullPdName = "ПД-" + pdNum;
             const filtered = tracksData.filter(t => t.pd === fullPdName && !t.track_type.includes('станція'));
             const uniquePeregons = [...new Set(filtered.map(t => t.name))].sort();
             
@@ -311,7 +421,7 @@
                 const selectedPeregons = Array.from(checkedBoxes).map(cb => cb.value);
 
                 if (selectedPeregons.length === 0) {
-                    container.innerHTML = "<p style='color:gray; text-align:center; padding:10px;'>Оберіть хоча б один перегін чекбоксом.</p>";
+                    container.innerHTML = "<p style='color:gray; text-align:center; padding:10px;'>Оберіть хоча б один перегін.</p>";
                     return;
                 }
 
@@ -331,7 +441,7 @@
             }
 
             if (segmentsToRender.length === 0) {
-                container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію ділянок для рендерингу не знайдено.</p>";
+                container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію ділянок не знайдено.</p>";
                 return;
             }
 
@@ -398,11 +508,9 @@
                         }
                     }
  
-                    // ЗМІНЕНО ТУТ: Використовуємо строге порівняння значень замість часткового .includes()
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'парна');
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'непарна');
 
-                    // Ліве бокове поле (Парна колія)
                     const leftMargin = document.createElement('div');
                     leftMargin.className = 'info-margin margin-left';
                     if (leftSignal) {
@@ -437,7 +545,6 @@
                     rightBank.innerHTML = `<div>${rightSide.label}</div>${rightPdLabel}<div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
                     nodeRow.appendChild(rightBank);
                     
-                    // Праве бокове поле (Непарна колія)
                     const rightMargin = document.createElement('div');
                     rightMargin.className = 'info-margin margin-right';
                     if (rightSignal) {
