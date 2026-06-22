@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📊 Двоколійна залізнична діаграма (Матча)</title>
     <style>
-        /* Фіксація скролбару та розтягування на весь екран для центрування */
+        /* Фіксація скролбару та розтягування на весь екран */
         html, body {
             height: 100%;
             overflow-y: scroll;
@@ -103,13 +103,12 @@
             box-sizing: border-box; 
             margin-bottom: 24px; 
             border: 1px solid #d1fae5;
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s;
         }
 
-        /* Стан порожнього ПД: перетворюємо екран на креативне фокус-вікно по центру */
+        /* Фіксоване верхнє положення блоку без стрибків вгору-вниз */
         .screen.welcome-focus {
-            margin-top: auto;
-            margin-bottom: auto;
+            margin-top: 10px;
             transform: scale(1.02);
             box-shadow: 0 20px 40px rgba(11, 94, 89, 0.12);
             border-color: #a7f3d0;
@@ -148,7 +147,7 @@
             animation: pulse-border 2.5s infinite ease-in-out; 
         }
         
-        /* Строге центрування поля введення за рахунок абсолютного позиціонування ПД- */
+        /* Строге центрування поля введення */
         .pd-input-row { 
             display: flex; 
             align-items: center; 
@@ -166,7 +165,7 @@
             left: 0;
         }
         
-        /* Збільшене поле вводу для фокус-режиму */
+        /* Поле вводу */
         .pd-number-box { 
             width: 100px !important; 
             height: 54px;
@@ -181,7 +180,7 @@
             margin-right: 0;
         }
 
-        /* Анімація пульсуючого кастомного плейсхолдера (імітація курсору) */
+        /* Анімація пульсуючого кастомного плейсхолдера */
         .pd-number-box::placeholder {
             color: #0d9488;
             opacity: 0.6;
@@ -249,7 +248,7 @@
         .debug-panel { 
             width: 100%;
             max-width: 580px;
-            margin-top: auto; 
+            margin-top: 24px; 
             padding: 10px; 
             background-color: rgba(230, 244, 234, 0.8); 
             backdrop-filter: blur(4px);
@@ -379,7 +378,6 @@
                 return;
             }
 
-            // Обмежуємо довжину введення двома цифрами на випадок ручного копіювання
             if (pdNum.length > 2) {
                 inputEl.value = pdNum.slice(0, 2);
             }
@@ -417,7 +415,6 @@
 
             drawDoubleTrackDiagram();
 
-            // АВТОМАТИЧНЕ ЗГОРТАННЯ КЛАВІАТУРИ НА МОБІЛЬНОМУ ПРИ 2 ЦИФРАХ
             if (inputEl.value.trim().length === 2) {
                 document.activeElement.blur(); 
                 logSys("Клавіатуру згорнуто автоматично.");
