@@ -145,7 +145,7 @@
             border-radius: 14px;
             border: 1px dashed #0d9488;
             margin-top: 10px;
-            animation: pulse-border 2.5s infinite ease-in-out; /* Дихаюче підсвічування картки */
+            animation: pulse-border 2.5s infinite ease-in-out; 
         }
         
         .pd-input-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 0; }
@@ -228,7 +228,7 @@
         .status-warn-yellow { background-color: #eab308 !important; color: #1f2937; }
         .status-overgrown-red { background-color: #ef4444 !important; color: white; }
         
-        /* МОНІТОР СИСТЕМИ: МАКСИМАЛЬНО ОПУЩЕНИЙ ВНИЗ ТА АДАПТИВНИЙ */
+        /* МОНІТОР СИСТЕМИ */
         .debug-panel { 
             width: 100%;
             max-width: 580px;
@@ -247,7 +247,6 @@
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 60px; overflow-y: auto; text-align: left; }
 
-        /* КЛЮЧОВІ АНІМАЦІЇ */
         @keyframes blink-cursor {
             0%, 100% { opacity: 0; }
             50% { opacity: 0.8; }
@@ -440,10 +439,16 @@
             container.innerHTML = "";
             
             let segmentsToRender = [];
+            let minKm, maxKm;
 
             if (currentMode === 'pd') {
-                // Вибираємо тільки ті ділянки, які належать поточному ПД
                 segmentsToRender = tracksData.filter(t => t.pd === fullPdName);
+                if (segmentsToRender.length === 0) {
+                    container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію ділянок не знайдено.</p>";
+                    return;
+                }
+                minKm = Math.min(...segmentsToRender.map(s => parseInt(s.start_km)));
+                maxKm = Math.max(...segmentsToRender.map(s => parseInt(s.end_km)));
             } else {
                 // Режим "по перегону"
                 const checkedBoxes = document.querySelectorAll('#peregon-checkbox-group input[type="checkbox"]:checked');
@@ -454,18 +459,41 @@
                     return;
                 }
 
-                // Захоплюємо ВИКЛЮЧНО обрані перегони. Суміжні станції сюди більше не додаються!
-                segmentsToRender = tracksData.filter(t => selectedPeregons.includes(t.name) && t.pd === fullPdName);
-            }
+                // Спочатку вибираємо суто конфігурацію самого перегону (або кількох вибраних)
+                const purePeregons = tracksData.filter(t => selectedPeregons.includes(t.name) && t.pd === fullPdName);
+                if (purePeregons.length === 0) {
+                    container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію перегону не знайдено.</p>";
+                    return;
+                }
 
-            if (segmentsToRender.length === 0) {
-                container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію ділянок не знайдено.</p>";
-                return;
-            }
+                // Визначаємо межі кілометрів виключно за обраним перегоном
+                minKm = Math.min(...purePeregons.map(s => parseInt(s.start_km)));
+                maxKm = Math.max(...purePeregons.map(s => parseInt(s.end_km)));
 
-            // Розраховуємо межі кілометрів строго на основі відфільтрованих сегментів цього ПД
-            const minKm = Math.min(...segmentsToRender.map(s => parseInt(s.start_km)));
-            const maxKm = Math.max(...segmentsToRender.map(s => parseInt(s.end_km)));
+                // Додаємо конфігурацію перегонів до фінального рендеру
+                segmentsToRender = [...purePeregons];
+
+                // Автоматично шукаємо та підтягуємо суміжні станції для заповнення суміжних пікетів на краях кілометрів
+                selectedPeregons.forEach(pName => {
+                    const stationTokens = pName.split('-').map(s => s.trim().toLowerCase());
+                    tracksData.forEach(t => {
+                        if (t.type && t.type.includes('станція')) {
+                            // Перевіряємо чи назва станції фігурує у назві поточного перегону
+                            const isDotichna = stationTokens.some(token => t.name.toLowerCase().includes(token));
+                            if (isDotichna) {
+                                // Перевіряємо чи станція перетинається з граничними кілометрами перегону
+                                const sStart = parseInt(t.start_km);
+                                const sEnd = parseInt(t.end_km);
+                                const hasOverlap = (sStart <= maxKm && sEnd >= minKm);
+
+                                if (hasOverlap && !segmentsToRender.some(added => added.id === t.id)) {
+                                    segmentsToRender.push(t);
+                                }
+                            }
+                        }
+                    });
+                });
+            }
 
             for (let km = minKm; km <= maxKm; km++) {
                 
@@ -486,10 +514,11 @@
                 container.appendChild(headersRow);
  
                 for (let pk = 1; pk <= 10; pk++) {
-                    const leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('парна')); 
-                    const rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type.includes('непарна'));
-                    const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type.includes('станція'));
+                    const leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('парна')); 
+                    const rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('непарна'));
+                    const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.includes('станція'));
 
+                    // Станція має пріоритет малювання на пікеті, якщо вона накладається на цей кілометр
                     const finalLeftConfig = stationConfig || leftConfig;
                     const finalRightConfig = stationConfig || rightConfig;
 
@@ -527,7 +556,6 @@
                         }
                     }
  
-                    // Фільтрація світлофорів із жорсткою прив'язкою до поточного ПД, щоб не чіпляти інші лінії (напр. ПД-16)
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'парна' && s.pd === fullPdName);
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'непарна' && s.pd === fullPdName);
 
