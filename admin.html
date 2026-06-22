@@ -298,13 +298,16 @@
             logSys(`Перемкнуто режим на: ${mode === 'lines' ? 'Дільниці' : 'Світлофори'}`);
         }
 
-        // ФУНКЦІЯ ЗБЕРЕЖЕННЯ В SUPABASE (ДОДАНА Й КОРЕКТНО НАЛАШТОВАНА)
+        // ОНОВЛЕНА ФУНКЦІЯ ЗБЕРЕЖЕННЯ (З ПРАВИЛЬНИМ ФОРМУВАННЯМ ПРЕФІКСУ ПД-)
         async function saveDataToCloud() {
-            const pdNum = document.getElementById('admin-pd-num').value.trim();
-            if (!pdNum) {
+            const pdRaw = document.getElementById('admin-pd-num').value.trim();
+            if (!pdRaw) {
                 alert("Будь ласка, спочатку вкажіть номер ПД (околоток)!");
                 return;
             }
+
+            // Автоматично додаємо префікс "ПД-", якщо користувач ввів просто цифру (наприклад, 16 -> ПД-16)
+            const pdNum = pdRaw.startsWith("ПД-") ? pdRaw : "ПД-" + pdRaw;
 
             const headers = { 
                 'apikey': fullKey, 
@@ -314,7 +317,6 @@
             };
 
             if (currentAdminMode === 'lines') {
-                // Логіка збору даних для дільниць
                 const name = document.getElementById('admin-peregon').value.trim();
                 const startKm = parseInt(document.getElementById('admin-start-km').value);
                 const startPk = parseInt(document.getElementById('admin-start-pk').value);
@@ -348,7 +350,7 @@
                 };
 
                 try {
-                    logSys("Надсилання дільниці до бази даних...");
+                    logSys(`Надсилання дільниці для ${pdNum} до бази даних...`);
                     const res = await fetch(`${baseDbUrl}/rest/v1/lines_config`, {
                         method: 'POST',
                         headers,
@@ -367,7 +369,6 @@
                 }
 
             } else if (currentAdminMode === 'signals') {
-                // Логіка збору даних для світлофорів (Таблиця signals)
                 const sigName = document.getElementById('sig-name').value.trim();
                 const km = parseInt(document.getElementById('sig-km').value);
                 const piket = parseInt(document.getElementById('sig-pk').value);
@@ -396,7 +397,7 @@
                 };
 
                 try {
-                    logSys(`Надсилання світлофора ${sigName} до бази даних...`);
+                    logSys(`Надсилання світлофора ${sigName} для ${pdNum} до бази даних...`);
                     const res = await fetch(`${baseDbUrl}/rest/v1/signals`, {
                         method: 'POST',
                         headers,
@@ -416,7 +417,6 @@
             }
         }
 
-        // Динамічна зміна підказок для дільниць/станцій
         function setObjectType(type) {
             currentObjectType = type;
             document.getElementById('type-btn-peregon').classList.toggle('active', type === 'peregon');
