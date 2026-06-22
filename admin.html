@@ -111,7 +111,7 @@
             <p>Для входу в панель адміністрування введіть пароль захисту</p>
             <div class="auth-box">
                 <label class="track-label">Пароль адміністратора:</label>
-                <input type="password" id="admin-password-input" class="input-field" onkeydown="if(event.key==='Enter') verifyAdminPassword()">
+                <input type="password" id="admin-password-input" class="input-field" value="1234" onkeydown="if(event.key==='Enter') verifyAdminPassword()">
                 <button class="btn-submit" onclick="verifyAdminPassword()">Підтвердити вхід</button>
             </div>
         </div>
@@ -195,7 +195,7 @@
                         <span>Непарна</span>
                     </label>
                     <label class="track-checkbox-item">
-                        <input type="checkbox" id="sig-chk-parna" checked>
+                        <input type="checkbox" id="sig-chk-parna">
                         <span>Парна</span>
                     </label>
                 </div>
@@ -214,8 +214,8 @@
                     </div>
                 </div>
 
-                <label class="track-label">5. Примітки:</label>
-                <input type="text" id="sig-type" class="input-field" placeholder="Введіть додаткову інформацію">
+                <label class="track-label">5. Примітки (Тип сигналу):</label>
+                <input type="text" id="sig-type" class="input-field" placeholder="Наприклад: Вхідний, Вихідний, Прохідний">
             </div>
 
             <button class="btn-submit" onclick="saveDataToCloud()">Зберегти в базу даних</button>
@@ -287,7 +287,7 @@
             con.scrollTop = con.scrollHeight;
         }
 
-        // Перемикаться режимів: Дільниці або Світлофори
+        // Перемикання режимів: Дільниці або Світлофори
         function switchAdminMode(mode) {
             currentAdminMode = mode;
             document.getElementById('form-lines-block').style.display = (mode === 'lines') ? 'block' : 'none';
@@ -296,6 +296,124 @@
             document.getElementById('mode-btn-lines').classList.toggle('active', mode === 'lines');
             document.getElementById('mode-btn-signals').classList.toggle('active', mode === 'signals');
             logSys(`Перемкнуто режим на: ${mode === 'lines' ? 'Дільниці' : 'Світлофори'}`);
+        }
+
+        // ФУНКЦІЯ ЗБЕРЕЖЕННЯ В SUPABASE (ДОДАНА Й КОРЕКТНО НАЛАШТОВАНА)
+        async function saveDataToCloud() {
+            const pdNum = document.getElementById('admin-pd-num').value.trim();
+            if (!pdNum) {
+                alert("Будь ласка, спочатку вкажіть номер ПД (околоток)!");
+                return;
+            }
+
+            const headers = { 
+                'apikey': fullKey, 
+                'authorization': 'Bearer ' + fullKey,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            };
+
+            if (currentAdminMode === 'lines') {
+                // Логіка збору даних для дільниць
+                const name = document.getElementById('admin-peregon').value.trim();
+                const startKm = parseInt(document.getElementById('admin-start-km').value);
+                const startPk = parseInt(document.getElementById('admin-start-pk').value);
+                const endKm = parseInt(document.getElementById('admin-end-km').value);
+                const endPk = parseInt(document.getElementById('admin-end-pk').value);
+                
+                if (!name || isNaN(startKm) || isNaN(startPk) || isNaN(endKm) || isNaN(endPk)) {
+                    alert("Заповніть усі обов'язкові поля для дільниці!");
+                    return;
+                }
+
+                let trackTypes = [];
+                if (document.getElementById('chk-neparna').checked) trackTypes.push("непарна");
+                if (document.getElementById('chk-parna').checked) trackTypes.push("парна");
+                if (trackTypes.length === 0) {
+                    alert("Оберіть хоча б одну колію дільниці!");
+                    return;
+                }
+
+                const typeUkr = currentObjectType === 'station' ? 'станція' : 'перегін';
+
+                const payload = {
+                    pd: pdNum,
+                    name: name,
+                    type: typeUkr,
+                    track_type: trackTypes.join(', '),
+                    start_km: startKm,
+                    start_pk: startPk,
+                    end_km: endKm,
+                    end_pk: endPk
+                };
+
+                try {
+                    logSys("Надсилання дільниці до бази даних...");
+                    const res = await fetch(`${baseDbUrl}/rest/v1/lines_config`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        logSys(`Дільницю «${name}» успішно додано!`, "success");
+                        alert("Дані дільниці успішно збережено!");
+                        loadPdsForCleaning();
+                    } else {
+                        const err = await res.json();
+                        logSys(`Помилка БД: ${JSON.stringify(err)}`, "error");
+                    }
+                } catch (e) {
+                    logSys(`Помилка мережі: ${e.message}`, "error");
+                }
+
+            } else if (currentAdminMode === 'signals') {
+                // Логіка збору даних для світлофорів (Таблиця signals)
+                const sigName = document.getElementById('sig-name').value.trim();
+                const km = parseInt(document.getElementById('sig-km').value);
+                const piket = parseInt(document.getElementById('sig-pk').value);
+                const sigType = document.getElementById('sig-type').value.trim();
+
+                if (!sigName || isNaN(km) || isNaN(piket)) {
+                    alert("Заповніть обов'язкові поля світлофора (Літера, КМ та ПК)!");
+                    return;
+                }
+
+                let trackTypes = [];
+                if (document.getElementById('sig-chk-neparna').checked) trackTypes.push("непарна");
+                if (document.getElementById('sig-chk-parna').checked) trackTypes.push("парна");
+                if (trackTypes.length === 0) {
+                    alert("Оберіть колію для світлофора!");
+                    return;
+                }
+
+                const payload = {
+                    pd: pdNum,
+                    signal_name: sigName,
+                    track_type: trackTypes.join(', '),
+                    km: km,
+                    piket: piket,
+                    signal_type: sigType || 'не вказано'
+                };
+
+                try {
+                    logSys(`Надсилання світлофора ${sigName} до бази даних...`);
+                    const res = await fetch(`${baseDbUrl}/rest/v1/signals`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        logSys(`Світлофор ${sigName} успішно додано на ${km} км!`, "success");
+                        alert("Світлофор успішно збережено в базу!");
+                    } else {
+                        const err = await res.json();
+                        logSys(`Помилка БД (Світлофори): ${JSON.stringify(err)}`, "error");
+                        alert("Помилка збереження. Перевір монітор системи.");
+                    }
+                } catch (e) {
+                    logSys(`Помилка мережі: ${e.message}`, "error");
+                }
+            }
         }
 
         // Динамічна зміна підказок для дільниць/станцій
@@ -344,7 +462,6 @@
             document.getElementById('db-modal').style.display = 'none';
         }
 
-        // Завантаження даних у вікно перегляду залежно від обраної таблиці
         async function loadTableDataFromModal() {
             const table = document.getElementById('modal-table-select').value;
             const container = document.getElementById('modal-db-cards-container');
@@ -355,7 +472,6 @@
                 const res = await fetch(`${baseDbUrl}/rest/v1/${table}?select=*`, { headers });
                 const data = await res.json();
                 
-                // Сортування
                 if(table === 'lines_config') {
                     data.sort((a,b) => String(a.pd).localeCompare(String(b.pd)) || a.start_km - b.start_km);
                 } else {
@@ -366,7 +482,6 @@
                 filterSelect.innerHTML = '<option value="all">Всі ПД</option>';
                 const uniquePds = [...new Set(data.map(item => item.pd))].sort((a,b) => String(a).localeCompare(String(b)));
                 uniquePds.forEach(pd => {
-                    // Чистимо вивід у фільтрі модалки, щоб було "ПД-13" незалежно від того, як воно в базі
                     const cleanDisplay = String(pd).startsWith("ПД-") ? pd : `ПД-${pd}`;
                     filterSelect.innerHTML += `<option value="${pd}">${cleanDisplay}</option>`;
                 });
@@ -444,7 +559,6 @@
             });
         }
 
-        // Поштучне видалення об'єкта з бази через модалку
         async function deleteSingleItem(table, id) {
             if(!confirm("Видалити цей запис безповоротно?")) return;
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
@@ -462,7 +576,6 @@
             }
         }
 
-        // Завантаження унікальних ПД для блоку Очищення околотків
         async function loadPdsForCleaning() {
             const optionsContainer = document.getElementById('dropdown-options');
             optionsContainer.innerHTML = "<div style='color:gray;padding:8px;font-size:12px;'>Завантаження...</div>";
@@ -492,7 +605,6 @@
                     chk.onchange = (e) => handlePdSelectionChange(pd, e.target.checked);
                     
                     const span = document.createElement('span');
-                    // ЗМІНА: Відображається тільки "ПД-Х", без дублювання префікса
                     span.innerText = String(pd).startsWith("ПД-") ? pd : `ПД-${pd}`;
                     
                     item.appendChild(chk);
@@ -525,27 +637,23 @@
             }
         }
 
-        // Повне очищення обраних ПД з бази даних
         async function clearSelectedPdTracks() {
             if(selectedPds.length === 0) {
                 alert("Будь ласка, оберіть хоча б один ПД для очищення.");
                 return;
             }
-            
             if(!confirm("Ви впевнені, що хочете видалити всі записи для вибраних ПД? Ця дія незворотна!")) return;
             
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
                 const pdQuery = selectedPds.join(',');
-                
-                // Приклад логіки видалення з бази Supabase для вибраних ПД
                 const res = await fetch(`${baseDbUrl}/rest/v1/lines_config?pd=in.(${pdQuery})`, { method: 'DELETE', headers });
                 
                 if(res.ok) {
                     logSys(`Успішно видалено конфігурації для: ${selectedPds.map(x => String(x).startsWith("ПД-") ? x : `ПД-${x}`).join(', ')}`, 'success');
                     selectedPds = [];
                     document.getElementById('dropdown-label').innerText = "Оберіть ПД...";
-                    loadPdsForCleaning(); // Оновлюємо список ПД
+                    loadPdsForCleaning();
                 } else {
                     logSys("Помилка під час видалення ПД", 'error');
                 }
