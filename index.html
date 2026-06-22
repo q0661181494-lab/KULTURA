@@ -116,7 +116,7 @@
             padding: 30px 20px;
         }
 
-        /* ОНОВЛЕНИЙ СОЛІДНИЙ ЗАГОЛОВОК ЗАГЛАВНИМИ ЛІТЕРАМИ */
+        /* СОЛІДНИЙ ЗАГОЛОВОК ЗАГЛАВНИМИ ЛІТЕРАМИ */
         h2 { 
             margin-top: 0; 
             margin-bottom: 6px; 
@@ -148,8 +148,23 @@
             animation: pulse-border 2.5s infinite ease-in-out; 
         }
         
-        .pd-input-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 0; }
-        .pd-prefix { font-size: 24px; font-weight: 900; color: #115e59; letter-spacing: 1px; }
+        /* Строге центрування поля введення за рахунок абсолютного позиціонування ПД- */
+        .pd-input-row { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative;
+            width: 180px;
+            margin: 0 auto;
+        }
+        .pd-prefix { 
+            font-size: 24px; 
+            font-weight: 900; 
+            color: #115e59; 
+            letter-spacing: 1px; 
+            position: absolute;
+            left: 0;
+        }
         
         /* Збільшене поле вводу для фокус-режиму */
         .pd-number-box { 
@@ -162,6 +177,8 @@
             border-radius: 12px;
             border: 2px solid #a7f3d0;
             box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            margin-left: auto;
+            margin-right: 0;
         }
 
         /* Анімація пульсуючого кастомного плейсхолдера (імітація курсору) */
@@ -345,7 +362,8 @@
         }
 
         function handlePdInput() {
-            const pdNum = document.getElementById('filter-pd-input').value.trim();
+            let inputEl = document.getElementById('filter-pd-input');
+            const pdNum = inputEl.value.trim();
             const tabsBlock = document.getElementById('control-tabs-block');
             const container = document.getElementById('diagram-render-zone');
             const screenCard = document.getElementById('screen-charts');
@@ -361,12 +379,17 @@
                 return;
             }
 
+            // Обмежуємо довжину введення двома цифрами на випадок ручного копіювання
+            if (pdNum.length > 2) {
+                inputEl.value = pdNum.slice(0, 2);
+            }
+
             screenCard.classList.remove('welcome-focus');
             tabsBlock.style.display = 'block';
             mainTitle.innerText = "ДВОКОЛІЙНА ДІАГРАМА";
             mainDesc.innerText = "Стан обкошування брівок парної та непарної колій";
 
-            const fullPdName = "ПД-" + pdNum;
+            const fullPdName = "ПД-" + inputEl.value.trim();
             const filtered = tracksData.filter(t => t.pd === fullPdName && !t.track_type.includes('станція'));
             const uniquePeregons = [...new Set(filtered.map(t => t.name))].sort();
             
@@ -393,6 +416,12 @@
             }
 
             drawDoubleTrackDiagram();
+
+            // АВТОМАТИЧНЕ ЗГОРТАННЯ КЛАВІАТУРИ НА МОБІЛЬНОМУ ПРИ 2 ЦИФРАХ
+            if (inputEl.value.trim().length === 2) {
+                document.activeElement.blur(); 
+                logSys("Клавіатуру згорнуто автоматично.");
+            }
         }
 
         function switchDisplayMode(mode) {
@@ -450,7 +479,6 @@
                 minKm = Math.min(...segmentsToRender.map(s => parseInt(s.start_km)));
                 maxKm = Math.max(...segmentsToRender.map(s => parseInt(s.end_km)));
             } else {
-                // Режим "по перегону"
                 const checkedBoxes = document.querySelectorAll('#peregon-checkbox-group input[type="checkbox"]:checked');
                 const selectedPeregons = Array.from(checkedBoxes).map(cb => cb.value);
 
@@ -459,29 +487,23 @@
                     return;
                 }
 
-                // Спочатку вибираємо суто конфігурацію самого перегону (або кількох вибраних)
                 const purePeregons = tracksData.filter(t => selectedPeregons.includes(t.name) && t.pd === fullPdName);
                 if (purePeregons.length === 0) {
                     container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію перегону не знайдено.</p>";
                     return;
                 }
 
-                // Визначаємо межі кілометрів виключно за обраним перегоном
                 minKm = Math.min(...purePeregons.map(s => parseInt(s.start_km)));
                 maxKm = Math.max(...purePeregons.map(s => parseInt(s.end_km)));
 
-                // Додаємо конфігурацію перегонів до фінального рендеру
                 segmentsToRender = [...purePeregons];
 
-                // Автоматично шукаємо та підтягуємо суміжні станції для заповнення суміжних пікетів на краях кілометрів
                 selectedPeregons.forEach(pName => {
                     const stationTokens = pName.split('-').map(s => s.trim().toLowerCase());
                     tracksData.forEach(t => {
                         if (t.type && t.type.includes('станція')) {
-                            // Перевіряємо чи назва станції фігурує у назві поточного перегону
                             const isDotichna = stationTokens.some(token => t.name.toLowerCase().includes(token));
                             if (isDotichna) {
-                                // Перевіряємо чи станція перетинається з граничними кілометрами перегону
                                 const sStart = parseInt(t.start_km);
                                 const sEnd = parseInt(t.end_km);
                                 const hasOverlap = (sStart <= maxKm && sEnd >= minKm);
@@ -518,7 +540,6 @@
                     const rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('непарна'));
                     const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.includes('станція'));
 
-                    // Станція має пріоритет малювання на пікеті, якщо вона накладається на цей кілометр
                     const finalLeftConfig = stationConfig || leftConfig;
                     const finalRightConfig = stationConfig || rightConfig;
 
