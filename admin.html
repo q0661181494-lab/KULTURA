@@ -223,10 +223,10 @@
             <hr class="section-divider">
 
             <h2>🧹 Очищення околотків</h2>
-            <p>Видалення конфігурацій для вибраних ПД</p>
+            <p>Виберіть ПД та відмітьте чекбоксами конкретні об'єкти для видалення</p>
 
             <label class="track-label">Виберіть ПД для очищення:</label>
-            <div class="multiselect-dropdown">
+            <div class="multiselect-dropdown" style="margin-bottom: 12px;">
                 <div class="multiselect-header" onclick="toggleDropdown('dropdown-options')">
                     <span id="dropdown-label">Оберіть ПД...</span>
                     <span>▼</span>
@@ -234,7 +234,12 @@
                 <div class="multiselect-options" id="dropdown-options"></div>
             </div>
 
-            <button class="btn-danger" onclick="clearSelectedPdTracks()">Очистити вибрані ПД</button>
+            <div id="cleaning-records-box" style="display: none; margin-bottom: 14px;">
+                <label class="track-label">Оберіть записи для видалення з бази:</label>
+                <div id="cleaning-records-list" style="max-height: 240px; overflow-y: auto; border: 1px solid #a7f3d0; border-radius: 12px; background: #f8fafc; padding: 6px; display: flex; flex-direction: column; gap: 6px;"></div>
+            </div>
+
+            <button class="btn-danger" onclick="clearSelectedPdTracks()">Очистити вибрані дані</button>
         </div>
 
         <div class="debug-panel">
@@ -290,7 +295,6 @@
         function clearFormInputs() {
             document.getElementById('admin-pd-num').value = "";
             
-            // Поля дільниць
             document.getElementById('admin-peregon').value = "";
             document.getElementById('admin-start-km').value = "";
             document.getElementById('admin-start-pk').value = "";
@@ -299,7 +303,6 @@
             document.getElementById('chk-neparna').checked = true;
             document.getElementById('chk-parna').checked = true;
             
-            // Поля світлофорів
             document.getElementById('sig-name').value = "";
             document.getElementById('sig-km').value = "";
             document.getElementById('sig-pk').value = "";
@@ -320,7 +323,6 @@
             logSys(`Перемкнуто режим на: ${mode === 'lines' ? 'Дільниці' : 'Світлофори'}`);
         }
 
-        // ОНОВЛЕНА ФУНКЦІЯ: тепер створює окремий рядок на кожну вибрану колію!
         async function saveDataToCloud() {
             const pdRaw = document.getElementById('admin-pd-num').value.trim();
             if (!pdRaw) {
@@ -363,13 +365,12 @@
                 try {
                     let successCount = 0;
                     
-                    // Цикл запису: створюємо окремий POST-запит для кожної колії
                     for (const singleTrack of trackTypes) {
                         const payload = {
                             pd: pdNum,
                             name: name,
                             type: typeUkr,
-                            track_type: singleTrack, // Записуємо суто "непарна" або суто "парна"
+                            track_type: singleTrack, 
                             start_km: startKm,
                             start_pk: startPk,
                             end_km: endKm,
@@ -387,7 +388,7 @@
 
                     if (successCount === trackTypes.length) {
                         logSys(`Усі записи дільниці (${successCount}) успішно додано!`, "success");
-                        alert("Дані дільниці успішно збережено!");
+                        alert("Дані дільниці успешно збережено!");
                         clearFormInputs(); 
                         loadPdsForCleaning();
                     } else {
@@ -421,12 +422,11 @@
                 try {
                     let successCount = 0;
 
-                    // Цикл запису: створюємо окремий POST-запит для кожної колії світлофора
                     for (const singleTrack of trackTypes) {
                         const payload = {
                             pd: pdNum,
                             signal_name: sigName,
-                            track_type: singleTrack, // Записуємо суто "непарна" або суто "парна"
+                            track_type: singleTrack, 
                             km: km,
                             piket: piket,
                             signal_type: sigType || 'не вказано'
@@ -445,6 +445,7 @@
                         logSys(`Усі записи світлофора (${successCount}) успішно додано!`, "success");
                         alert("Світлофор успішно збережено в базу!");
                         clearFormInputs(); 
+                        loadPdsForCleaning();
                     } else {
                         logSys(`Помилка: збережено лише ${successCount} з ${trackTypes.length} світлофорів.`, "error");
                         alert("Часткова помилка збереження. Перевір монітор системи.");
@@ -611,19 +612,28 @@
             }
         }
 
+        // Завантажуємо ПД з обох таблиць для повного покриття
         async function loadPdsForCleaning() {
             const optionsContainer = document.getElementById('dropdown-options');
             optionsContainer.innerHTML = "<div style='color:gray;padding:8px;font-size:12px;'>Завантаження...</div>";
             
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
-                const res = await fetch(`${baseDbUrl}/rest/v1/lines_config?select=pd`, { headers });
-                const data = await res.json();
+                const [resLines, resSignals] = await Promise.all([
+                    fetch(`${baseDbUrl}/rest/v1/lines_config?select=pd`, { headers }),
+                    fetch(`${baseDbUrl}/rest/v1/signals?select=pd`, { headers })
+                ]);
+                const dataLines = await resLines.json();
+                const dataSignals = await resSignals.json();
                 
-                const pds = [...new Set(data.map(item => item.pd))].sort((a,b) => String(a).localeCompare(String(b)));
+                const allPds = [...dataLines.map(i => i.pd), ...dataSignals.map(i => i.pd)];
+                const pds = [...new Set(allPds)].sort((a,b) => String(a).localeCompare(String(b)));
+                
                 optionsContainer.innerHTML = "";
                 selectedPds = [];
                 document.getElementById('dropdown-label').innerText = "Оберіть ПД...";
+                document.getElementById('cleaning-records-box').style.display = 'none';
+                document.getElementById('cleaning-records-list').innerHTML = "";
 
                 if(pds.length === 0) {
                     optionsContainer.innerHTML = "<div style='color:gray;padding:8px;font-size:12px;'>Немає даних</div>";
@@ -670,30 +680,134 @@
             } else {
                 lbl.innerText = selectedPds.map(x => String(x).startsWith("ПД-") ? x : `ПД-${x}`).join(', ');
             }
+            
+            // Завантажуємо індивідуальні об'єкти для вибраних ПД
+            loadItemsForCleaning();
         }
 
-        async function clearSelectedPdTracks() {
-            if(selectedPds.length === 0) {
-                alert("Будь ласка, оберіть хоча б один ПД для очищення.");
+        // НОВА ФУНКЦІЯ: завантаження конкретних записів для видалення
+        async function loadItemsForCleaning() {
+            const box = document.getElementById('cleaning-records-box');
+            const list = document.getElementById('cleaning-records-list');
+            
+            if (selectedPds.length === 0) {
+                box.style.display = 'none';
+                list.innerHTML = "";
                 return;
             }
-            if(!confirm("Ви впевнені, що хочете видалити всі записи для вибраних ПД? Ця дія незворотна!")) return;
+            
+            box.style.display = 'block';
+            list.innerHTML = "<div style='color:gray;padding:8px;font-size:12px;text-align:center;'>Завантаження записів...</div>";
             
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+            const pdQuery = selectedPds.join(',');
+            
             try {
-                const pdQuery = selectedPds.join(',');
-                const res = await fetch(`${baseDbUrl}/rest/v1/lines_config?pd=in.(${pdQuery})`, { method: 'DELETE', headers });
+                const [resLines, resSignals] = await Promise.all([
+                    fetch(`${baseDbUrl}/rest/v1/lines_config?pd=in.(${pdQuery})`, { headers }),
+                    fetch(`${baseDbUrl}/rest/v1/signals?pd=in.(${pdQuery})`, { headers })
+                ]);
                 
-                if(res.ok) {
-                    logSys(`Успішно видалено конфігурації для: ${selectedPds.map(x => String(x).startsWith("ПД-") ? x : `ПД-${x}`).join(', ')}`, 'success');
-                    selectedPds = [];
-                    document.getElementById('dropdown-label').innerText = "Оберіть ПД...";
-                    loadPdsForCleaning();
-                } else {
-                    logSys("Помилка під час видалення ПД", 'error');
+                const lines = await resLines.json();
+                const signals = await resSignals.json();
+                
+                list.innerHTML = "";
+                
+                if (lines.length === 0 && signals.length === 0) {
+                    list.innerHTML = "<div style='color:gray;padding:8px;font-size:12px;text-align:center;'>Немає записів для вибраних ПД</div>";
+                    return;
                 }
+                
+                // Рендеримо дільниці / станції
+                lines.forEach(item => {
+                    const div = document.createElement('div');
+                    div.style = "display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:8px; border:1px solid #e2e8f0; font-size:13px;";
+                    
+                    const cleanDisplay = String(item.pd).startsWith("ПД-") ? item.pd : `ПД-${item.pd}`;
+                    const typeBadgeColor = item.type === 'станція' ? '#6366f1' : '#0d9488';
+                    
+                    div.innerHTML = `
+                        <input type="checkbox" class="clean-item-chk" data-table="lines_config" data-id="${item.id}" style="width:18px; height:18px; accent-color:#ef4444; margin:0; cursor:pointer;">
+                        <div style="flex:1; color:#115e59; text-align:left;">
+                            <span style="font-weight:bold; font-size:10px; background:#e6f4ea; padding:2px 5px; border-radius:4px; margin-right:4px; color:#115e59;">${cleanDisplay}</span>
+                            <span style="font-weight:bold; font-size:10px; background:${typeBadgeColor}; color:white; padding:2px 5px; border-radius:4px; margin-right:4px; text-transform:uppercase;">${item.type}</span>
+                            <b>${item.name}</b> (${item.track_type} колія)
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+                
+                // Рендеримо світлофори
+                signals.forEach(item => {
+                    const div = document.createElement('div');
+                    div.style = "display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:8px; border:1px solid #e2e8f0; font-size:13px;";
+                    
+                    const cleanDisplay = String(item.pd).startsWith("ПД-") ? item.pd : `ПД-${item.pd}`;
+                    
+                    div.innerHTML = `
+                        <input type="checkbox" class="clean-item-chk" data-table="signals" data-id="${item.id}" style="width:18px; height:18px; accent-color:#ef4444; margin:0; cursor:pointer;">
+                        <div style="flex:1; color:#115e59; text-align:left;">
+                            <span style="font-weight:bold; font-size:10px; background:#e6f4ea; padding:2px 5px; border-radius:4px; margin-right:4px; color:#115e59;">${cleanDisplay}</span>
+                            <span style="font-weight:bold; font-size:10px; background:#f59e0b; color:white; padding:2px 5px; border-radius:4px; margin-right:4px; text-transform:uppercase;">Сигнал</span>
+                            <b>🚦 Світлофор ${item.signal_name}</b> (${item.track_type} колія, ${item.km} км)
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+                
             } catch(e) {
-                logSys("Помилка з'єднання: " + e.message, 'error');
+                list.innerHTML = `<div style='color:red;padding:8px;font-size:12px;'>Помилка: ${e.message}</div>`;
+            }
+        }
+
+        // НОВА ФУНКЦІЯ: точкове видалення обраних чекбоксами елементів
+        async function clearSelectedPdTracks() {
+            const checkedInputs = document.querySelectorAll('.clean-item-chk:checked');
+            if (checkedInputs.length === 0) {
+                alert("Будь ласка, спочатку оберіть галочками конкретні записи, які ви хочете видалити!");
+                return;
+            }
+            
+            if (!confirm(`Ви впевнені, що хочете видалити вибрані записи (${checkedInputs.length} шт.) безповоротно?`)) {
+                return;
+            }
+            
+            const groups = { lines_config: [], signals: [] };
+            
+            checkedInputs.forEach(input => {
+                const table = input.getAttribute('data-table');
+                const id = input.getAttribute('data-id');
+                if (groups[table]) groups[table].push(id);
+            });
+            
+            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+            let totalDeleted = 0;
+            
+            try {
+                // Видаляємо з lines_config
+                if (groups.lines_config.length > 0) {
+                    const queryIds = groups.lines_config.join(',');
+                    logSys(`Видалення ${groups.lines_config.length} записів з lines_config...`);
+                    const res = await fetch(`${baseDbUrl}/rest/v1/lines_config?id=in.(${queryIds})`, { method: 'DELETE', headers });
+                    if (res.ok) totalDeleted += groups.lines_config.length;
+                }
+                
+                // Видаляємо з signals
+                if (groups.signals.length > 0) {
+                    const queryIds = groups.signals.join(',');
+                    logSys(`Видалення ${groups.signals.length} світлофорів з signals...`);
+                    const res = await fetch(`${baseDbUrl}/rest/v1/signals?id=in.(${queryIds})`, { method: 'DELETE', headers });
+                    if (res.ok) totalDeleted += groups.signals.length;
+                }
+                
+                logSys(`Успішно видалено ${totalDeleted} записів!`, 'success');
+                alert(`Успішно видалено ${totalDeleted} записів із бази даних!`);
+                
+                // Повне оновлення списків
+                await loadPdsForCleaning(); 
+            } catch(e) {
+                logSys("Помилка при видаленні: " + e.message, 'error');
+                alert("Виникла помилка під час видалення: " + e.message);
             }
         }
     </script>
