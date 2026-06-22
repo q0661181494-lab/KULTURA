@@ -20,7 +20,7 @@
             display: flex; 
             flex-direction: column; 
             align-items: center;
-            justify-content: space-between; /* Рівномірно розподіляє контент, притискаючи підвал */
+            justify-content: space-between; 
             box-sizing: border-box;
         }
 
@@ -30,7 +30,7 @@
             box-sizing: border-box; 
             display: flex; 
             flex-direction: column;
-            flex-grow: 1; /* Дозволяє контейнеру займати весь доступний простір */
+            flex-grow: 1; 
         }
         
         /* Навігаційне меню у шавлієвих тонах */
@@ -93,7 +93,7 @@
             pointer-events: none;
         }
         
-        /* Головна картка з м'якою шавлієвою рамкою та плавною анімацією */
+        /* Головна картка з м'якою шавлієвою рамкою */
         .screen { 
             background: white; 
             padding: 20px; 
@@ -125,27 +125,41 @@
         .track-label { font-size: 11px; font-weight: 700; color: #115e59; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* КРЕАТИВНИЙ БЛОК ВВЕДЕННЯ ПД */
+        .pd-container-box {
+            transition: all 0.3s ease;
+        }
+        
         .welcome-focus .pd-container-box {
             background: #f0fdf4;
-            padding: 20px;
+            padding: 24px;
             border-radius: 14px;
             border: 1px dashed #0d9488;
             margin-top: 10px;
+            animation: pulse-border 2.5s infinite ease-in-out; /* Дихаюче підсвічування картки */
         }
-        .pd-input-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0; }
-        .pd-prefix { font-size: 22px; font-weight: 900; color: #115e59; letter-spacing: 1px; }
+        
+        .pd-input-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 0; }
+        .pd-prefix { font-size: 24px; font-weight: 900; color: #115e59; letter-spacing: 1px; }
         
         /* Збільшене поле вводу для фокус-режиму */
         .pd-number-box { 
             width: 100px !important; 
-            height: 50px;
-            font-size: 22px !important; 
+            height: 54px;
+            font-size: 24px !important; 
             margin-bottom: 0 !important; 
             text-align: center; 
             font-weight: 900;
             border-radius: 12px;
             border: 2px solid #a7f3d0;
             box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        /* Анімація пульсуючого кастомного плейсхолдера (імітація курсору) */
+        .pd-number-box::placeholder {
+            color: #0d9488;
+            opacity: 0.6;
+            font-weight: 300;
+            animation: blink-cursor 1.2s infinite steps(2);
         }
 
         /* Стильні Кнопки-Таби */
@@ -208,7 +222,7 @@
         .debug-panel { 
             width: 100%;
             max-width: 580px;
-            margin-top: auto; /* Штовхає панель до самого низу body */
+            margin-top: auto; 
             padding: 10px; 
             background-color: rgba(230, 244, 234, 0.8); 
             backdrop-filter: blur(4px);
@@ -222,32 +236,38 @@
         }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 60px; overflow-y: auto; text-align: left; }
+
+        /* КЛЮЧОВІ АНІМАЦІЇ */
+        @keyframes blink-cursor {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.8; }
+        }
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 0 rgba(13, 148, 136, 0); }
+            50% { box-shadow: 0 0 14px rgba(13, 148, 136, 0.15); border-color: #0d9488; }
+        }
     </style>
 </head>
 <body>
  
     <div class="container">
-        <!-- Навігаційне меню -->
         <div class="nav-menu">
             <a href="index.html" class="nav-link active" id="nav-btn-charts">📊 Графіки</a>
             <a href="master.html" class="nav-link" id="nav-btn-master">🧑‍🔧 Майстер</a>
             <a href="admin.html" class="admin-menu-btn" id="nav-btn-admin">⚙️</a>
         </div>
  
-        <!-- Картка екрана з додатковим початковим класом центрування 'welcome-focus' -->
         <div class="screen welcome-focus" id="screen-charts">
             <h2 id="main-screen-title">🚂 Вхід у систему діаграм</h2>
-            <p id="main-screen-desc">Введіть номер вашого навколотка для формування лінійного графіка</p>
+            <p id="main-screen-desc">введіть номер околотка для формування лінійного графіка</p>
             
             <div class="pd-container-box">
-                <label class="track-label" style="text-align: center; margin-bottom: 6px;">Номер лінії (ПД):</label>
                 <div class="pd-input-row">
                     <span class="pd-prefix">ПД-</span>
-                    <input type="number" id="filter-pd-input" class="input-field pd-number-box" placeholder="?" oninput="handlePdInput()">
+                    <input type="number" id="filter-pd-input" class="input-field pd-number-box" placeholder="|" oninput="handlePdInput()" autofocus>
                 </div>
             </div>
 
-            <!-- Блок управління табами та чекбоксами (з'являється після вводу ПД) -->
             <div id="control-tabs-block" style="display: none; margin-top: 16px;">
                 <label class="track-label">Оберіть режим відображення:</label>
                 <div class="mode-tabs">
@@ -261,12 +281,10 @@
                 </div>
             </div>
  
-            <!-- Зона рендерингу діаграми -->
             <div id="diagram-render-zone" class="railway-canvas"></div>
         </div>
     </div>
  
-    <!-- Монітор системи тепер винесено окремо з контейнера, він завжди на дні екрана -->
     <div class="debug-panel">
         <div class="debug-title">🖥️ Монітор системи</div>
         <div id="debug-console" class="debug-scroll"></div>
@@ -295,6 +313,8 @@
         async function initApp() {
             logSys("Запуск рейкової платформи...");
             await reloadDataFromCloud();
+            // Встановлюємо фокус на інпут при старті
+            document.getElementById('filter-pd-input').focus();
         }
  
         async function reloadDataFromCloud() {
@@ -329,12 +349,12 @@
                 screenCard.classList.add('welcome-focus');
                 tabsBlock.style.display = 'none';
                 mainTitle.innerText = "🚂 Вхід у систему діаграм";
-                mainDesc.innerText = "Введіть номер вашого навколотка для формування лінійного графіка";
+                mainDesc.innerText = "введіть номер околотка для формування лінійного графіка";
                 container.innerHTML = "";
                 return;
             }
 
-            // Користувач почав вводити дані: прибираємо фокус-центрування, розгортаємо інтерфейс
+            // Користувач ввів цифру: розгортаємо робочий інтерфейс
             screenCard.classList.remove('welcome-focus');
             tabsBlock.style.display = 'block';
             mainTitle.innerText = "📊 Двоколійна діаграма";
