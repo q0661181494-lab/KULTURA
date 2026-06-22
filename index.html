@@ -398,8 +398,9 @@
                         }
                     }
  
-                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().includes('парна'));
-                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().includes('непарна'));
+                    // ЗМІНЕНО ТУТ: Використовуємо строге порівняння значень замість часткового .includes()
+                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'парна');
+                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'непарна');
 
                     // Ліве бокове поле (Парна колія)
                     const leftMargin = document.createElement('div');
