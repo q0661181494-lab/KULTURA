@@ -323,7 +323,6 @@
         async function initApp() {
             logSys("Запуск рейкової платформи...");
             await reloadDataFromCloud();
-            // Встановлюємо фокус на інпут при старті
             document.getElementById('filter-pd-input').focus();
         }
  
@@ -355,7 +354,6 @@
             const mainDesc = document.getElementById('main-screen-desc');
 
             if (!pdNum) {
-                // Повертаємо стан фокусу по центру екрана без іконок
                 screenCard.classList.add('welcome-focus');
                 tabsBlock.style.display = 'none';
                 mainTitle.innerText = "ВХІД У СИСТЕМУ ДІАГРАМ";
@@ -364,7 +362,6 @@
                 return;
             }
 
-            // Користувач ввів цифру: розгортаємо робочий інтерфейс без іконок
             screenCard.classList.remove('welcome-focus');
             tabsBlock.style.display = 'block';
             mainTitle.innerText = "ДВОКОЛІЙНА ДІАГРАМА";
@@ -445,8 +442,10 @@
             let segmentsToRender = [];
 
             if (currentMode === 'pd') {
+                // Вибираємо тільки ті ділянки, які належать поточному ПД
                 segmentsToRender = tracksData.filter(t => t.pd === fullPdName);
             } else {
+                // Режим "по перегону"
                 const checkedBoxes = document.querySelectorAll('#peregon-checkbox-group input[type="checkbox"]:checked');
                 const selectedPeregons = Array.from(checkedBoxes).map(cb => cb.value);
 
@@ -455,19 +454,8 @@
                     return;
                 }
 
-                segmentsToRender = tracksData.filter(t => selectedPeregons.includes(t.name));
-
-                selectedPeregons.forEach(peregon => {
-                    const stationsTokens = peregon.split('-').map(s => s.trim().toLowerCase());
-                    tracksData.forEach(t => {
-                        if (t.type.includes('станція')) {
-                            const isDotichna = stationsTokens.some(token => t.name.toLowerCase().includes(token));
-                            if (isDotichna && !segmentsToRender.some(added => added.id === t.id)) {
-                                segmentsToRender.push(t);
-                            }
-                        }
-                    });
-                });
+                // Захоплюємо ВИКЛЮЧНО обрані перегони. Суміжні станції сюди більше не додаються!
+                segmentsToRender = tracksData.filter(t => selectedPeregons.includes(t.name) && t.pd === fullPdName);
             }
 
             if (segmentsToRender.length === 0) {
@@ -475,6 +463,7 @@
                 return;
             }
 
+            // Розраховуємо межі кілометрів строго на основі відфільтрованих сегментів цього ПД
             const minKm = Math.min(...segmentsToRender.map(s => parseInt(s.start_km)));
             const maxKm = Math.max(...segmentsToRender.map(s => parseInt(s.end_km)));
 
@@ -538,8 +527,9 @@
                         }
                     }
  
-                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'парна');
-                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'непарна');
+                    // Фільтрація світлофорів із жорсткою прив'язкою до поточного ПД, щоб не чіпляти інші лінії (напр. ПД-16)
+                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'парна' && s.pd === fullPdName);
+                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'непарна' && s.pd === fullPdName);
 
                     const leftMargin = document.createElement('div');
                     leftMargin.className = 'info-margin margin-left';
