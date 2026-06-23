@@ -69,7 +69,7 @@
             font-size: 1.2rem;
         }
 
-        /* Картки */
+        /* Картки форми */
         .card {
             background: var(--card-bg);
             border-radius: 15px;
@@ -123,7 +123,7 @@
             border-color: var(--primary-teal);
         }
 
-        /* Список кілометрів */
+        /* Випадаючий список кілометрів */
         .km-dropdown {
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -278,226 +278,254 @@
 </div>
 
 <script>
-    const SUPABASE_URL = "https://zcyntywoftcahfjwqldr.supabase.co";
-    
-    // ⚠️ ОБОВ'ЯЗКОВО ВСТАВТЕ СВІЙ ДІЙСНИЙ КЛЮЧ АНОНІМНОГО ДОСТУПУ З SUPABASE (Project Settings -> API)
-    const SUPABASE_ANON_KEY = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh"; 
-
-    const CURRENT_PD = "ПД-13";
-    const TEMPORARY_PASSWORD = "1234"; // Пароль для перевірки
-
-    let supabase = null;
-    let globalTracks = [];
-
-    // DOM елементи
-    const logsContainer = document.getElementById('monitorLogs');
-    const authCard = document.getElementById('authCard');
-    const cabinetCard = document.getElementById('cabinetCard');
-    const loginBtn = document.getElementById('loginBtn');
-    const passwordInput = document.getElementById('access_password');
-    const peregonSelect = document.getElementById('peregon');
-    const trackSelect = document.getElementById('track_type');
-    const workDateInput = document.getElementById('work_date');
-    const kmHeaderBtn = document.getElementById('kmHeaderBtn');
-    const kmListContainer = document.getElementById('kmListContainer');
-    const selectedCountSpan = document.getElementById('selectedCount');
-    const submitBtn = document.getElementById('submitBtn');
-
-    function logMessage(text, type = 'info') {
-        if (!logsContainer) return;
-        const time = new Date().toLocaleTimeString();
-        let className = 'log-info';
-        if (type === 'success') className = 'log-success';
-        if (type === 'error') className = 'log-error';
-
-        const line = document.createElement('div');
-        line.className = `log-line ${className}`;
-        line.innerText = `[${time}]: ${text}`;
-        logsContainer.appendChild(line);
-        logsContainer.scrollTop = logsContainer.scrollHeight;
-    }
-
-    if (workDateInput) {
-        workDateInput.value = new Date().toISOString().split('T')[0];
-    }
-
-    // Синхронізація ліній та перегонів при запуску сторінки
-    async function initSystem() {
-        logMessage(`Синхронізація хмари для ${CURRENT_PD}...`, 'info');
+    // Захищений запуск логіки строго після повного завантаження сторінки DOM
+    window.addEventListener('DOMContentLoaded', () => {
         
-        try {
-            if (typeof Supabase === 'undefined') {
-                throw new Error("Бібліотека Supabase JS не завантажилась. Перевірте інтернет.");
-            }
+        const SUPABASE_URL = "https://zcyntywoftcahfjwqldr.supabase.co";
+        
+        // ⚠️ ОБОВ'ЯЗКОВО ВСТАВТЕ СВІЙ ДІЙСНИЙ КЛЮЧ З SUPABASE СЮДИ:
+        const SUPABASE_ANON_KEY = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh"; 
 
-            if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes("ВСТАВТЕ_СЮДИ")) {
-                throw new Error("Не вказано реальний SUPABASE_ANON_KEY у коді скрипту!");
-            }
+        const CURRENT_PD = "ПД-13";
+        const TEMPORARY_PASSWORD = "1234"; 
 
-            supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabase = null;
+        let globalTracks = [];
 
-            const { data, error } = await supabase
-                .from('lines_config')
-                .select('*')
-                .eq('pd', CURRENT_PD);
+        // Безпечний пошук DOM-елементів
+        const logsContainer = document.getElementById('monitorLogs');
+        const authCard = document.getElementById('authCard');
+        const cabinetCard = document.getElementById('cabinetCard');
+        const loginBtn = document.getElementById('loginBtn');
+        const passwordInput = document.getElementById('access_password');
+        const peregonSelect = document.getElementById('peregon');
+        const trackSelect = document.getElementById('track_type');
+        const workDateInput = document.getElementById('work_date');
+        const kmHeaderBtn = document.getElementById('kmHeaderBtn');
+        const kmListContainer = document.getElementById('kmListContainer');
+        const selectedCountSpan = document.getElementById('selectedCount');
+        const submitBtn = document.getElementById('submitBtn');
 
-            if (error) throw error;
+        // Логування в монітор системи та консоль розробника
+        function logMessage(text, type = 'info') {
+            console.log(`[${type.toUpperCase()}]: ${text}`);
+            if (!logsContainer) return;
+            const time = new Date().toLocaleTimeString();
+            let className = 'log-info';
+            if (type === 'success') className = 'log-success';
+            if (type === 'error') className = 'log-error';
 
-            globalTracks = data || [];
-
-            if (globalTracks.length === 0) {
-                logMessage(`Попередження: Для ${CURRENT_PD} немає записів у lines_config!`, 'error');
-                peregonSelect.innerHTML = '<option value="" disabled>Дані відсутні</option>';
-                return;
-            }
-
-            logMessage("Синхронізацію ліній виконано успішно", 'success');
-            buildPeregonDropdown();
-
-        } catch (err) {
-            logMessage(`Помилка зв'язку: ${err.message}`, 'error');
-            peregonSelect.innerHTML = '<option value="" disabled>Помилка завантаження</option>';
-        }
-    }
-
-    // Обробка входу за паролем
-    loginBtn.addEventListener('click', () => {
-        if (passwordInput.value === TEMPORARY_PASSWORD) {
-            logMessage("Вхід виконано успішно", "success");
-            authCard.style.display = 'none';
-            cabinetCard.style.display = 'block';
-            document.getElementById('pd-title').innerText = CURRENT_PD;
-        } else {
-            logMessage("Помилка входу: Невірний пароль доступу!", "error");
-            alert("Невірний пароль!");
-        }
-    });
-
-    // Побудова списку перегонів (по колонці 'name')
-    function buildPeregonDropdown() {
-        const uniquePeregons = [...new Set(globalTracks.map(track => track.name))];
-        peregonSelect.innerHTML = '<option value="" disabled selected>Оберіть ділянку...</option>';
-        uniquePeregons.forEach(name => {
-            if (name) {
-                peregonSelect.innerHTML += `<option value="${name}">${name}</option>`;
-            }
-        });
-    }
-
-    // Обробка вибору перегону
-    peregonSelect.addEventListener('change', (e) => {
-        const selectedPeregonName = e.target.value;
-        const filteredTracks = globalTracks.filter(t => t.name === selectedPeregonName);
-
-        trackSelect.innerHTML = '<option value="" disabled selected>Оберіть колію...</option>';
-        filteredTracks.forEach(track => {
-            if (track.track_type) {
-                trackSelect.innerHTML += `<option value="${track.track_type}">${track.track_type}</option>`;
-            }
-        });
-
-        trackSelect.disabled = false;
-        resetKmList();
-    });
-
-    // Обробка вибору колії (генерація списку кілометрів)
-    trackSelect.addEventListener('change', () => {
-        const selectedPeregon = peregonSelect.value;
-        const selectedTrackType = trackSelect.value;
-
-        const config = globalTracks.find(t => t.name === selectedPeregon && t.track_type === selectedTrackType);
-
-        if (config) {
-            const start = config.start_km || 1;
-            const end = config.end_km || (start + 10);
-            generateKmCheckboxes(start, end);
-            logMessage(`Завантажено кілометри для: ${selectedPeregon} (${selectedTrackType} колія)`, 'info');
-        }
-    });
-
-    function generateKmCheckboxes(start, end) {
-        kmListContainer.innerHTML = '';
-        for (let i = start; i <= end; i++) {
-            const label = document.createElement('label');
-            label.className = 'km-item';
-            label.innerHTML = `<input type="checkbox" class="km-checkbox" value="${i}"> км ${i}`;
-            kmListContainer.appendChild(label);
+            const line = document.createElement('div');
+            line.className = `log-line ${className}`;
+            line.innerText = `[${time}]: ${text}`;
+            logsContainer.appendChild(line);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
         }
 
-        document.querySelectorAll('.km-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                const checkedCount = document.querySelectorAll('.km-checkbox:checked').length;
-                selectedCountSpan.innerText = `обрано: ${checkedCount}`;
+        if (workDateInput) {
+            workDateInput.value = new Date().toISOString().split('T')[0];
+        }
+
+        // Ініціалізація клієнта хмари
+        async function initSystem() {
+            logMessage(`Синхронізація хмари для ${CURRENT_PD}...`, 'info');
+            
+            try {
+                // Визначаємо правильний глобальний об'єкт SDK версії 2
+                const supabaseLib = window.supabase || window.supabasejs;
+                if (!supabaseLib) {
+                    throw new Error("Бібліотека Supabase JS не завантажилась. Перевірте скрипт у head.");
+                }
+
+                if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes("ВСТАВТЕ_СЮДИ")) {
+                    throw new Error("Не вказано реальний SUPABASE_ANON_KEY у коді скрипту!");
+                }
+
+                supabase = supabaseLib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                // Запит конфігурації ділянок
+                const { data, error } = await supabase
+                    .from('lines_config')
+                    .select('*')
+                    .eq('pd', CURRENT_PD);
+
+                if (error) throw error;
+
+                globalTracks = Array.isArray(data) ? data : [];
+
+                if (globalTracks.length === 0) {
+                    logMessage(`Для ${CURRENT_PD} немає записів у lines_config!`, 'error');
+                    if (peregonSelect) peregonSelect.innerHTML = '<option value="" disabled>Дані відсутні</option>';
+                    return;
+                }
+
+                logMessage(`Знайдено ділянок: ${globalTracks.length}. Будуємо меню...`, 'success');
+                buildPeregonDropdown();
+
+            } catch (err) {
+                logMessage(`Помилка конфігурації: ${err.message}`, 'error');
+                if (peregonSelect) peregonSelect.innerHTML = '<option value="" disabled>Помилка завантаження</option>';
+            }
+        }
+
+        // Авторизація
+        if (loginBtn) {
+            loginBtn.addEventListener('click', () => {
+                if (passwordInput && passwordInput.value === TEMPORARY_PASSWORD) {
+                    logMessage("Вхід виконано успішно", "success");
+                    if (authCard) authCard.style.display = 'none';
+                    if (cabinetCard) cabinetCard.style.display = 'block';
+                    const pdTitle = document.getElementById('pd-title');
+                    if (pdTitle) pdTitle.innerText = CURRENT_PD;
+                } else {
+                    logMessage("Помилка входу: Невірний пароль доступу!", "error");
+                    alert("Невірний пароль!");
+                }
             });
-        });
-    }
-
-    function resetKmList() {
-        kmListContainer.innerHTML = '';
-        selectedCountSpan.innerText = 'обрано: 0';
-    }
-
-    kmHeaderBtn.addEventListener('click', () => {
-        const isOpened = kmListContainer.style.display === 'grid';
-        kmListContainer.style.display = isOpened ? 'none' : 'grid';
-    });
-
-    // Натискання кнопки "Внести дані (відкрити діаграму)"
-    submitBtn.addEventListener('click', async () => {
-        const peregon = peregonSelect.value;
-        const trackType = trackSelect.value;
-        const date = workDateInput.value;
-        const selectedKms = Array.from(document.querySelectorAll('.km-checkbox:checked')).map(cb => parseInt(cb.value));
-
-        if (!peregon || !trackType) {
-            logMessage("Помилка збереження: не вказано ділянку або колію", "error");
-            alert("Будь ласка, оберіть перегін та колію!");
-            return;
         }
 
-        if (selectedKms.length === 0) {
-            logMessage("Помилка збереження: не вибрано жодного кілометра", "error");
-            alert("Оберіть хоча б один кілометр!");
-            return;
+        // Побудова списку перегонів (фільтрація від порожніх та undefined значень)
+        function buildPeregonDropdown() {
+            if (!peregonSelect) return;
+            
+            const uniquePeregons = [...new Set(globalTracks.map(track => track.name || track.peregon).filter(Boolean))];
+            
+            peregonSelect.innerHTML = '<option value="" disabled selected>Оберіть ділянку...</option>';
+            uniquePeregons.forEach(name => {
+                peregonSelect.innerHTML += `<option value="${name}">${name}</option>`;
+            });
         }
 
-        logMessage(`Запуск збереження даних для ${peregon}...`, 'info');
+        // Зміна перегону -> генерація списку колій
+        if (peregonSelect) {
+            peregonSelect.addEventListener('change', (e) => {
+                const selectedPeregonName = e.target.value;
+                const filteredTracks = globalTracks.filter(t => (t.name === selectedPeregonName || t.peregon === selectedPeregonName));
 
-        const finalRows = [];
-        selectedKms.forEach(km => {
-            for (let p = 1; p <= 10; p++) {
-                finalRows.push({
-                    pd: CURRENT_PD,
-                    peregon: peregon,
-                    track_type: trackType,
-                    km: km,
-                    piket: p,
-                    status: 'green',
-                    date: date
-                });
+                if (trackSelect) {
+                    trackSelect.innerHTML = '<option value="" disabled selected>Оберіть колію...</option>';
+                    filteredTracks.forEach(track => {
+                        if (track.track_type) {
+                            trackSelect.innerHTML += `<option value="${track.track_type}">${track.track_type}</option>`;
+                        }
+                    });
+                    trackSelect.disabled = false;
+                }
+                resetKmList();
+            });
+        }
+
+        // Зміна колії -> генерація чекбоксів кілометрів
+        if (trackSelect) {
+            trackSelect.addEventListener('change', () => {
+                const selectedPeregon = peregonSelect.value;
+                const selectedTrackType = trackSelect.value;
+
+                const config = globalTracks.find(t => 
+                    (t.name === selectedPeregon || t.peregon === selectedPeregon) && 
+                     t.track_type === selectedTrackType
+                );
+
+                if (config) {
+                    const start = parseInt(config.start_km) || 1;
+                    const end = parseInt(config.end_km) || (start + 10);
+                    generateKmCheckboxes(start, end);
+                    logMessage(`Завантажено кілометри: з ${start} по ${end}`, 'info');
+                }
+            });
+        }
+
+        function generateKmCheckboxes(start, end) {
+            if (!kmListContainer) return;
+            kmListContainer.innerHTML = '';
+            
+            for (let i = start; i <= end; i++) {
+                const label = document.createElement('label');
+                label.className = 'km-item';
+                label.innerHTML = `<input type="checkbox" class="km-checkbox" value="${i}"> км ${i}`;
+                kmListContainer.appendChild(label);
             }
-        });
 
-        try {
-            const { error } = await supabase
-                .from('mowing')
-                .upsert(finalRows, { onConflict: 'peregon,track_type,km,piket' });
-
-            if (error) throw error;
-
-            logMessage(`Успішно оновлено ${selectedKms.length} км (${finalRows.length} пікетів).`, 'success');
-            alert("Дані успішно внесено до бази даних!");
-
-            // АВТОМАТИЧНИЙ ПЕРЕХІД НА СТОРІНКУ ГРАФІКІВ ПІСЛЯ ЗБЕРЕЖЕННЯ
-            location.href = 'charts.html';
-
-        } catch (err) {
-            logMessage(`Помилка запису в Supabase Mowing: ${err.message}`, 'error');
-            alert("Не вдалося виконати збереження в базу.");
+            document.querySelectorAll('.km-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const checkedCount = document.querySelectorAll('.km-checkbox:checked').length;
+                    if (selectedCountSpan) selectedCountSpan.innerText = `обрано: ${checkedCount}`;
+                });
+            });
         }
-    });
 
-    window.addEventListener('DOMContentLoaded', initSystem);
+        function resetKmList() {
+            if (kmListContainer) kmListContainer.innerHTML = '';
+            if (selectedCountSpan) selectedCountSpan.innerText = 'обрано: 0';
+        }
+
+        if (kmHeaderBtn) {
+            kmHeaderBtn.addEventListener('click', () => {
+                if (!kmListContainer) return;
+                const isOpened = kmListContainer.style.display === 'grid';
+                kmListContainer.style.display = isOpened ? 'none' : 'grid';
+            });
+        }
+
+        // Збереження даних (UPSERT)
+        if (submitBtn) {
+            submitBtn.addEventListener('click', async () => {
+                const peregon = peregonSelect ? peregonSelect.value : '';
+                const trackType = trackSelect ? trackSelect.value : '';
+                const selectedKms = Array.from(document.querySelectorAll('.km-checkbox:checked')).map(cb => parseInt(cb.value));
+
+                if (!peregon || !trackType) {
+                    logMessage("Помилка збереження: не вказано ділянку або колію", "error");
+                    alert("Будь ласка, оберіть перегін та колію!");
+                    return;
+                }
+
+                if (selectedKms.length === 0) {
+                    logMessage("Помилка збереження: не вибрано жодного кілометра", "error");
+                    alert("Оберіть хоча б один кілометр!");
+                    return;
+                }
+
+                logMessage(`Запуск збереження даних для ${peregon}...`, 'info');
+
+                // Формуємо масив рядків суворо під структуру таблиці mowing у вашій базі
+                const finalRows = [];
+                selectedKms.forEach(km => {
+                    for (let p = 1; p <= 10; p++) {
+                        finalRows.push({
+                            pd: CURRENT_PD,          // Передаємо pd (рядок додано)
+                            peregon: peregon,
+                            track_type: trackType,
+                            km: km,
+                            piket: p,
+                            status: 'green'          // Поле date ВИЛУЧЕНО, оскільки його немає в базі
+                        });
+                    }
+                });
+
+                try {
+                    const { error } = await supabase
+                        .from('mowing')
+                        .upsert(finalRows, { onConflict: 'pd,peregon,track_type,km,piket' });
+
+                    if (error) throw error;
+
+                    logMessage(`Успішно оновлено ${selectedKms.length} км.`, 'success');
+                    alert("Дані успішно внесено до бази даних!");
+
+                    // Перенаправлення на сторінку графіків
+                    location.href = 'charts.html';
+
+                } catch (err) {
+                    logMessage(`Помилка запису в базу Mowing: ${err.message}`, 'error');
+                    alert(`Не вдалося виконати збереження: ${err.message}`);
+                }
+            });
+        }
+
+        // Запуск системи
+        initSystem();
+    });
 </script>
 
 </body>
