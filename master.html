@@ -36,7 +36,7 @@
             max-width: 650px;
         }
 
-        /* Вкладки навігації */
+        /* Навігація між вкладками */
         .tabs-container {
             display: flex;
             background: white;
@@ -69,7 +69,7 @@
             font-size: 1.2rem;
         }
 
-        /* Картки інтерфейсу */
+        /* Картки */
         .card {
             background: var(--card-bg);
             border-radius: 15px;
@@ -123,7 +123,7 @@
             border-color: var(--primary-teal);
         }
 
-        /* Вибір кілометрів */
+        /* Список кілометрів */
         .km-dropdown {
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -217,8 +217,8 @@
 <div class="container">
 
     <div class="tabs-container">
-        <div class="tab" onclick="alert('Перехід на графіки...')">📊 Графіки</div>
-        <div class="tab active">🧑‍🔧 Майстер</div>
+        <div class="tab" onclick="location.href='charts.html'">📊 Графіки</div>
+        <div class="tab active" onclick="location.href='master.html'">🧑‍🔧 Майстер</div>
         <div class="settings-btn">⚙️</div>
     </div>
 
@@ -278,19 +278,18 @@
 </div>
 
 <script>
-    // --- КОНФІГУРАЦІЯ БАЗИ ДАНИХ ---
     const SUPABASE_URL = "https://zcyntywoftcahfjwqldr.supabase.co";
     
-    // ⚠️ ОБОВ'ЯЗКОВО ВСТАВТЕ СВІЙ АНОНІМНИЙ КЛЮЧ З SUPABASE СЮДИ:
+    // ⚠️ ОБОВ'ЯЗКОВО ВСТАВТЕ СВІЙ ДІЙСНИЙ КЛЮЧ АНОНІМНОГО ДОСТУПУ З SUPABASE (Project Settings -> API)
     const SUPABASE_ANON_KEY = "ВСТАВТЕ_СЮДИ_ВАШ_КЛЮЧ_ANON_PUBLIC"; 
 
     const CURRENT_PD = "ПД-13";
-    const TEMPORARY_PASSWORD = "1234"; // Тестовий пароль для входу
+    const TEMPORARY_PASSWORD = "1234"; // Пароль для перевірки
 
     let supabase = null;
     let globalTracks = [];
 
-    // Елементи інтерфейсу
+    // DOM елементи
     const logsContainer = document.getElementById('monitorLogs');
     const authCard = document.getElementById('authCard');
     const cabinetCard = document.getElementById('cabinetCard');
@@ -304,7 +303,6 @@
     const selectedCountSpan = document.getElementById('selectedCount');
     const submitBtn = document.getElementById('submitBtn');
 
-    // Логування (працює миттєво)
     function logMessage(text, type = 'info') {
         if (!logsContainer) return;
         const time = new Date().toLocaleTimeString();
@@ -319,28 +317,25 @@
         logsContainer.scrollTop = logsContainer.scrollHeight;
     }
 
-    // Встановлення сьогоднішньої дати
     if (workDateInput) {
         workDateInput.value = new Date().toISOString().split('T')[0];
     }
 
-    // Автоматичний старт та синхронізація конфігурації перегонів
+    // Синхронізація ліній та перегонів при запуску сторінки
     async function initSystem() {
         logMessage(`Синхронізація хмари для ${CURRENT_PD}...`, 'info');
         
         try {
             if (typeof Supabase === 'undefined') {
-                throw new Error("Бібліотека Supabase JS не завантажилась. Перевірте підключення до мережі.");
+                throw new Error("Бібліотека Supabase JS не завантажилась. Перевірте інтернет.");
             }
 
             if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes("ВСТАВТЕ_СЮДИ")) {
-                throw new Error("Критична помилка: Не вказано реальний SUPABASE_ANON_KEY у коді скрипту!");
+                throw new Error("Не вказано реальний SUPABASE_ANON_KEY у коді скрипту!");
             }
 
-            // Ініціалізуємо підключення
             supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // Викачуємо лінії ліній_config тільки для нашого ПД-13
             const { data, error } = await supabase
                 .from('lines_config')
                 .select('*')
@@ -348,11 +343,10 @@
 
             if (error) throw error;
 
-            // Гарантуємо, що globalTracks — це чистий масив
             globalTracks = data || [];
 
             if (globalTracks.length === 0) {
-                logMessage(`Попередження: Для ${CURRENT_PD} не знайдено записів у lines_config!`, 'error');
+                logMessage(`Попередження: Для ${CURRENT_PD} немає записів у lines_config!`, 'error');
                 peregonSelect.innerHTML = '<option value="" disabled>Дані відсутні</option>';
                 return;
             }
@@ -366,7 +360,7 @@
         }
     }
 
-    // Обробка логіну
+    // Обробка входу за паролем
     loginBtn.addEventListener('click', () => {
         if (passwordInput.value === TEMPORARY_PASSWORD) {
             logMessage("Вхід виконано успішно", "success");
@@ -379,10 +373,9 @@
         }
     });
 
-    // Побудова унікального списку перегонів (береться поле .name)
+    // Побудова списку перегонів (по колонці 'name')
     function buildPeregonDropdown() {
         const uniquePeregons = [...new Set(globalTracks.map(track => track.name))];
-        
         peregonSelect.innerHTML = '<option value="" disabled selected>Оберіть ділянку...</option>';
         uniquePeregons.forEach(name => {
             if (name) {
@@ -391,7 +384,7 @@
         });
     }
 
-    // Зміна перегону -> завантаження відповідних колій
+    // Обробка вибору перегону
     peregonSelect.addEventListener('change', (e) => {
         const selectedPeregonName = e.target.value;
         const filteredTracks = globalTracks.filter(t => t.name === selectedPeregonName);
@@ -407,7 +400,7 @@
         resetKmList();
     });
 
-    // Зміна колії -> генерація кілометрів відповідно до start_km та end_km з бази даних
+    // Обробка вибору колії (генерація списку кілометрів)
     trackSelect.addEventListener('change', () => {
         const selectedPeregon = peregonSelect.value;
         const selectedTrackType = trackSelect.value;
@@ -417,13 +410,11 @@
         if (config) {
             const start = config.start_km || 1;
             const end = config.end_km || (start + 10);
-            
             generateKmCheckboxes(start, end);
             logMessage(`Завантажено кілометри для: ${selectedPeregon} (${selectedTrackType} колія)`, 'info');
         }
     });
 
-    // Генерація чекбоксів кілометрів
     function generateKmCheckboxes(start, end) {
         kmListContainer.innerHTML = '';
         for (let i = start; i <= end; i++) {
@@ -446,13 +437,12 @@
         selectedCountSpan.innerText = 'обрано: 0';
     }
 
-    // Відкриття/закриття випадаючого списку кілометрів
     kmHeaderBtn.addEventListener('click', () => {
         const isOpened = kmListContainer.style.display === 'grid';
         kmListContainer.style.display = isOpened ? 'none' : 'grid';
     });
 
-    // Відправка та збереження даних (UPSERT по 10 пікетів на кожен кілометр)
+    // Натискання кнопки "Внести дані (відкрити діаграму)"
     submitBtn.addEventListener('click', async () => {
         const peregon = peregonSelect.value;
         const trackType = trackSelect.value;
@@ -466,14 +456,13 @@
         }
 
         if (selectedKms.length === 0) {
-            logMessage("Помилка збереження: не вибрано жодного кілометра для косіння", "error");
+            logMessage("Помилка збереження: не вибрано жодного кілометра", "error");
             alert("Оберіть хоча б один кілометр!");
             return;
         }
 
         logMessage(`Запуск збереження даних для ${peregon}...`, 'info');
 
-        // Генеруємо масив рядків для бази даних (всі 10 пікетів для кожного обраного км)
         const finalRows = [];
         selectedKms.forEach(km => {
             for (let p = 1; p <= 10; p++) {
@@ -483,14 +472,13 @@
                     track_type: trackType,
                     km: km,
                     piket: p,
-                    status: 'green', // зелений колір означає успішно виконане косіння
+                    status: 'green',
                     date: date
                 });
             }
         });
 
         try {
-            // Використовуємо .upsert з вказанням унікальних колонок, щоб перезаписувати старі записи новими датами
             const { error } = await supabase
                 .from('mowing')
                 .upsert(finalRows, { onConflict: 'peregon,track_type,km,piket' });
@@ -500,13 +488,15 @@
             logMessage(`Успішно оновлено ${selectedKms.length} км (${finalRows.length} пікетів).`, 'success');
             alert("Дані успішно внесено до бази даних!");
 
+            // АВТОМАТИЧНИЙ ПЕРЕХІД НА СТОРІНКУ ГРАФІКІВ ПІСЛЯ ЗБЕРЕЖЕННЯ
+            location.href = 'charts.html';
+
         } catch (err) {
             logMessage(`Помилка запису в Supabase Mowing: ${err.message}`, 'error');
             alert("Не вдалося виконати збереження в базу.");
         }
     });
 
-    // Старт системи одразу після завантаження сторінки
     window.addEventListener('DOMContentLoaded', initSystem);
 </script>
 
