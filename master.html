@@ -20,7 +20,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
             padding: 20px;
@@ -36,7 +36,7 @@
             max-width: 650px;
         }
 
-        /* Навігаційні вкладки */
+        /* Вкладки навігації */
         .tabs-container {
             display: flex;
             background: white;
@@ -69,7 +69,7 @@
             font-size: 1.2rem;
         }
 
-        /* Головна картка кабінету */
+        /* Картки інтерфейсу */
         .card {
             background: var(--card-bg);
             border-radius: 15px;
@@ -123,7 +123,7 @@
             border-color: var(--primary-teal);
         }
 
-        /* Вибір кілометрів (Аккордеон/Дропдаун) */
+        /* Вибір кілометрів */
         .km-dropdown {
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -143,10 +143,10 @@
 
         .km-list {
             padding: 10px;
-            max-height: 150px;
+            max-height: 160px;
             overflow-y: auto;
             display: none;
-            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
             gap: 8px;
             border-top: 1px solid var(--border-color);
         }
@@ -154,12 +154,16 @@
         .km-item {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             font-size: 0.9rem;
             cursor: pointer;
+            background: #f5fdfa;
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: 1px solid #e2f4ed;
         }
 
-        /* Кнопка відправки */
+        /* Кнопки */
         .btn-submit {
             width: 100%;
             background-color: var(--primary-teal);
@@ -186,21 +190,21 @@
             padding: 12px;
             font-family: "Courier New", Courier, monospace;
             font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
         .monitor-title {
             color: #0c544b;
             font-weight: bold;
             margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
             text-transform: uppercase;
         }
 
         .log-line {
             margin: 3px 0;
             line-height: 1.4;
+            white-space: pre-wrap;
         }
 
         .log-success { color: #27ae60; }
@@ -213,14 +217,25 @@
 <div class="container">
 
     <div class="tabs-container">
-        <div class="tab" onclick="location.href='charts.html'">📊 Графіки</div>
+        <div class="tab" onclick="alert('Перехід на графіки...')">📊 Графіки</div>
         <div class="tab active">🧑‍🔧 Майстер</div>
         <div class="settings-btn">⚙️</div>
     </div>
 
-    <div class="card">
+    <div class="card" id="authCard">
+        <h2 class="card-title">🧑‍🔧 Вхід для ПД</h2>
+        <div class="card-subtitle">Внесіть дані про виконане обкошування на вашому околотку.</div>
+        
+        <div class="form-group">
+            <label for="access_password">Пароль доступу:</label>
+            <input type="password" id="access_password" class="form-control" placeholder="••••">
+        </div>
+        <button class="btn-submit" id="loginBtn">Увійти в кабінет</button>
+    </div>
+
+    <div class="card" id="cabinetCard" style="display: none;">
         <h2 class="card-title">🧑‍🔧 Кабінет: <span id="pd-title">ПД-13</span></h2>
-        <div class="card-subtitle">Оберіть діляннку, дату та відмітьте потрібні кілометри.</div>
+        <div class="card-subtitle">Оберіть ділянку, дату та відмітьте потрібні кілометри.</div>
 
         <div class="form-group">
             <label for="peregon">Перегін:</label>
@@ -248,8 +263,7 @@
                     <span>📂 Показати список кілометрів (<span id="selectedCount">обрано: 0</span>)</span>
                     <span>🔽</span>
                 </div>
-                <div class="km-list" id="kmListContainer">
-                    </div>
+                <div class="km-list" id="kmListContainer"></div>
             </div>
         </div>
 
@@ -258,42 +272,41 @@
 
     <div class="monitor">
         <div class="monitor-title">💻 Монітор самоаудиту системи</div>
-        <div id="monitorLogs">
-            </div>
+        <div id="monitorLogs"></div>
     </div>
 
 </div>
 
 <script>
-    // --- НАЛАШТУВАННЯ SUPABASE ---
-    const SUPABASE_URL = "https://zcyntywoftcahfjwqldr.supabase.co"; // Ваш URL з скріншоту
-    const SUPABASE_ANON_KEY = "ВАШ_SUPABASE_ANON_KEY";             // Вставте сюди свій ключ безпеки
+    // --- КОНФІГУРАЦІЯ БАЗИ ДАНИХ ---
+    const SUPABASE_URL = "https://zcyntywoftcahfjwqldr.supabase.co";
     
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ⚠️ ОБОВ'ЯЗКОВО ВСТАВТЕ СВІЙ АНОНІМНИЙ КЛЮЧ З SUPABASE СЮДИ:
+    const SUPABASE_ANON_KEY = "ВСТАВТЕ_СЮДИ_ВАШ_КЛЮЧ_ANON_PUBLIC"; 
 
-    // Поточний околоток (динамічний або фіксований)
     const CURRENT_PD = "ПД-13";
-    document.getElementById('pd-title').innerText = CURRENT_PD;
+    const TEMPORARY_PASSWORD = "1234"; // Тестовий пароль для входу
 
-    // Глобальний масив ліній (захищений від помилок)
+    let supabase = null;
     let globalTracks = [];
 
-    // Елементи DOM
+    // Елементи інтерфейсу
+    const logsContainer = document.getElementById('monitorLogs');
+    const authCard = document.getElementById('authCard');
+    const cabinetCard = document.getElementById('cabinetCard');
+    const loginBtn = document.getElementById('loginBtn');
+    const passwordInput = document.getElementById('access_password');
     const peregonSelect = document.getElementById('peregon');
     const trackSelect = document.getElementById('track_type');
     const workDateInput = document.getElementById('work_date');
     const kmHeaderBtn = document.getElementById('kmHeaderBtn');
     const kmListContainer = document.getElementById('kmListContainer');
     const selectedCountSpan = document.getElementById('selectedCount');
-    const logsContainer = document.getElementById('monitorLogs');
     const submitBtn = document.getElementById('submitBtn');
 
-    // Встановлення поточної дати за замовчуванням
-    const today = new Date().toISOString().split('T')[0];
-    workDateInput.value = today;
-
-    // --- ФУНКЦІЯ ЛОГУВАННЯ (МОНІТОР) ---
+    // Логування (працює миттєво)
     function logMessage(text, type = 'info') {
+        if (!logsContainer) return;
         const time = new Date().toLocaleTimeString();
         let className = 'log-info';
         if (type === 'success') className = 'log-success';
@@ -303,17 +316,31 @@
         line.className = `log-line ${className}`;
         line.innerText = `[${time}]: ${text}`;
         logsContainer.appendChild(line);
-        
-        // Автоскрол монітора донизу
         logsContainer.scrollTop = logsContainer.scrollHeight;
     }
 
-    // --- ЗАВАНТАЖЕННЯ ДАНИХ З БАЗИ ---
-    async function initCabinet() {
+    // Встановлення сьогоднішньої дати
+    if (workDateInput) {
+        workDateInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    // Автоматичний старт та синхронізація конфігурації перегонів
+    async function initSystem() {
         logMessage(`Синхронізація хмари для ${CURRENT_PD}...`, 'info');
         
         try {
-            // Завантажуємо конфігурацію з таблиці lines_config під наш ПД
+            if (typeof Supabase === 'undefined') {
+                throw new Error("Бібліотека Supabase JS не завантажилась. Перевірте підключення до мережі.");
+            }
+
+            if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.includes("ВСТАВТЕ_СЮДИ")) {
+                throw new Error("Критична помилка: Не вказано реальний SUPABASE_ANON_KEY у коді скрипту!");
+            }
+
+            // Ініціалізуємо підключення
+            supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            // Викачуємо лінії ліній_config тільки для нашого ПД-13
             const { data, error } = await supabase
                 .from('lines_config')
                 .select('*')
@@ -321,163 +348,166 @@
 
             if (error) throw error;
 
-            // БЕЗПЕЧНИЙ ЗАПИС: гарантуємо, що це завжди масив
+            // Гарантуємо, що globalTracks — це чистий масив
             globalTracks = data || [];
 
             if (globalTracks.length === 0) {
-                logMessage(`Попередження: Для ${CURRENT_PD} не знайдено ділянок в lines_config`, 'error');
-                peregonSelect.innerHTML = '<option value="" disabled>Немає доступних ділянок</option>';
+                logMessage(`Попередження: Для ${CURRENT_PD} не знайдено записів у lines_config!`, 'error');
+                peregonSelect.innerHTML = '<option value="" disabled>Дані відсутні</option>';
                 return;
             }
 
-            logMessage("Вхід виконано успішно", 'success');
-            populatePeregons();
+            logMessage("Синхронізацію ліній виконано успішно", 'success');
+            buildPeregonDropdown();
 
         } catch (err) {
-            logMessage(`Помилка зв'язку: Supabase Mowing: ${err.message}`, 'error');
+            logMessage(`Помилка зв'язку: ${err.message}`, 'error');
             peregonSelect.innerHTML = '<option value="" disabled>Помилка завантаження</option>';
         }
     }
 
-    // --- ЗАПОВНЕННЯ СЕЛЕКТУ ПЕРЕГОНІВ ---
-    function populatePeregons() {
-        // Отримуємо виключно унікальні назви з колонки 'name'
-        const uniqueNames = [...new Set(globalTracks.map(t => t.name))];
+    // Обробка логіну
+    loginBtn.addEventListener('click', () => {
+        if (passwordInput.value === TEMPORARY_PASSWORD) {
+            logMessage("Вхід виконано успішно", "success");
+            authCard.style.display = 'none';
+            cabinetCard.style.display = 'block';
+            document.getElementById('pd-title').innerText = CURRENT_PD;
+        } else {
+            logMessage("Помилка входу: Невірний пароль доступу!", "error");
+            alert("Невірний пароль!");
+        }
+    });
+
+    // Побудова унікального списку перегонів (береться поле .name)
+    function buildPeregonDropdown() {
+        const uniquePeregons = [...new Set(globalTracks.map(track => track.name))];
         
         peregonSelect.innerHTML = '<option value="" disabled selected>Оберіть ділянку...</option>';
-        uniqueNames.forEach(name => {
-            peregonSelect.innerHTML += `<option value="${name}">${name}</option>`;
+        uniquePeregons.forEach(name => {
+            if (name) {
+                peregonSelect.innerHTML += `<option value="${name}">${name}</option>`;
+            }
         });
     }
 
-    // --- ОБРОБКА ВИБОРУ ПЕРЕГОНУ ---
+    // Зміна перегону -> завантаження відповідних колій
     peregonSelect.addEventListener('change', (e) => {
-        const selectedName = e.target.value;
-        
-        // Фільтруємо колії, які належать цьому перегону
-        const availableTracks = globalTracks.filter(t => t.name === selectedName);
+        const selectedPeregonName = e.target.value;
+        const filteredTracks = globalTracks.filter(t => t.name === selectedPeregonName);
 
         trackSelect.innerHTML = '<option value="" disabled selected>Оберіть колію...</option>';
-        availableTracks.forEach(track => {
-            trackSelect.innerHTML += `<option value="${track.track_type}">${track.track_type}</option>`;
+        filteredTracks.forEach(track => {
+            if (track.track_type) {
+                trackSelect.innerHTML += `<option value="${track.track_type}">${track.track_type}</option>`;
+            }
         });
 
         trackSelect.disabled = false;
-        // Скидаємо вибір кілометрів при зміні перегону
-        resetKmSelection();
+        resetKmList();
     });
 
-    // --- ОБРОБКА ВИБОРУ КОЛІЇ ТА ГЕНЕРАЦІЯ КІЛОМЕТРІВ ---
+    // Зміна колії -> генерація кілометрів відповідно до start_km та end_km з бази даних
     trackSelect.addEventListener('change', () => {
-        const selectedName = peregonSelect.value;
+        const selectedPeregon = peregonSelect.value;
         const selectedTrackType = trackSelect.value;
 
-        // Шукаємо конкретний рядок конфігурації
-        const currentLineConfig = globalTracks.find(t => t.name === selectedName && t.track_type === selectedTrackType);
+        const config = globalTracks.find(t => t.name === selectedPeregon && t.track_type === selectedTrackType);
 
-        if (currentLineConfig) {
-            // Використовуємо значення кілометрів з бази даних.
-            // Якщо у вашій таблиці є старт/кінець, беремо їх (наприклад, від start_km до start_km + 15)
-            const startKm = currentLineConfig.start_km || 1;
-            const endKm = currentLineConfig.end_km || (startKm + 10); // якщо end_km немає, генеруємо 10 км
+        if (config) {
+            const start = config.start_km || 1;
+            const end = config.end_km || (start + 10);
             
-            generateKmCheckboxes(startKm, endKm);
-            logMessage(`Завантажено кілометри для ділянки ${selectedName} (${selectedTrackType} колія)`, 'info');
+            generateKmCheckboxes(start, end);
+            logMessage(`Завантажено кілометри для: ${selectedPeregon} (${selectedTrackType} колія)`, 'info');
         }
     });
 
-    // --- ГЕНЕРАЦІЯ ЧЕКБОКСІВ КІЛОМЕТРІВ ---
+    // Генерація чекбоксів кілометрів
     function generateKmCheckboxes(start, end) {
         kmListContainer.innerHTML = '';
         for (let i = start; i <= end; i++) {
-            const item = document.createElement('label');
-            item.className = 'km-item';
-            item.innerHTML = `<input type="checkbox" class="km-checkbox" value="${i}"> км ${i}`;
-            kmListContainer.appendChild(item);
+            const label = document.createElement('label');
+            label.className = 'km-item';
+            label.innerHTML = `<input type="checkbox" class="km-checkbox" value="${i}"> км ${i}`;
+            kmListContainer.appendChild(label);
         }
 
-        // Вішаємо подію оновлення лічильника на кожен чекбокс
-        document.querySelectorAll('.km-checkbox').forEach(cb => {
-            cb.addEventListener('change', updateSelectedKmCount);
+        document.querySelectorAll('.km-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const checkedCount = document.querySelectorAll('.km-checkbox:checked').length;
+                selectedCountSpan.innerText = `обрано: ${checkedCount}`;
+            });
         });
     }
 
-    function updateSelectedKmCount() {
-        const checkedCount = document.querySelectorAll('.km-checkbox:checked').length;
-        selectedCountSpan.innerText = `обрано: ${checkedCount}`;
-    }
-
-    function resetKmSelection() {
+    function resetKmList() {
         kmListContainer.innerHTML = '';
         selectedCountSpan.innerText = 'обрано: 0';
     }
 
-    // --- ВІДКРИТТЯ/ЗАКРИТТЯ СПИСКУ КІЛОМЕТРІВ ---
+    // Відкриття/закриття випадаючого списку кілометрів
     kmHeaderBtn.addEventListener('click', () => {
-        const isVisible = kmListContainer.style.display === 'grid';
-        kmListContainer.style.display = isVisible ? 'none' : 'grid';
+        const isOpened = kmListContainer.style.display === 'grid';
+        kmListContainer.style.display = isOpened ? 'none' : 'grid';
     });
 
-    // --- ЗБЕРЕЖЕННЯ ДАНИХ (ВНЕСЕННЯ В БАЗУ) ---
+    // Відправка та збереження даних (UPSERT по 10 пікетів на кожен кілометр)
     submitBtn.addEventListener('click', async () => {
         const peregon = peregonSelect.value;
         const trackType = trackSelect.value;
         const date = workDateInput.value;
         const selectedKms = Array.from(document.querySelectorAll('.km-checkbox:checked')).map(cb => parseInt(cb.value));
 
-        // Валідація
         if (!peregon || !trackType) {
-            logMessage("Помилка внесення: не обрано перегін або колію!", "error");
+            logMessage("Помилка збереження: не вказано ділянку або колію", "error");
             alert("Будь ласка, оберіть перегін та колію!");
             return;
         }
+
         if (selectedKms.length === 0) {
-            logMessage("Помилка внесення: не обрано жодного кілометра!", "error");
+            logMessage("Помилка збереження: не вибрано жодного кілометра для косіння", "error");
             alert("Оберіть хоча б один кілометр!");
             return;
         }
 
         logMessage(`Запуск збереження даних для ${peregon}...`, 'info');
-        
-        // Готуємо масив рядків для вставки.
-        // За замовчуванням автоматично закриваємо всі 10 пікетів на вказаних кілометрах
-        const rowsToInsert = [];
+
+        // Генеруємо масив рядків для бази даних (всі 10 пікетів для кожного обраного км)
+        const finalRows = [];
         selectedKms.forEach(km => {
-            for (let piket = 1; piket <= 10; piket++) {
-                rowsToInsert.push({
+            for (let p = 1; p <= 10; p++) {
+                finalRows.push({
                     pd: CURRENT_PD,
                     peregon: peregon,
                     track_type: trackType,
                     km: km,
-                    piket: piket,
-                    status: 'green', // Статус виконаного косіння
+                    piket: p,
+                    status: 'green', // зелений колір означає успішно виконане косіння
                     date: date
                 });
             }
         });
 
         try {
-            // Використовуємо .upsert() разом із унікальним первинним ключем бази для перезапису дублікатів
+            // Використовуємо .upsert з вказанням унікальних колонок, щоб перезаписувати старі записи новими датами
             const { error } = await supabase
                 .from('mowing')
-                .upsert(rowsToInsert, { onConflict: 'peregon,track_type,km,piket' });
+                .upsert(finalRows, { onConflict: 'peregon,track_type,km,piket' });
 
             if (error) throw error;
 
-            logMessage(`Успішно внесено/оновлено ${selectedKms.length} км (${rowsToInsert.length} пікетів).`, 'success');
-            alert("Дані успішно збережено в системі!");
-            
-            // За бажанням тут можна перенаправити на сторінку графіків:
-            // location.href = 'charts.html';
+            logMessage(`Успішно оновлено ${selectedKms.length} км (${finalRows.length} пікетів).`, 'success');
+            alert("Дані успішно внесено до бази даних!");
 
         } catch (err) {
-            logMessage(`Помилка запису в Supabase: ${err.message}`, 'error');
-            alert("Не вдалося зберегти дані в хмару. Перевірте монітор помилок.");
+            logMessage(`Помилка запису в Supabase Mowing: ${err.message}`, 'error');
+            alert("Не вдалося виконати збереження в базу.");
         }
     });
 
-    // Запуск системи при завантаженні сторінки
-    window.onload = initCabinet;
+    // Старт системи одразу після завантаження сторінки
+    window.addEventListener('DOMContentLoaded', initSystem);
 </script>
 
 </body>
