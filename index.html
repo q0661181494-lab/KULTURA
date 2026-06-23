@@ -697,8 +697,7 @@
  
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
-                    const leftPdLabel = (currentMode === 'peregon' && finalLeftConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalLeftConfig.pd}</div>` : '';
-                    leftBank.innerHTML = `<div>${leftSide.label}</div>${leftPdLabel}<div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
+                    leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
                     nodeRow.appendChild(leftBank);
  
                     const leftTrackVisual = document.createElement('div');
@@ -718,8 +717,7 @@
  
                     const rightBank = document.createElement('div');
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
-                    const rightPdLabel = (currentMode === 'peregon' && finalRightConfig) ? `<div style="font-size:8px; opacity:0.7;">${finalRightConfig.pd}</div>` : '';
-                    rightBank.innerHTML = `<div>${rightSide.label}</div>${rightPdLabel}<div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
+                    rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
                     nodeRow.appendChild(rightBank);
                     
                     const rightMargin = document.createElement('div');
