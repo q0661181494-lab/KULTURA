@@ -22,12 +22,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* Навігація */
-        .nav-container { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 600px; }
-        .nav-btn { flex: 1; background: #fff; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .nav-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-        .settings-btn { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; cursor: pointer; }
-
         /* Картки інтерфейсу */
         .card { background: var(--card-bg); border-radius: 16px; padding: 25px; width: 100%; max-width: 600px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid rgba(0, 139, 116, 0.1); margin-bottom: 20px; }
         .card-title { font-size: 20px; font-weight: bold; color: var(--primary-color); margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
@@ -92,12 +86,6 @@
     </style>
 </head>
 <body>
-
-    <div class="nav-container">
-        <button class="nav-btn">📊 Графіки</button>
-        <button class="nav-btn active">🚪 Кабінет ПД</button>
-        <button class="settings-btn">⚙️</button>
-    </div>
 
     <div id="login-card" class="card">
         <div class="card-title">🧑‍🔧 Вхід для ПД</div>
@@ -339,7 +327,6 @@
                 return;
             }
 
-            // Збираємо унікальний набір усіх доступних кілометрів
             let kmSet = new Set();
             configs.forEach(config => {
                 const start = parseInt(config.start_km);
@@ -413,7 +400,6 @@
                 diagramContent.innerHTML = "";
                 const today = new Date();
 
-                // Фільтруємо конфігурації, які дійсно було обрано користувачем
                 const activeConfigs = linesConfigList.filter(item => 
                     checkedPeregons.includes(item.name) && checkedTracks.includes(item.track_type)
                 );
@@ -426,7 +412,6 @@
                     const minKm = Math.min(start, end);
                     const maxKm = Math.max(start, end);
 
-                    // Знаходимо кілометри, що належать саме цій ділянці
                     const kmsForThisSection = checkedKilometers.filter(km => km >= minKm && km <= maxKm);
 
                     if (kmsForThisSection.length === 0) return;
@@ -513,7 +498,6 @@
             logToMonitor(`Обрано пікетів для збереження: ${selectedDataToSave.length}`, "info");
         }
 
-        // Безпечне збереження через .insert()
         async function saveSelectedData() {
             if (selectedDataToSave.length === 0) {
                 alert("Ви не вибрали жодного пікету на діаграмі для збереження!");
