@@ -143,134 +143,176 @@
     <script>
         const SUPABASE_URL = "https://zcyntywoftcahfjwqldr.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+        
+        let supabase = null;
         let currentPD = "";
         let selectedDataToSave = []; 
 
-        // Встановлюємо поточну дату за замовчуванням
-        document.getElementById('date-input').valueAsDate = new Date();
-
+        // Функція безпечного виводу логів (працює завжди завдяки підняттю функцій)
         function log(msg) {
             const el = document.getElementById('monitor-logs');
-            el.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
-            el.scrollTop = el.scrollHeight;
+            if (el) {
+                el.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+                el.scrollTop = el.scrollHeight;
+            }
         }
 
-        async function executeLogin() {
-            const pass = document.getElementById('password-input').value.trim();
-            if (!/^\d{4}$/.test(pass) || pass.slice(0, 2) !== pass.slice(2, 4)) {
-                alert("Невірний формат паролю! Спробуйте ще раз."); return;
-            }
+        // Безпечний старт після повного завантаження структури сторінки DOM
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Встановлюємо дату
+                const dateInput = document.getElementById('date-input');
+                if (dateInput) dateInput.valueAsDate = new Date();
 
-            currentPD = `ПД-${pass.slice(0, 2)}`;
-            document.getElementById('pd-title-name').innerText = currentPD;
-            log(`Успішний вхід: ${currentPD}`);
-            
-            document.getElementById('login-card').classList.add('hidden');
-            document.getElementById('cabinet-card').classList.remove('hidden');
-            
-            await loadPeregons();
+                // Перевіряємо наявність глобального об'єкта Supabase з CDN
+                if (typeof window.supabase === 'undefined') {
+                    log("🚨 КРИТИЧНА ПОМИЛКА: Скрипт Supabase CDN не завантажився. Перевірте підключення до інтернету!");
+                    alert("Помилка мережі: Не вдалося завантажити бібліотеку Supabase. Перевірте зв'язок.");
+                    return;
+                }
+
+                // Ініціалізуємо клієнт
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                log("✅ База даних успішно підключена. Система очікує авторизації...");
+            } catch (err) {
+                log(`🚨 Помилка запуску системи: ${err.message}`);
+            }
+        });
+
+        async function executeLogin() {
+            try {
+                const passInput = document.getElementById('password-input');
+                if (!passInput) return;
+                
+                const pass = passInput.value.trim();
+                
+                if (!/^\d{4}$/.test(pass) || pass.slice(0, 2) !== pass.slice(2, 4)) {
+                    alert("Невірний формат паролю! Введіть 4 цифри дублем (наприклад: 1313).");
+                    log("❌ Відхилено спробу входу: невірний маскований формат.");
+                    return;
+                }
+
+                if (!supabase) {
+                    alert("Помилка: З'єднання з базою відсутнє. Подивіться лог монітора внизу сторінки.");
+                    return;
+                }
+
+                currentPD = `ПД-${pass.slice(0, 2)}`;
+                document.getElementById('pd-title-name').innerText = currentPD;
+                log(`🔐 Авторизовано: успішний вхід для ${currentPD}`);
+                
+                document.getElementById('login-card').classList.add('hidden');
+                document.getElementById('cabinet-card').classList.remove('hidden');
+                
+                await loadPeregons();
+            } catch (err) {
+                log(`🚨 Помилка при обробці входу: ${err.message}`);
+            }
         }
 
         async function loadPeregons() {
-            log("Запит перегонів з конфігурації лінії...");
-            const { data, error } = await supabase.from('lines_config').select('name').eq('pd', currentPD);
-            
-            if (error) { log(`Помилка завантаження перегонів: ${error.message}`); return; }
-            
-            const unique = [...new Set(data.map(item => item.name))].filter(Boolean);
-            const container = document.getElementById('peregons-container');
-            container.innerHTML = "";
-            
-            unique.forEach(name => {
-                container.innerHTML += `<label class="checkbox-label"><input type="checkbox" class="peregon-cb" value="${name}"> ${name}</label>`;
-            });
-            log(`Завантажено перегонів: ${unique.length}`);
+            try {
+                log("Запит списку ділянок з конфігурації лінії...");
+                const { data, error } = await supabase.from('lines_config').select('name').eq('pd', currentPD);
+                
+                if (error) throw error;
+                
+                const unique = [...new Set(data.map(item => item.name))].filter(Boolean);
+                const container = document.getElementById('peregons-container');
+                container.innerHTML = "";
+                
+                unique.forEach(name => {
+                    container.innerHTML += `<label class="checkbox-label"><input type="checkbox" class="peregon-cb" value="${name}"> ${name}</label>`;
+                });
+                log(`Завантажено перегонів для вибору: ${unique.length}`);
+            } catch (err) {
+                log(`🚨 Помилка отримання перегонів: ${err.message}`);
+            }
         }
 
         async function buildDiagram() {
-            selectedDataToSave = []; 
+            try {
+                selectedDataToSave = []; 
 
-            const peregons = Array.from(document.querySelectorAll('.peregon-cb:checked')).map(cb => cb.value);
-            const tracks = Array.from(document.querySelectorAll('.track-cb:checked')).map(cb => cb.value);
-            const kmRaw = document.getElementById('km-input').value;
-            
-            if (peregons.length === 0 || tracks.length === 0 || kmRaw.trim() === "") {
-                alert("Помилка: Оберіть перегін, колію та впишіть кілометри через кому!");
-                return;
-            }
+                const peregons = Array.from(document.querySelectorAll('.peregon-cb:checked')).map(cb => cb.value);
+                const tracks = Array.from(document.querySelectorAll('.track-cb:checked')).map(cb => cb.value);
+                const kmRaw = document.getElementById('km-input').value;
+                
+                if (peregons.length === 0 || tracks.length === 0 || kmRaw.trim() === "") {
+                    alert("Помилка: Оберіть перегін, колію та впишіть кілометри через кому!");
+                    return;
+                }
 
-            const kms = kmRaw.split(',').map(k => parseInt(k.trim())).filter(k => !isNaN(k));
-            log(`Аналіз стану для км: ${kms.join(', ')}...`);
+                const kms = kmRaw.split(',').map(k => parseInt(k.trim())).filter(k => !isNaN(k));
+                log(`Синхронізація журналів старіння для КМ: ${kms.join(', ')}...`);
 
-            // Завантажуємо історію обкошування з бази для розрахунку дат старіння
-            const { data: pastData, error } = await supabase
-                .from('mowing')
-                .select('*')
-                .eq('pd', currentPD)
-                .in('peregon', peregons)
-                .in('track_type', tracks)
-                .in('km', kms);
+                const { data: pastData, error } = await supabase
+                    .from('mowing')
+                    .select('*')
+                    .eq('pd', currentPD)
+                    .in('peregon', peregons)
+                    .in('track_type', tracks)
+                    .in('km', kms);
 
-            if (error) log(`Помилка отримання журналів: ${error.message}`);
+                if (error) throw error;
 
-            const diagramContent = document.getElementById('diagram-content');
-            diagramContent.innerHTML = "";
-            const today = new Date();
+                const diagramContent = document.getElementById('diagram-content');
+                diagramContent.innerHTML = "";
+                const today = new Date();
 
-            peregons.forEach(peregon => {
-                tracks.forEach(track => {
-                    const row = document.createElement('div');
-                    row.className = 'diagram-row';
-                    row.innerHTML = `<div class="diagram-title">🛤️ Ділянка: ${peregon} | Колія: ${track}</div>`;
+                peregons.forEach(peregon => {
+                    tracks.forEach(track => {
+                        const row = document.createElement('div');
+                        row.className = 'diagram-row';
+                        row.innerHTML = `<div class="diagram-title">🛤️ Ділянка: ${peregon} | Колія: ${track}</div>`;
 
-                    kms.forEach(km => {
-                        const kmBlock = document.createElement('div');
-                        kmBlock.className = 'km-block';
-                        kmBlock.innerHTML = `<div class="km-label">КМ ${km}</div>`;
-                        
-                        const piketsGrid = document.createElement('div');
-                        piketsGrid.className = 'pikets-grid';
-
-                        for (let p = 1; p <= 10; p++) {
-                            // Знаходимо найсвіжіший запис обкошування для цього пікету
-                            const history = (pastData || [])
-                                .filter(d => d.peregon === peregon && d.track_type === track && d.km === km && d.piket === p)
-                                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-
-                            let statusClass = 'status-red'; 
+                        kms.forEach(km => {
+                            const kmBlock = document.createElement('div');
+                            kmBlock.className = 'km-block';
+                            kmBlock.innerHTML = `<div class="km-label">КМ ${km}</div>`;
                             
-                            if (history && history.created_at) {
-                                const diffDays = Math.floor((today - new Date(history.created_at)) / (1000 * 60 * 60 * 24));
-                                if (diffDays <= 30) statusClass = 'status-green';
-                                else if (diffDays <= 45) statusClass = 'status-yellow';
-                                else statusClass = 'status-red';
+                            const piketsGrid = document.createElement('div');
+                            piketsGrid.className = 'pikets-grid';
+
+                            for (let p = 1; p <= 10; p++) {
+                                const history = (pastData || [])
+                                    .filter(d => d.peregon === peregon && d.track_type === track && d.km === km && d.piket === p)
+                                    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+
+                                let statusClass = 'status-red'; 
+                                
+                                if (history && history.created_at) {
+                                    const diffDays = Math.floor((today - new Date(history.created_at)) / (1000 * 60 * 60 * 24));
+                                    if (diffDays <= 30) statusClass = 'status-green';
+                                    else if (diffDays <= 45) statusClass = 'status-yellow';
+                                    else statusClass = 'status-red';
+                                }
+
+                                const pBox = document.createElement('div');
+                                pBox.className = `piket ${statusClass}`;
+                                pBox.innerText = p;
+                                pBox.dataset.peregon = peregon;
+                                pBox.dataset.track = track;
+                                pBox.dataset.km = km;
+                                pBox.dataset.piket = p;
+                                
+                                pBox.onclick = () => togglePiket(pBox);
+                                piketsGrid.appendChild(pBox);
                             }
-
-                            const pBox = document.createElement('div');
-                            pBox.className = `piket ${statusClass}`;
-                            pBox.innerText = p;
-                            pBox.dataset.peregon = peregon;
-                            pBox.dataset.track = track;
-                            pBox.dataset.km = km;
-                            pBox.dataset.piket = p;
-                            pBox.dataset.originalClass = statusClass; // запам'ятовуємо старий колір
                             
-                            pBox.onclick = () => togglePiket(pBox);
-                            piketsGrid.appendChild(pBox);
-                        }
-                        
-                        kmBlock.appendChild(piketsGrid);
-                        row.appendChild(kmBlock);
+                            kmBlock.appendChild(piketsGrid);
+                            row.appendChild(kmBlock);
+                        });
+
+                        diagramContent.appendChild(row);
                     });
-
-                    diagramContent.appendChild(row);
                 });
-            });
 
-            document.getElementById('diagram-section').classList.remove('hidden');
-            log("Діаграму успішно побудовано. Можна відмічати пікети тапанням.");
+                document.getElementById('diagram-section').classList.remove('hidden');
+                log("Лінійну діаграму сформовано. Відмітьте виконані пікети тапанням.");
+            } catch (err) {
+                log(`🚨 Помилка побудови графіка: ${err.message}`);
+            }
         }
 
         function togglePiket(element) {
@@ -287,20 +329,18 @@
             };
 
             if (isSelected) {
-                // Скасування виділення: повертаємо початковий колір старіння
                 element.classList.remove('status-active');
                 element.innerText = element.dataset.piket;
                 selectedDataToSave = selectedDataToSave.filter(d => 
                     !(d.peregon === pData.peregon && d.track_type === pData.track_type && d.km === pData.km && d.piket === pData.piket)
                 );
             } else {
-                // Відмітка: ПІКЕТ СТАЄ ЗЕЛЕНИМ з контуром та галочкою
                 element.classList.add('status-active');
                 element.innerText = "✓";
                 selectedDataToSave.push(pData);
             }
             
-            log(`Готово до збереження: ${selectedDataToSave.length} пік.`);
+            log(`Обрано пікетів для фіксації: ${selectedDataToSave.length}`);
         }
 
         async function saveData() {
@@ -309,18 +349,18 @@
                 return;
             }
 
-            log(`Запис даних в таблицю mowing... Кількість: ${selectedDataToSave.length}`);
+            try {
+                log(`Запис даних в хмару (кількість записів: ${selectedDataToSave.length})...`);
+                const { error } = await supabase.from('mowing').insert(selectedDataToSave);
 
-            const { error } = await supabase.from('mowing').insert(selectedDataToSave);
+                if (error) throw error;
 
-            if (error) {
-                log(`🚨 ПОМИЛКА БАЗИ: ${error.message}`);
-                alert(`Помилка синхронізації: ${error.message}\nПеревірте RLS політики таблиці mowing.`);
-            } else {
-                log("✅ Усі відмітки успішно синхронізовано з хмарою!");
+                log("✅ Усі відмітки успішно синхронізовано з базою даних!");
                 alert("Дані успішно збережено в журнал обкошування!");
-                // Перебудовуємо сітку, щоб зафіксувати нові зелені кольори з бази
                 buildDiagram(); 
+            } catch (err) {
+                log(`🚨 ПОМИЛКА СИНХРОНІЗАЦІЇ: ${err.message}`);
+                alert(`Помилка під час відправки даних: ${err.message}\nПеревірте, чи вимкнено політики RLS для таблиці "mowing".`);
             }
         }
     </script>
