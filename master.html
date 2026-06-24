@@ -38,6 +38,10 @@
         .form-group label { display: block; font-weight: 800; font-size: 12px; margin-bottom: 8px; color: var(--primary-color); letter-spacing: 0.5px; }
         .form-control { width: 100%; padding: 12px; border: 1px solid var(--primary-color); border-radius: 10px; font-size: 15px; outline: none; background: #fff; color: var(--text-color); }
         
+        /* Контейнери для чекбоксів Перегонів та Колій */
+        .checkbox-group-container { border: 1px solid var(--primary-color); border-radius: 10px; padding: 12px; background: #fff; display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text-color); }
+        
         .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
         .btn-submit:hover { background: var(--primary-hover); }
 
@@ -91,7 +95,7 @@
 
     <div class="nav-container">
         <button class="nav-btn">📊 Графіки</button>
-        <button class="nav-btn active">🧑‍🔧 Майстер</button>
+        <button class="nav-btn active">🚪 Кабінет ПД</button>
         <button class="settings-btn">⚙️</button>
     </div>
 
@@ -107,22 +111,22 @@
     </div>
 
     <div id="cabinet-card" class="card hidden">
-        <div class="card-title">🧑‍🔧 Кабінет: <span id="pd-title-name">ПД-XX</span></div>
+        <div class="card-title">🚪 Кабінет: <span id="pd-title-name">ПД-XX</span></div>
         <div class="card-subtitle">Оберіть ділянку, дату та відмітьте потрібні кілометри.</div>
 
         <form id="mowing-form" onsubmit="handleFormSubmit(event)">
             <div class="form-group">
                 <label>ПЕРЕГІН:</label>
-                <select id="peregon-select" class="form-control" onchange="syncTracksDropdown()" required>
-                    <option value="">Оберіть перегін...</option>
-                </select>
+                <div id="peregon-checkboxes" class="checkbox-group-container">
+                    <div style="color: #64748b; font-size: 13px;">Завантаження ділянок...</div>
+                </div>
             </div>
 
             <div class="form-group">
                 <label>КОЛІЯ:</label>
-                <select id="track-select" class="form-control" onchange="generateKmCheckboxes()" required disabled>
-                    <option value="">Спочатку оберіть перегін</option>
-                </select>
+                <div id="track-checkboxes" class="checkbox-group-container">
+                    <div style="color: #64748b; font-size: 13px;">Спочатку оберіть перегін</div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -266,15 +270,16 @@
                     return;
                 }
 
-                const uniquePeregons = [...new Set(linesConfigList.map(item => item.name))];
+                const uniquePeregons = [...new Set(linesConfigList.map(item => item.name))].filter(Boolean);
                 
-                const selectElement = document.getElementById('peregon-select');
-                selectElement.innerHTML = '<option value="">Оберіть перегін...</option>';
+                const container = document.getElementById('peregon-checkboxes');
+                container.innerHTML = '';
                 
                 uniquePeregons.forEach(peregonName => {
-                    if(peregonName) {
-                        selectElement.innerHTML += `<option value="${peregonName}">${peregonName}</option>`;
-                    }
+                    container.innerHTML += `
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="${peregonName}" class="peregon-checkbox" onchange="syncTracksDropdown()"> ${peregonName}
+                        </label>`;
                 });
 
                 logToMonitor(`Знайдено ділянок: ${uniquePeregons.length}. Будуємо меню...`, "success");
@@ -285,64 +290,76 @@
             }
         }
 
-        // Оновлення списку колій при виборі конкретного перегону
+        // Оновлення списку колій при виборі чекбоксів перегонів
         function syncTracksDropdown() {
-            const selectedName = document.getElementById('peregon-select').value;
-            const trackSelect = document.getElementById('track-select');
+            const checkedPeregons = Array.from(document.querySelectorAll('.peregon-checkbox:checked')).map(cb => cb.value);
+            const trackContainer = document.getElementById('track-checkboxes');
             
             document.getElementById('km-grid').innerHTML = "";
             updateKmBadge(0);
             document.getElementById('diagram-section').classList.add('hidden');
 
-            if (!selectedName) {
-                trackSelect.innerHTML = '<option value="">Спочатку оберіть перегін</option>';
-                trackSelect.disabled = true;
+            if (checkedPeregons.length === 0) {
+                trackContainer.innerHTML = '<div style="color: #64748b; font-size: 13px;">Спочатку оберіть хоча б один перегін</div>';
                 return;
             }
 
-            const filteredTracks = linesConfigList.filter(item => item.name === selectedName);
+            const filteredLines = linesConfigList.filter(item => checkedPeregons.includes(item.name));
+            const uniqueTracks = [...new Set(filteredLines.map(item => item.track_type))].filter(Boolean);
             
-            trackSelect.innerHTML = '<option value="">Оберіть колію...</option>';
-            filteredTracks.forEach(item => {
-                if(item.track_type) {
-                    trackSelect.innerHTML += `<option value="${item.track_type}">${item.track_type}</option>`;
-                }
+            trackContainer.innerHTML = '';
+            uniqueTracks.forEach(trackType => {
+                trackContainer.innerHTML += `
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="${trackType}" class="track-checkbox" onchange="generateKmCheckboxes()"> ${trackType}
+                    </label>`;
             });
 
-            trackSelect.disabled = false;
-            logToMonitor(`Обрано перегін: ${selectedName}`, "info");
+            logToMonitor(`Обрано перегонів: ${checkedPeregons.length}`, "info");
         }
 
-        // Генерація списку чекбоксів кілометрів
+        // Генерація списку чекбоксів кілометрів на основі УСІХ обраних ділянок
         function generateKmCheckboxes() {
-            const selectedName = document.getElementById('peregon-select').value;
-            const selectedTrack = document.getElementById('track-select').value;
+            const checkedPeregons = Array.from(document.querySelectorAll('.peregon-checkbox:checked')).map(cb => cb.value);
+            const checkedTracks = Array.from(document.querySelectorAll('.track-checkbox:checked')).map(cb => cb.value);
             const kmGrid = document.getElementById('km-grid');
 
             kmGrid.innerHTML = "";
             updateKmBadge(0);
             document.getElementById('diagram-section').classList.add('hidden');
 
-            if (!selectedName || !selectedTrack) return;
+            if (checkedPeregons.length === 0 || checkedTracks.length === 0) return;
 
-            const config = linesConfigList.find(item => item.name === selectedName && item.track_type === selectedTrack);
+            const configs = linesConfigList.filter(item => 
+                checkedPeregons.includes(item.name) && checkedTracks.includes(item.track_type)
+            );
 
-            if (!config) {
-                logToMonitor("Не вдалося знайти межі кілометражу для ділянки", "error");
+            if (configs.length === 0) {
+                logToMonitor("Не вдалося знайти межі кілометражу для обраної комбінації", "error");
                 return;
             }
 
-            const start = parseInt(config.start_km);
-            const end = parseInt(config.end_km);
+            // Збираємо унікальний набір усіх доступних кілометрів
+            let kmSet = new Set();
+            configs.forEach(config => {
+                const start = parseInt(config.start_km);
+                const end = parseInt(config.end_km);
+                if (!isNaN(start) && !isNaN(end)) {
+                    for (let km = Math.min(start, end); km <= Math.max(start, end); km++) {
+                        kmSet.add(km);
+                    }
+                }
+            });
 
-            logToMonitor(`Завантажено кілометри: з ${start} по ${end}`, "success");
+            const sortedKm = Array.from(kmSet).sort((a, b) => a - b);
+            logToMonitor(`Завантажено доступні кілометри. Всього КМ: ${sortedKm.length}`, "success");
 
-            for (let km = start; km <= end; km++) {
+            sortedKm.forEach(km => {
                 const itemLabel = document.createElement('label');
                 itemLabel.className = 'km-item';
                 itemLabel.innerHTML = `<input type="checkbox" value="${km}" onchange="recalculateCheckedKm()"> KM ${km}`;
                 kmGrid.appendChild(itemLabel);
-            }
+            });
         }
 
         function toggleKmView() {
@@ -359,12 +376,18 @@
             document.getElementById('km-count-label').innerText = `обрано: ${count}`;
         }
 
-        // Побудова лінійної діаграми пікетів
+        // Побудова лінійної діаграми пікетів (підтримує мультивибір перегонів/колій)
         async function handleFormSubmit(event) {
             event.preventDefault();
 
-            const peregonValue = document.getElementById('peregon-select').value;
-            const trackValue = document.getElementById('track-select').value;
+            const checkedPeregons = Array.from(document.querySelectorAll('.peregon-checkbox:checked')).map(cb => cb.value);
+            const checkedTracks = Array.from(document.querySelectorAll('.track-checkbox:checked')).map(cb => cb.value);
+
+            if (checkedPeregons.length === 0 || checkedTracks.length === 0) {
+                logToMonitor("Помилка: Не обрано перегін або колію!", "error");
+                alert("Будь ласка, оберіть перегін та колію.");
+                return;
+            }
 
             if (checkedKilometers.length === 0) {
                 logToMonitor("Помилка: Не обрано жодного кілометра!", "error");
@@ -373,15 +396,15 @@
             }
 
             selectedDataToSave = []; 
-            logToMonitor(`Запит стану обкошування для обраних КМ з бази...`, "info");
+            logToMonitor(`Запит стану обкошування з бази для обраних ділянок...`, "info");
 
             try {
                 const { data: pastData, error } = await supabaseClient
                     .from('mowing')
                     .select('*')
                     .eq('pd', currentPD)
-                    .eq('peregon', peregonValue)
-                    .eq('track_type', trackValue)
+                    .in('peregon', checkedPeregons)
+                    .in('track_type', checkedTracks)
                     .in('km', checkedKilometers);
 
                 if (error) throw error;
@@ -390,52 +413,72 @@
                 diagramContent.innerHTML = "";
                 const today = new Date();
 
-                const row = document.createElement('div');
-                row.className = 'diagram-row';
-                row.innerHTML = `<div class="diagram-title">🛤️ Ділянка: ${peregonValue} | Колія: ${trackValue}</div>`;
+                // Фільтруємо конфігурації, які дійсно було обрано користувачем
+                const activeConfigs = linesConfigList.filter(item => 
+                    checkedPeregons.includes(item.name) && checkedTracks.includes(item.track_type)
+                );
 
-                checkedKilometers.forEach(km => {
-                    const kmBlock = document.createElement('div');
-                    kmBlock.className = 'km-block';
-                    kmBlock.innerHTML = `<div class="km-label">КМ ${km}</div>`;
-                    
-                    const piketsGrid = document.createElement('div');
-                    piketsGrid.className = 'pikets-grid';
+                activeConfigs.forEach(config => {
+                    const pValue = config.name;
+                    const tValue = config.track_type;
+                    const start = parseInt(config.start_km);
+                    const end = parseInt(config.end_km);
+                    const minKm = Math.min(start, end);
+                    const maxKm = Math.max(start, end);
 
-                    for (let p = 1; p <= 10; p++) {
-                        const history = (pastData || [])
-                            .filter(d => d.km === km && d.piket === p)
-                            .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                    // Знаходимо кілометри, що належать саме цій ділянці
+                    const kmsForThisSection = checkedKilometers.filter(km => km >= minKm && km <= maxKm);
 
-                        let statusClass = 'status-red'; 
+                    if (kmsForThisSection.length === 0) return;
+
+                    const row = document.createElement('div');
+                    row.className = 'diagram-row';
+                    row.innerHTML = `<div class="diagram-title">🛤️ Ділянка: ${pValue} | Колія: ${tValue}</div>`;
+
+                    kmsForThisSection.forEach(km => {
+                        const kmBlock = document.createElement('div');
+                        kmBlock.className = 'km-block';
+                        kmBlock.innerHTML = `<div class="km-label">КМ ${km}</div>`;
                         
-                        if (history && history.date) {
-                            const diffDays = Math.floor((today - new Date(history.date)) / (1000 * 60 * 60 * 24));
-                            if (diffDays <= 30) statusClass = 'status-green';
-                            else if (diffDays <= 45) statusClass = 'status-yellow';
-                            else statusClass = 'status-red';
+                        const piketsGrid = document.createElement('div');
+                        piketsGrid.className = 'pikets-grid';
+
+                        for (let p = 1; p <= 10; p++) {
+                            const history = (pastData || [])
+                                .filter(d => d.peregon === pValue && d.track_type === tValue && d.km === km && d.piket === p)
+                                .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+                            let statusClass = 'status-red'; 
+                            
+                            if (history && history.date) {
+                                const diffDays = Math.floor((today - new Date(history.date)) / (1000 * 60 * 60 * 24));
+                                if (diffDays <= 30) statusClass = 'status-green';
+                                else if (diffDays <= 45) statusClass = 'status-yellow';
+                                else statusClass = 'status-red';
+                            }
+
+                            const pBox = document.createElement('div');
+                            pBox.className = `piket ${statusClass}`;
+                            pBox.innerText = p;
+                            
+                            pBox.dataset.peregon = pValue;
+                            pBox.dataset.track = tValue;
+                            pBox.dataset.km = km;
+                            pBox.dataset.piket = p;
+                            
+                            pBox.onclick = () => togglePiketSelection(pBox);
+                            piketsGrid.appendChild(pBox);
                         }
+                        
+                        kmBlock.appendChild(piketsGrid);
+                        row.appendChild(kmBlock);
+                    });
 
-                        const pBox = document.createElement('div');
-                        pBox.className = `piket ${statusClass}`;
-                        pBox.innerText = p;
-                        
-                        pBox.dataset.peregon = peregonValue;
-                        pBox.dataset.track = trackValue;
-                        pBox.dataset.km = km;
-                        pBox.dataset.piket = p;
-                        
-                        pBox.onclick = () => togglePiketSelection(pBox);
-                        piketsGrid.appendChild(pBox);
-                    }
-                    
-                    kmBlock.appendChild(piketsGrid);
-                    row.appendChild(kmBlock);
+                    diagramContent.appendChild(row);
                 });
 
-                diagramContent.appendChild(row);
                 document.getElementById('diagram-section').classList.remove('hidden');
-                logToMonitor("Лінійну діаграму сформовано. Виберіть пікети, де виконано роботи.", "success");
+                logToMonitor("Лінійну діаграму сформовано для обраних комбінацій.", "success");
 
             } catch (err) {
                 logToMonitor(`Не вдалося побудувати діаграму: ${err.message || err}`, "error");
@@ -459,7 +502,7 @@
                 element.classList.remove('status-active');
                 element.innerText = element.dataset.piket;
                 selectedDataToSave = selectedDataToSave.filter(d => 
-                    !(d.km === piketObject.km && d.piket === piketObject.piket)
+                    !(d.peregon === piketObject.peregon && d.track_type === piketObject.track_type && d.km === piketObject.km && d.piket === piketObject.piket)
                 );
             } else {
                 element.classList.add('status-active');
