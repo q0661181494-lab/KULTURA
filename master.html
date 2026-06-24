@@ -22,37 +22,42 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
+        /* ВІДНОВЛЕНА НАВІГАЦІЯ */
         .nav-container { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 600px; }
-        .nav-btn { flex: 1; background: #fff; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .nav-btn { flex: 1; background: #fff; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .nav-btn:hover { background: #f8fafc; }
         .nav-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-        .card { background: var(--card-bg); border-radius: 16px; padding: 25px; width: 100%; max-width: 600px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .settings-btn { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; cursor: pointer; font-size: 16px; }
+
+        .card { background: var(--card-bg); border-radius: 16px; padding: 25px; width: 100%; max-width: 600px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid rgba(0, 139, 116, 0.1); margin-bottom: 20px; }
         .card-title { font-size: 20px; font-weight: bold; color: var(--primary-color); margin-bottom: 15px; }
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; font-weight: 800; font-size: 12px; margin-bottom: 8px; color: var(--primary-color); }
         .form-control { width: 100%; padding: 12px; border: 1px solid var(--primary-color); border-radius: 10px; font-size: 15px; outline: none; }
         
-        /* Розгортаючий список */
+        /* РОЗГОРТАЮЧИЙ СПИСОК */
         details { border: 1px solid var(--primary-color); border-radius: 10px; padding: 10px; background: #f8fafc; margin-bottom: 10px; }
-        summary { cursor: pointer; font-weight: bold; color: var(--primary-color); padding: 5px; outline: none; }
+        summary { cursor: pointer; font-weight: bold; color: var(--primary-color); padding: 5px; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        summary::after { content: '▼'; font-size: 10px; }
         .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); }
-        input[type="checkbox"] { accent-color: var(--accent-checkbox); transform: scale(1.2); }
+        input[type="checkbox"] { accent-color: var(--accent-checkbox); transform: scale(1.2); margin-right: 8px; }
 
-        .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* Монітор */
+        /* МОНІТОР */
         .monitor { width: 100%; max-width: 600px; background: #1e293b; color: #f8fafc; border-radius: 10px; padding: 15px; font-family: monospace; font-size: 12px; margin-top: 10px; }
         .log-msg-error { color: #f87171; }
         .log-msg-success { color: #4ade80; }
         
         .hidden { display: none !important; }
-        .piket { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; background: #e2e8f0; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .status-active { background: #1d4ed8; color: white; }
     </style>
 </head>
 <body>
 
     <div class="nav-container">
+        <button class="nav-btn" onclick="window.location.href='index.html'">📊 Графіки</button>
         <button class="nav-btn active">🚪 Кабінет ПД</button>
+        <button class="settings-btn" onclick="window.location.href='admin.html'">⚙️</button>
     </div>
 
     <div id="login-card" class="card">
@@ -61,7 +66,7 @@
             <label>ПАРОЛЬ:</label>
             <input type="password" id="password-input" class="form-control" placeholder="••••" value="" autocomplete="off">
         </div>
-        <button class="btn-submit" id="login-submit-btn" onclick="executeLogin()">Увійти</button>
+        <button class="btn-submit" id="login-submit-btn" onclick="executeLogin()">Увійти в кабінет</button>
     </div>
 
     <div id="cabinet-card" class="card hidden">
@@ -109,33 +114,40 @@
             log("Система ініціалізована...", "info");
             try {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                log("Підключення до Supabase успішне", "success");
+                // Швидка перевірка зв'язку
+                const { error } = await supabaseClient.from('lines_config').select('pd').limit(1);
+                if (error) throw error;
+                log("Підключення до хмари активне", "success");
             } catch (e) {
-                log("Помилка ініціалізації: " + e.message, "error");
+                log("Помилка зв'язку: " + e.message, "error");
             }
         });
 
         async function executeLogin() {
-            const pass = document.getElementById('password-input').value.trim();
+            const passInput = document.getElementById('password-input');
+            const pass = passInput.value.trim();
+            
             if (!/^\d{4}$/.test(pass)) {
                 log("Помилка: Пароль має бути 4 цифри", "error");
                 return;
             }
             
             // Очищення паролю
-            document.getElementById('password-input').value = "";
+            passInput.value = "";
             
             const pd = `ПД-${pass.slice(0, 2)}`;
             log(`Спроба входу для ${pd}...`);
 
             const { data, error } = await supabaseClient.from('lines_config').select('*').eq('pd', pd);
             if (error) { log("Помилка БД: " + error.message, "error"); return; }
+            if (!data || data.length === 0) { log("Невірний пароль або немає даних", "error"); return; }
             
             linesConfigList = data;
             document.getElementById('login-card').classList.add('hidden');
             document.getElementById('cabinet-card').classList.remove('hidden');
             
             renderSelections();
+            log("Вхід успішний", "success");
         }
 
         function renderSelections() {
@@ -159,8 +171,7 @@
                 log("Помилка: Оберіть перегін та введіть КМ", "error");
                 return;
             }
-            log(`Побудова діаграми для КМ: ${manualKm.join(', ')}`, "success");
-            // Тут подальша логіка...
+            log(`Побудова для: ${selectedPeregons.join(', ')} | КМ: ${manualKm.join(', ')}`, "success");
         }
     </script>
 </body>
