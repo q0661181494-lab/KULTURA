@@ -36,7 +36,6 @@
         .form-control { width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; outline: none; transition: border-color 0.2s; background: #fff; }
         .form-control:focus { border-color: var(--primary); }
         
-        /* Стиль для папки з кілометрами */
         .folder-container { border: 1px solid var(--border); border-radius: 10px; background: #fff; overflow: hidden; }
         .folder-header { padding: 12px 15px; background: #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; border-bottom: 1px solid var(--border); }
         .folder-content { padding: 15px; display: flex; flex-wrap: wrap; gap: 10px; max-height: 200px; overflow-y: auto; }
@@ -48,7 +47,6 @@
         .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
         .btn-submit:hover { background: var(--primary-hover); }
 
-        /* Діаграма татання пікетів */
         .diagram-container { margin-top: 25px; border-top: 2px dashed var(--border); padding-top: 25px; }
         .diagram-row { margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
         .diagram-title { font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #334155; }
@@ -63,21 +61,19 @@
         .status-yellow { background: var(--color-yellow); color: #1e293b; }
         .status-green { background: var(--color-green); }
         
-        /* Стиль активованого зараз пікету */
         .status-active { 
-            background: var(--color-green) !important; 
-            border: 2px solid #15803d !important; 
-            box-shadow: 0 0 8px rgba(34, 197, 94, 0.5); 
+            background: #1d4ed8 !important; /* Синій колір для відмічених зараз пікетів */
+            border: 2px solid #1e40af !important; 
+            box-shadow: 0 0 8px rgba(29, 78, 216, 0.5); 
             color: white !important; 
         }
 
         .legend { display: flex; gap: 15px; font-size: 12px; font-weight: bold; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
         .legend-item { display: flex; align-items: center; gap: 6px; }
         .legend-color { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
-        .legend-active-box { border: 2px solid #15803d; box-shadow: 0 0 4px rgba(34, 197, 94, 0.4); }
+        .legend-active-box { background: #1d4ed8; border: 1px solid #1e40af; }
 
-        /* Термінал самоаудиту */
-        .monitor { width: 100%; max-width: 650px; background: #1e293b; color: #34d399; border-radius: 12px; padding: 15px; font-family: monospace; font-size: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .monitor { width: 100%; max-width: 650px; background: #1e293b; color: #34d399; border-radius: 12px; padding: 15px; font-family: monospace; font-size: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 20px; }
         .monitor-title { color: #cbd5e1; margin-bottom: 8px; font-weight: bold; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
         .monitor-logs { max-height: 140px; overflow-y: auto; line-height: 1.5; }
         .log-err { color: #f87171; }
@@ -93,14 +89,14 @@
     </div>
 
     <div id="login-card" class="card">
-        <div class="card-title">🧑‍🔧 Вхід для ПД</div>
+        <div class="card-title">🧑‍🔧 Авторизація майстра</div>
         <div class="card-subtitle">Внесіть дані про виконане обкошування на вашому околотку.</div>
         
         <div class="form-group">
-            <label>Пароль доступу (номер ПД дублем):</label>
+            <label>ПАРОЛЬ ДОСТУПУ (номер ПД дублем):</label>
             <input type="password" id="password-input" class="form-control" placeholder="Наприклад: 1313" maxlength="4">
         </div>
-        <button type="button" class="btn-submit" onclick="executeLogin()">Увійти в кабінет</button>
+        <button type="button" class="btn-submit" onclick="executeLogin()">Увійти в систему</button>
     </div>
 
     <div id="cabinet-card" class="card hidden">
@@ -108,26 +104,26 @@
         <div class="card-subtitle">Оберіть ділянку, дату та відмітьте потрібні кілометри.</div>
         
         <div class="form-group">
-            <label>Перегін / Станція:</label>
+            <label>ПЕРЕГІН:</label>
             <select id="peregon-select" class="form-control" onchange="handlePeregonChange()">
                 <option value="">Оберіть перегін...</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label>Колія:</label>
+            <label>КОЛІЯ:</label>
             <select id="track-select" class="form-control">
                 <option value="">Спочатку оберіть перегін</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label>Дата виконання робіт:</label>
+            <label>ДАТА ВИКОНАННЯ РОБІТ:</label>
             <input type="date" id="date-input" class="form-control">
         </div>
 
         <div class="form-group">
-            <label>Вибір кілометрів:</label>
+            <label>ВИБІР КІЛОМЕТРІВ:</label>
             <div class="folder-container">
                 <div class="folder-header" onclick="toggleFolder()">
                     <span>📁 Показати список кілометрів</span>
@@ -145,7 +141,7 @@
                 <div class="legend-item"><div class="legend-color status-green"></div> Свіже (до 30 дн.)</div>
                 <div class="legend-item"><div class="legend-color status-yellow"></div> Увага (30-45 дн.)</div>
                 <div class="legend-item"><div class="legend-color status-red"></div> Протерміновано (>45 дн.)</div>
-                <div class="legend-item"><div class="legend-color status-green legend-active-box"></div> ✓ Відмічено зараз</div>
+                <div class="legend-item"><div class="legend-color legend-active-box"></div> ✓ Відмічено зараз</div>
             </div>
             
             <div id="diagram-content"></div>
@@ -155,14 +151,15 @@
     </div>
 
     <div class="monitor">
-        <div class="monitor-title">💻 Монітор самоаудиту системи:</div>
+        <div class="monitor-title">💻 МОНІТОР СИНХРОНІЗАЦІЇ ХМАРИ:</div>
         <div id="monitor-logs" class="monitor-logs"></div>
     </div>
 
     <script>
-        // Конфігурація підключення до Supabase
+        // Конфігурація підключення до вашого Supabase
         const SUPABASE_URL = "https://zcyntywoftcahfjwqldr.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
+        // ВСТАВТЕ СЮДИ ПОВНИЙ КЛЮЧ, СКОПІЙОВАНИЙ КНОПКОЮ З СУПАБЕЙЗ
+        const SUPABASE_ANON_KEY = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh"; 
         
         let supabase = null;
         let currentPD = "";
@@ -180,17 +177,16 @@
             el.scrollTop = el.scrollHeight;
         }
 
-        // Безпечний запуск після завантаження сторінки browser-side
         window.addEventListener('DOMContentLoaded', () => {
             try {
                 document.getElementById('date-input').valueAsDate = new Date();
 
                 if (typeof window.supabase === 'undefined') {
-                    log("🚨 КРИТИЧНА ПОМИЛКА: Не завантажено інструмент Supabase CDN!", "error");
+                    log("🚨 Помилка: Не завантажено бібліотеку Supabase CDN!", "error");
                     return;
                 }
 
-                // Виправлено: чистий виклик без символу @
+                // Ініціалізація без символу @
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 log("Система готова до авторизації майстра.");
             } catch (err) {
@@ -211,7 +207,6 @@
             log(`Синхронізація хмари для ${currentPD}...`);
 
             try {
-                // Завантажуємо ділянки конкретного околотку
                 const { data, error } = await supabase
                     .from('lines_config')
                     .select('*')
@@ -220,7 +215,7 @@
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    log(`⚠️ Для ${currentPD} не знайдено конфігурації ділянок в lines_config.`, "error");
+                    log(`⚠️ Для ${currentPD} не знайдено ділянок в lines_config.`, "error");
                     alert(`Помилка: Налаштування для ${currentPD} відсутні в базі.`);
                     return;
                 }
@@ -228,7 +223,6 @@
                 linesConfigList = data;
                 log(`Знайдено ділянок: ${data.length}. Будуємо меню...`, "success");
                 
-                // Заповнюємо випадаючий список перегонів
                 const peregonSelect = document.getElementById('peregon-select');
                 peregonSelect.innerHTML = '<option value="">Оберіть перегін...</option>';
                 
@@ -243,8 +237,8 @@
                 log("Вхід виконано успішно", "success");
 
             } catch (err) {
-                log(`🚨 Помилка авторизації: ${err.message}`, "error");
-                alert("Не вдалося підключитися до бази даних.");
+                log(`🚨 Помилка зв'язку: ${err.message}`, "error");
+                alert("Не вдалося підключитися. Перевірте правильність API-ключа в коді.");
             }
         }
 
@@ -261,17 +255,13 @@
 
             log(`Обрано перегін: ${selectedPeregon}`);
 
-            // Фільтруємо колії для цього перегону
             const filtered = linesConfigList.filter(item => item.name === selectedPeregon);
-            
-            // Заповнюємо колії
             const uniqueTracks = [...new Set(filtered.map(item => item.track_type))];
             uniqueTracks.forEach(track => {
                 trackSelect.innerHTML += `<option value="${track}">${track}</option>`;
             });
             if(uniqueTracks.length === 1) trackSelect.selectedIndex = 1;
 
-            // Визначаємо діапазон кілометрів (мінімальний та максимальний серед усіх записів перегону)
             const startKms = filtered.map(item => item.start_km).filter(k => k !== null);
             const endKms = filtered.map(item => item.end_km).filter(k => k !== null);
             
@@ -279,9 +269,6 @@
                 const minKm = Math.min(...startKms);
                 const maxKm = Math.max(...endKms);
                 
-                log(`Завантажено кілометри: з ${minKm} по ${maxKm}`);
-
-                // Будуємо чекбокси для кожного КМ
                 for (let k = minKm; k <= maxKm; k++) {
                     kmContent.innerHTML += `
                         <label class="km-checkbox" id="label-km-${k}">
@@ -323,10 +310,10 @@
                 return;
             }
 
-            log(`Запит журналів стану для КМ: ${checkedKms.join(', ')}...`);
+            log(`Запит стану обкошування з бази даних для обраних КМ...`);
 
             try {
-                // Завантажуємо історію обкошування з бази даних
+                // Запитуємо дані з фільтрацією
                 const { data: pastData, error } = await supabase
                     .from('mowing')
                     .select('*')
@@ -354,15 +341,15 @@
                     piketsGrid.className = 'pikets-grid';
 
                     for (let p = 1; p <= 10; p++) {
-                        // Фільтруємо записи для поточного пікету
+                        // Фільтруємо історію та сортуємо за вашою новою колонкою "date"
                         const history = (pastData || [])
                             .filter(d => d.km === km && d.piket === p)
-                            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+                            .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
 
                         let statusClass = 'status-red'; 
                         
-                        if (history && history.created_at) {
-                            const diffDays = Math.floor((today - new Date(history.created_at)) / (1000 * 60 * 60 * 24));
+                        if (history && history.date) {
+                            const diffDays = Math.floor((today - new Date(history.date)) / (1000 * 60 * 60 * 24));
                             if (diffDays <= 30) statusClass = 'status-green';
                             else if (diffDays <= 45) statusClass = 'status-yellow';
                             else statusClass = 'status-red';
@@ -386,16 +373,17 @@
 
                 diagramContent.appendChild(row);
                 document.getElementById('diagram-section').classList.remove('hidden');
-                log("Лінійну діаграму сформовано. Відмітьте виконані пікети тапанням.", "success");
+                log("Лінійну діаграму сформовано. Натисніть на потрібні пікети, щоб відмітити обкошування.", "success");
 
             } catch (err) {
-                log(`🚨 Помилка побудови сітки: ${err.message}`, "error");
+                log(`🚨 Помилка завантаження сітки: ${err.message}`, "error");
             }
         }
 
         function togglePiket(element) {
             const isSelected = element.classList.contains('status-active');
             
+            // Формуємо об'єкт точно під назви ваших колонок у базі даних (pd, peregon, track_type, km, piket, status, date)
             const pData = {
                 pd: currentPD,
                 peregon: element.dataset.peregon,
@@ -403,7 +391,7 @@
                 km: parseInt(element.dataset.km),
                 piket: parseInt(element.dataset.piket),
                 status: 'обкошено',
-                created_at: new Date(document.getElementById('date-input').value).toISOString()
+                date: document.getElementById('date-input').value // Передає чистий YYYY-MM-DD
             };
 
             if (isSelected) {
@@ -428,23 +416,23 @@
             }
 
             try {
-                log(`Надсилання даних в хмару (записів: ${selectedDataToSave.length})...`);
+                log(`Надсилання записів до хмари (${selectedDataToSave.length} шт.)...`);
                 
-                // Використовуємо простий безпечний .insert()
+                // Простий і надійний .insert, який не викликає помилку унікальності ON CONFLICT
                 const { error } = await supabase
                     .from('mowing')
                     .insert(selectedDataToSave);
 
                 if (error) throw error;
 
-                log("✅ Усі відмітки успішно зафіксовано в системі!", "success");
-                alert("Успіх! Дані збережено в журнал обкошування.");
+                log("✅ Дані успішно додано до журналу обкошування!", "success");
+                alert("Успіх! Роботу зафіксовано.");
                 
-                // Оновлюємо діаграму, щоб зафіксувати сталі зелені кольори
+                // Перебудовуємо діаграму для оновлення кольорів на актуальні зелені
                 buildDiagram(); 
             } catch (err) {
-                log(`🚨 НЕ ВДАЛОСЯ ВИКОНАТИ ЗБЕРЕЖЕННЯ: ${err.message}`, "error");
-                alert(`Помилка бази даних: ${err.message}\n\nПЕРЕВІРТЕ: Чи вимкнули ви політику RLS для таблиці 'mowing' у кабінеті Supabase?`);
+                log(`🚨 Помилка збереження: ${err.message}`, "error");
+                alert(`Не вдалося зберегти: ${err.message}`);
             }
         }
     </script>
