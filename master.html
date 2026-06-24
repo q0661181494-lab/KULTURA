@@ -20,7 +20,17 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        /* Зміна для body: min-height забезпечує розтягування на весь екран */
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
         
         /* НАВІГАЦІЯ */
         .nav-container { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 600px; }
@@ -44,11 +54,11 @@
 
         .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* ІМПОРТОВАНІ СТИЛІ МОНІТОРА СИСТЕМИ З INDEX */
+        /* МОНІТОР СИСТЕМИ (Оновлено для притискання до низу екрана) */
         .debug-panel {
             width: 100%;
             max-width: 580px;
-            margin-top: 24px; 
+            margin-top: auto; /* Авто-відступ зверху виштовхує елемент в самий низ body */
             padding: 10px; 
             background-color: rgba(230, 244, 234, 0.8); 
             backdrop-filter: blur(4px);
