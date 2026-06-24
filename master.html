@@ -13,9 +13,10 @@
             --card-bg: #ffffff;
             --text-color: #1e293b;
             --border-color: #cbd5e1;
-            --color-red: #ef4444;
-            --color-yellow: #eab308;
-            --color-green: #22c55e;
+            
+            --color-red: #ef4444;    /* > 45 днів */
+            --color-yellow: #eab308; /* 30-45 днів */
+            --color-green: #22c55e;  /* < 30 днів */
             --accent-checkbox: #008b74;
         }
 
@@ -37,54 +38,144 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px 20px 110px 20px;
+            padding: 12px 12px 110px 12px;
         }
         
-        .nav-container { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 600px; }
-        .nav-btn { flex: 1; background: #fff; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
-        .nav-btn:hover { background: #f8fafc; }
-        .nav-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-        .settings-btn { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; cursor: pointer; font-size: 16px; }
-
-        .card { background: var(--card-bg); border-radius: 16px; padding: 25px; width: 100%; max-width: 600px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid rgba(0, 139, 116, 0.1); margin-bottom: 20px; }
-        .card-title { font-size: 20px; font-weight: bold; color: var(--primary-color); margin-bottom: 15px; }
-        .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; font-weight: 800; font-size: 12px; margin-bottom: 8px; color: var(--primary-color); }
-        .form-control { width: 100%; padding: 12px; border: 1px solid var(--primary-color); border-radius: 10px; font-size: 15px; outline: none; }
-        
-        details { border: 1px solid var(--primary-color); border-radius: 10px; padding: 10px; background: #f8fafc; margin-bottom: 10px; }
-        summary { cursor: pointer; font-weight: bold; color: var(--primary-color); padding: 5px; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-        summary::after { content: '▼'; font-size: 10px; }
-        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); }
-        input[type="checkbox"] { accent-color: var(--accent-checkbox); transform: scale(1.2); margin-right: 8px; }
-
-        .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        
-        .debug-panel {
-            flex-shrink: 0;
-            width: 100%;
-            max-width: 580px;
-            position: fixed;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            padding: 10px; 
-            background-color: rgba(230, 244, 234, 0.95);
-            backdrop-filter: blur(6px);
-            border: 1px solid #c2e7d9; 
-            color: #115e59; 
+        /* Навігаційне меню */
+        .nav-menu { 
+            background: white; 
             border-radius: 12px; 
-            font-size: 11px; 
-            font-family: monospace; 
-            box-shadow: 0 -4px 15px rgba(11,94,89,0.1);
-            box-sizing: border-box;
+            padding: 6px; 
+            margin-bottom: 12px; 
+            display: flex; 
+            gap: 6px; 
+            box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); 
+            width: 100%; 
+            max-width: 580px;
+            box-sizing: border-box; 
+            align-items: center; 
+            border: 1px solid #d1fae5; 
         }
-        @media (max-width: 600px) {
-            .debug-panel {
-                width: calc(100% - 20px);
-            }
+        
+        .nav-link { 
+            flex: 1; 
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center; 
+            font-weight: bold; 
+            font-size: 14px; 
+            color: #115e59; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            background: #f0fdf4; 
+            cursor: pointer; 
+            border: none;
         }
+        
+        .admin-menu-btn { 
+            width: 42px; 
+            height: 42px; 
+            background-color: #f0fdf4; 
+            color: #115e59; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 18px; 
+            border: none; 
+            flex-shrink: 0; 
+            text-decoration: none; 
+            cursor: pointer;
+        }
+        
+        .nav-link:hover, .admin-menu-btn:hover { background-color: #e6f4ea; }
+        .nav-link.active, .admin-menu-btn.active { background-color: #115e59 !important; color: white !important; pointer-events: none; }
+
+        /* Картки інтерфейсу */
+        .screen { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); 
+            width: 100%; 
+            max-width: 580px;
+            box-sizing: border-box; 
+            margin-bottom: 24px; 
+            border: 1px solid #d1fae5;
+        }
+        
+        .screen.welcome-focus {
+            margin-top: 10px;
+            transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(11, 94, 89, 0.12);
+            border-color: #a7f3d0;
+            padding: 30px 20px;
+        }
+
+        .card-title { font-size: 18px; font-weight: 800; color: #115e59; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.8px; text-align: center; }
+        .card-subtitle { color: #0f766e; font-size: 13px; margin-bottom: 16px; text-align: center; opacity: 0.8; }
+        
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-weight: 700; font-size: 11px; margin-bottom: 4px; color: #115e59; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-control { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; outline: none; background: #fff; color: #115e59; font-weight: 500; }
+        .form-control:focus { border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2); }
+        
+        .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .btn-submit:hover { background: var(--primary-hover); }
+
+        /* Стилі залізничної двоколійної діаграми */
+        .railway-canvas { display: flex; flex-direction: column; width: 100%; margin-top: 12px; }
+        .km-signboard { background: #e6f4ea; border: 2px solid #115e59; border-radius: 8px; padding: 8px; margin: 18px 0 8px 0; text-align: center; font-weight: 900; font-size: 14px; color: #115e59; letter-spacing: 1px; text-transform: uppercase; }
+        
+        .track-headers-row { display: flex; width: 100%; margin-bottom: 6px; font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; text-align: center; opacity: 0.8; }
+        .header-margin-space { width: 50px; }
+        .header-left-track { flex: 1; padding-right: 16px; }
+        .header-center-space { width: 42px; }
+        .header-right-track { flex: 1; padding-left: 16px; }
+
+        .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; border-radius: 6px; }
+        .station-piket-row { background-color: #f1f5f9 !important; border-left: 3px solid #0d9488; border-right: 3px solid #0d9488; }
+        .station-piket-row .piket-center-core { background: #0d9488 !important; color: white !important; border-color: #0f766e !important; }
+        .station-boundary-delimiter { background: #f0fdf4; border: 2px dashed #0d9488; border-radius: 8px; padding: 6px; margin: 12px 0 12px 0; text-align: center; font-weight: 800; font-size: 12px; color: #0d9488; letter-spacing: 0.5px; text-transform: uppercase; }
+        
+        .info-margin { width: 50px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: bold; color: #0f766e; box-sizing: border-box; }
+        .margin-left { justify-content: flex-end; padding-right: 4px; }
+        .margin-right { justify-content: flex-start; padding-left: 4px; }
+
+        .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #ffffff; padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #475569; min-width: 42px; box-sizing: border-box; }
+        .signal-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%; margin-right: 4px; box-shadow: 0 0 6px #22c55e; }
+
+        .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; cursor: pointer; transition: transform 0.1s; user-select: none; }
+        .mowing-bank-zone:active { transform: scale(0.96); }
+        
+        /* Стан вибору для збереження */
+        .mowing-bank-zone.piket-selected {
+            background-color: #1d4ed8 !important;
+            color: white !important;
+            border: 2px solid #1e40af !important;
+            box-shadow: 0 0 8px rgba(29, 78, 216, 0.5);
+        }
+
+        .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
+        
+        .rail-line-visual { width: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: #cbd5e1; }
+        .rail-line-visual::before, .rail-line-visual::after { content: ""; position: absolute; top: 0; width: 2px; height: 100%; background: #475569; }
+        .rail-line-visual::before { left: 1px; }
+        .rail-line-visual::after { right: 1px; }
+        .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
+
+        .status-clear-green { background-color: #22c55e !important; color: white; }
+        .status-warn-yellow { background-color: #eab308 !important; color: #1f2937; }
+        .status-overgrown-red { background-color: #ef4444 !important; color: white; }
+
+        /* Монітор системи фіксований внизу */
+        .debug-panel {
+            flex-shrink: 0; width: 100%; max-width: 580px; position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; 
+            background-color: rgba(230, 244, 234, 0.95); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 15px rgba(11,94,89,0.1); box-sizing: border-box;
+        }
+        @media (max-width: 600px) { .debug-panel { width: calc(100% - 20px); } }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 60px; overflow-y: auto; text-align: left; }
         
@@ -94,124 +185,284 @@
 <body>
 
     <div class="main-content">
-        <div class="nav-container">
-            <button class="nav-btn" onclick="window.location.href='index.html'">📊 Графіки</button>
-            <button class="nav-btn active">🚪 Кабінет ПД</button>
-            <button class="settings-btn" onclick="window.location.href='admin.html'">⚙️</button>
+        <div class="nav-menu">
+            <a href="index.html" class="nav-link">📊 Графіки</a>
+            <button class="nav-link active">🚪 Кабінет ПД</button>
+            <a href="admin.html" class="admin-menu-btn">⚙️</a>
         </div>
 
-        <div id="login-card" class="card">
-            <div class="card-title">🧑‍🔧 Вхід для ПД</div>
+        <div id="login-card" class="screen welcome-focus">
+            <div class="card-title">Вхід для ПД</div>
+            <div class="card-subtitle">Введіть пароль вашого околотка для переходу до графіка.</div>
             <div class="form-group">
-                <label>ПАРОЛЬ:</label>
-                <input type="password" id="password-input" class="form-control" value="" autocomplete="off">
+                <input type="password" id="password-input" class="form-control" style="text-align:center; font-size:20px; letter-spacing:4px;" maxlength="4" autocomplete="off">
             </div>
-            <button class="btn-submit" id="login-submit-btn" onclick="executeLogin()">Увійти в кабінет</button>
+            <button class="btn-submit" onclick="executeLogin()">Увійти в кабінет</button>
         </div>
 
-        <div id="cabinet-card" class="card hidden">
-            <div class="card-title">Налаштування робіт</div>
+        <div id="cabinet-card" class="screen hidden">
+            <div class="card-title" id="cabinet-header-title">Кабінет ПД</div>
+            <div class="card-subtitle">Клацніть на брівку пікета, щоб позначити виконання робіт.</div>
             
-            <form id="mowing-form" onsubmit="handleFormSubmit(event)">
-                <details>
-                    <summary>Оберіть перегони</summary>
-                    <div id="peregon-container" class="checkbox-group"></div>
-                </details>
+            <div class="form-group">
+                <label>Дата виконання робіт:</label>
+                <input type="date" id="work-date-input" class="form-control">
+            </div>
 
-                <details>
-                    <summary>Оберіть колії</summary>
-                    <div id="track-container" class="checkbox-group"></div>
-                </details>
+            <div class="form-group">
+                <label>Фільтр КМ (ручний ввід через кому / порожньо - весь околоток):</label>
+                <input type="text" id="manual-km-input" class="form-control" placeholder="Наприклад: 5, 6, 12" oninput="filterDiagramByKm()">
+            </div>
 
-                <div class="form-group">
-                    <label>РУЧНИЙ ВВІД КМ (через кому):</label>
-                    <input type="text" id="manual-km-input" class="form-control" placeholder="Наприклад: 12, 14, 25">
-                </div>
-
-                <button type="submit" class="btn-submit">Побудувати діаграму</button>
-            </form>
+            <div id="diagram-render-zone" class="railway-canvas"></div>
+            
+            <button class="btn-submit" style="background:#1d4ed8; margin-top:20px;" onclick="saveMowingProgress()">Синхронізувати з хмарою</button>
         </div>
     </div>
 
     <div class="debug-panel">
         <div class="debug-title">🖥️ Монітор системи</div>
-        <div id="monitor-logs" class="debug-scroll"></div>
+        <div id="debug-console" class="debug-scroll"></div>
     </div>
 
     <script>
-        const SUPABASE_URL = "https://zcyntywoftcahfjwqldr.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
-        let supabaseClient, linesConfigList = [];
+        const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
+        const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
+        let supabaseClient;
 
-        function log(text, type = 'info') {
-            const el = document.getElementById('monitor-logs');
+        let tracksData = []; 
+        let mowingData = [];
+        let signalsData = [];
+        let currentPD = "";
+        let selectedPiketsToSave = []; 
+
+        document.getElementById('work-date-input').valueAsDate = new Date();
+
+        function logSys(text, status = 'info') {
+            const con = document.getElementById('debug-console');
+            if(!con) return;
             const div = document.createElement('div');
-            if (type === 'error') div.style.color = '#dc2626';
-            if (type === 'success') div.style.color = '#16a34a';
-            div.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
-            el.appendChild(div);
-            el.scrollTop = el.scrollHeight;
+            if(status === 'success') div.style.color = '#16a34a';
+            if(status === 'error') div.style.color = '#dc2626';
+            div.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
+            con.appendChild(div);
+            con.scrollTop = con.scrollHeight;
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
-            log("Система ініціалізована...", "info");
+            logSys("Система ініціалізована...", "info");
             try {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                const { error } = await supabaseClient.from('lines_config').select('pd').limit(1);
-                if (error) throw error;
-                log("Підключення до хмари активне", "success");
+                supabaseClient = window.supabase.createClient(baseDbUrl, fullKey);
+                logSys("Зв'язок із хмарою Supabase встановлено.", "success");
             } catch (e) {
-                log("Помилка зв'язку: " + e.message, "error");
+                logSys("Помилка підключення: " + e.message, "error");
             }
         });
 
         async function executeLogin() {
             const passInput = document.getElementById('password-input');
             const pass = passInput.value.trim();
-            
-            if (!/^\d{4}$/.test(pass)) {
-                log("Помилка: Пароль має бути 4 цифри", "error");
+            if (!/^\d{4}$/.test(pass) || pass.slice(0, 2) !== pass.slice(2, 4)) {
+                logSys("Помилка: Невірний формат паролю!", "error");
                 return;
             }
-            
-            passInput.value = "";
-            const pd = `ПД-${pass.slice(0, 2)}`;
-            log(`Спроба входу для ${pd}...`);
 
-            const { data, error } = await supabaseClient.from('lines_config').select('*').eq('pd', pd);
-            if (error) { log("Помилка БД: " + error.message, "error"); return; }
-            if (!data || data.length === 0) { log("Невірний пароль або немає даних", "error"); return; }
+            currentPD = `ПД-${pass.slice(0, 2)}`;
+            passInput.value = ""; 
             
-            linesConfigList = data;
-            document.getElementById('login-card').classList.add('hidden');
-            document.getElementById('cabinet-card').classList.remove('hidden');
-            
-            renderSelections();
-            log("Вхід успішний", "success");
+            logSys(`Завантаження конфігурації для ${currentPD}...`, "info");
+            document.getElementById('cabinet-header-title').innerText = `Кабінет: ${currentPD}`;
+
+            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+            try {
+                const resTracks = await fetch(`${baseDbUrl}/rest/v1/lines_config?pd=eq.${currentPD}`, { headers });
+                tracksData = await resTracks.json();
+
+                const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${currentPD}`, { headers });
+                mowingData = await resMowing.json();
+
+                const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals?pd=eq.${currentPD}`, { headers });
+                signalsData = await resSignals.json();
+
+                document.getElementById('login-card').classList.add('hidden');
+                document.getElementById('cabinet-card').classList.remove('hidden');
+                
+                logSys("Дані успішно синхронізовано. Будуємо автоматичну діаграму...", "success");
+                buildMasterDiagram();
+            } catch (e) {
+                logSys("Помилка завантаження даних: " + e.message, "error");
+            }
         }
 
-        function renderSelections() {
-            const pContainer = document.getElementById('peregon-container');
-            const tContainer = document.getElementById('track-container');
-            
-            const peregons = [...new Set(linesConfigList.map(i => i.name))];
-            const tracks = [...new Set(linesConfigList.map(i => i.track_type))];
+        function getPiketAnalysis(peregonName, trackType, km, pk) {
+            if (!mowingData || mowingData.length === 0) return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+            const record = mowingData.find(m => m.object_name === peregonName && m.track_type === trackType && parseInt(m.km) === km && parseInt(m.piket) === pk);
+            if (!record || record.status !== 'green') return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+            if (!record.date) return { colorClass: 'status-clear-green', label: 'Обкошено', days: '0 дн.' };
 
-            pContainer.innerHTML = peregons.map(p => `<label><input type="checkbox" value="${p}"> ${p}</label>`).join('');
-            tContainer.innerHTML = tracks.map(t => `<label><input type="checkbox" value="${t}"> ${t}</label>`).join('');
+            const diffDays = Math.ceil(Math.abs(new Date() - new Date(record.date)) / (1000 * 60 * 60 * 24));
+            if (diffDays >= 45) return { colorClass: 'status-overgrown-red', label: 'Критично', days: `${diffDays} дн.` };
+            if (diffDays >= 30) return { colorClass: 'status-warn-yellow', label: 'Увага', days: `${diffDays} дн.` };
+            return { colorClass: 'status-clear-green', label: 'Обкошено', days: `${diffDays} дн.` };
         }
 
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            const selectedPeregons = Array.from(document.querySelectorAll('#peregon-container input:checked')).map(i => i.value);
-            const manualKmStr = document.getElementById('manual-km-input').value;
-            const manualKm = manualKmStr.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+        function buildMasterDiagram(allowedKm = null) {
+            const container = document.getElementById('diagram-render-zone');
+            container.innerHTML = "";
 
-            if (selectedPeregons.length === 0 || manualKm.length === 0) {
-                log("Помилка: Оберіть перегін та введіть КМ", "error");
+            if (tracksData.length === 0) {
+                container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію ділянок не знайдено.</p>";
                 return;
             }
-            log(`Побудова для: ${selectedPeregons.join(', ')} | КМ: ${manualKm.join(', ')}`, "success");
+
+            let minKm = Math.min(...tracksData.map(s => parseInt(s.start_km)));
+            let maxKm = Math.max(...tracksData.map(s => parseInt(s.end_km)));
+
+            for (let km = minKm; km <= maxKm; km++) {
+                if (allowedKm && !allowedKm.includes(km)) continue; // Фільтрація по ручному вводу КМ
+
+                const kmSign = document.createElement('div');
+                kmSign.className = 'km-signboard';
+                kmSign.innerText = `Кілометр ${km}`;
+                container.appendChild(kmSign);
+
+                const headersRow = document.createElement('div');
+                headersRow.className = 'track-headers-row';
+                headersRow.innerHTML = `<div class="header-margin-space"></div><div class="header-left-track">ПАРНА</div><div class="header-center-space"></div><div class="header-right-track">НЕПАРНА</div><div class="header-margin-space"></div>`;
+                container.appendChild(headersRow);
+
+                for (let pk = 1; pk <= 10; pk++) {
+                    const leftConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('парна')); 
+                    const rightConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('непарна'));
+                    const stationConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.includes('станція'));
+
+                    const finalLeftConfig = stationConfig || leftConfig;
+                    const finalRightConfig = stationConfig || rightConfig;
+
+                    const leftSide = finalLeftConfig ? getPiketAnalysis(finalLeftConfig.name, finalLeftConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+                    const rightSide = finalRightConfig ? getPiketAnalysis(finalRightConfig.name, finalRightConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+
+                    const nodeRow = document.createElement('div');
+                    nodeRow.className = 'piket-rail-node';
+                    if (stationConfig) nodeRow.classList.add('station-piket-row');
+
+                    // Бокове поле зліва (Світлофори Парна)
+                    const leftMargin = document.createElement('div');
+                    leftMargin.className = 'info-margin margin-left';
+                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'парна');
+                    if (leftSignal) leftMargin.innerHTML = `<span class="signal-badge">${leftSignal.signal_name}</span>`;
+                    nodeRow.appendChild(leftMargin);
+
+                    // Брівка Парна (Ліва)
+                    const leftBank = document.createElement('div');
+                    leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
+                    leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
+                    if (finalLeftConfig) {
+                        leftBank.onclick = () => togglePiketSelection(leftBank, finalLeftConfig.name, finalLeftConfig.track_type, km, pk);
+                    }
+                    nodeRow.appendChild(leftBank);
+
+                    // Колія Парна
+                    const leftTrack = document.createElement('div');
+                    leftTrack.className = 'rail-line-visual';
+                    leftTrack.innerHTML = '<span></span><span></span><span></span><span></span>';
+                    nodeRow.appendChild(leftTrack);
+
+                    // Центральний сердечник пікета
+                    const centerPiket = document.createElement('div');
+                    centerPiket.className = 'piket-center-core';
+                    centerPiket.innerText = pk;
+                    nodeRow.appendChild(centerPiket);
+
+                    // Колія Непарна
+                    const rightTrack = document.createElement('div');
+                    rightTrack.className = 'rail-line-visual';
+                    rightTrack.innerHTML = '<span></span><span></span><span></span><span></span>';
+                    nodeRow.appendChild(rightTrack);
+
+                    // Брівка Непарна (Права)
+                    const rightBank = document.createElement('div');
+                    rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
+                    rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
+                    if (finalRightConfig) {
+                        rightBank.onclick = () => togglePiketSelection(rightBank, finalRightConfig.name, finalRightConfig.track_type, km, pk);
+                    }
+                    nodeRow.appendChild(rightBank);
+
+                    // Бокове поле справа (Світлофори Непарна)
+                    const rightMargin = document.createElement('div');
+                    rightMargin.className = 'info-margin margin-right';
+                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'непарна');
+                    if (rightSignal) rightMargin.innerHTML = `<span class="signal-badge">${rightSignal.signal_name}</span>`;
+                    nodeRow.appendChild(rightMargin);
+
+                    container.appendChild(nodeRow);
+                }
+            }
+        }
+
+        function filterDiagramByKm() {
+            const inputVal = document.getElementById('manual-km-input').value.trim();
+            if (!inputVal) {
+                buildMasterDiagram();
+                return;
+            }
+            const allowed = inputVal.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+            buildMasterDiagram(allowed);
+        }
+
+        function togglePiketSelection(element, objectName, trackType, km, piket) {
+            const isSelected = element.classList.contains('piket-selected');
+            
+            if (isSelected) {
+                element.classList.remove('piket-selected');
+                selectedPiketsToSave = selectedPiketsToSave.filter(p => !(p.object_name === objectName && p.track_type === trackType && p.km === km && p.piket === piket));
+            } else {
+                element.classList.add('piket-selected');
+                selectedPiketsToSave.push({
+                    pd: currentPD,
+                    object_name: objectName,
+                    track_type: trackType,
+                    km: km,
+                    piket: piket,
+                    status: 'green'
+                });
+            }
+            logSys(`Зараз обрано пікетів для оновлення: ${selectedPiketsToSave.length}`, "info");
+        }
+
+        async function saveMowingProgress() {
+            if (selectedPiketsToSave.length === 0) {
+                alert("Ви не вибрали жодного пікета на діаграмі!");
+                return;
+            }
+
+            const dateValue = document.getElementById('work-date-input').value;
+            const recordsToSend = selectedPiketsToSave.map(p => ({
+                ...p,
+                date: dateValue
+            }));
+
+            logSys(`Збереження робіт у хмару (${recordsToSend.length} шт.)...`, "info");
+            
+            try {
+                const { error } = await supabaseClient.from('mowing').insert(recordsToSend);
+                if (error) throw error;
+
+                logSys("Дані успішно завантажено в базу даних!", "success");
+                alert("Роботу успішно зафіксовано!");
+                
+                selectedPiketsToSave = [];
+                // Перезавантажуємо кабінет
+                const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+                const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${currentPD}`, { headers });
+                mowingData = await resMowing.json();
+                
+                filterDiagramByKm();
+            } catch (e) {
+                logSys("Помилка збереження: " + e.message, "error");
+                alert("Помилка синхронізації: " + e.message);
+            }
         }
     </script>
 </body>
