@@ -21,7 +21,6 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         
-        /* Налаштування body для мобільних дисплеїв */
         html, body { height: 100%; margin: 0; padding: 0; background-color: var(--bg-color); }
         
         body { 
@@ -32,17 +31,15 @@
             position: relative;
         }
 
-        /* Основний контейнер для контенту (займає весь доступний простір, крім монітора) */
         .main-content {
             flex: 1 0 auto;
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px 20px 110px 20px; /* Великий нижній паддінг, щоб картки не перекривалися монітором на малих екранах */
+            padding: 20px 20px 110px 20px;
         }
         
-        /* НАВІГАЦІЯ */
         .nav-container { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 600px; }
         .nav-btn { flex: 1; background: #fff; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .nav-btn:hover { background: #f8fafc; }
@@ -55,7 +52,6 @@
         .form-group label { display: block; font-weight: 800; font-size: 12px; margin-bottom: 8px; color: var(--primary-color); }
         .form-control { width: 100%; padding: 12px; border: 1px solid var(--primary-color); border-radius: 10px; font-size: 15px; outline: none; }
         
-        /* РОЗГОРТАЮЧИЙ СПИСОК */
         details { border: 1px solid var(--primary-color); border-radius: 10px; padding: 10px; background: #f8fafc; margin-bottom: 10px; }
         summary { cursor: pointer; font-weight: bold; color: var(--primary-color); padding: 5px; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center; }
         summary::after { content: '▼'; font-size: 10px; }
@@ -64,18 +60,17 @@
 
         .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* ЖОРСТКЕ ПРИТИСКАННЯ МОНІТОРА ДО НИЗУ ДИСПЛЕЯ */
         .debug-panel {
             flex-shrink: 0;
             width: 100%;
             max-width: 580px;
-            position: fixed; /* Фіксуємо на екрані телефону */
-            bottom: 10px; /* Відступ від самого низу дисплея */
+            position: fixed;
+            bottom: 10px;
             left: 50%;
-            transform: translateX(-50%); /* Центрування по горизонталі */
-            z-index: 9999; /* Поверх усіх елементів */
+            transform: translateX(-50%);
+            z-index: 9999;
             padding: 10px; 
-            background-color: rgba(230, 244, 234, 0.95); /* Трохи щільніший фон, щоб текст під ним не просвічувався */
+            background-color: rgba(230, 244, 234, 0.95);
             backdrop-filter: blur(6px);
             border: 1px solid #c2e7d9; 
             color: #115e59; 
@@ -87,7 +82,7 @@
         }
         @media (max-width: 600px) {
             .debug-panel {
-                width: calc(100% - 20px); /* Враховуємо бокові відступи на смартфонах */
+                width: calc(100% - 20px);
             }
         }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -109,7 +104,7 @@
             <div class="card-title">🧑‍🔧 Вхід для ПД</div>
             <div class="form-group">
                 <label>ПАРОЛЬ:</label>
-                <input type="password" id="password-input" class="form-control" placeholder="••••" value="" autocomplete="off">
+                <input type="password" id="password-input" class="form-control" value="" autocomplete="off">
             </div>
             <button class="btn-submit" id="login-submit-btn" onclick="executeLogin()">Увійти в кабінет</button>
         </div>
