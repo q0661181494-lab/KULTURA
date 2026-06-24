@@ -122,7 +122,7 @@
         .form-control { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; outline: none; background: #fff; color: #115e59; font-weight: 500; }
         .form-control:focus { border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2); }
         
-        .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: background 0.2s; }
         .btn-submit:hover { background: var(--primary-hover); }
 
         /* Стилі залізничної двоколійної діаграми */
@@ -147,16 +147,8 @@
         .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #ffffff; padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #475569; min-width: 42px; box-sizing: border-box; }
         .signal-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%; margin-right: 4px; box-shadow: 0 0 6px #22c55e; }
 
-        .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; cursor: pointer; transition: transform 0.1s; user-select: none; }
+        .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; cursor: pointer; transition: background-color 0.15s, transform 0.1s; user-select: none; }
         .mowing-bank-zone:active { transform: scale(0.96); }
-        
-        /* Стан вибору для збереження */
-        .mowing-bank-zone.piket-selected {
-            background-color: #1d4ed8 !important;
-            color: white !important;
-            border: 2px solid #1e40af !important;
-            box-shadow: 0 0 8px rgba(29, 78, 216, 0.5);
-        }
 
         .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
         
@@ -166,9 +158,9 @@
         .rail-line-visual::after { right: 1px; }
         .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
 
-        .status-clear-green { background-color: #22c55e !important; color: white; }
-        .status-warn-yellow { background-color: #eab308 !important; color: #1f2937; }
-        .status-overgrown-red { background-color: #ef4444 !important; color: white; }
+        .status-clear-green { background-color: #22c55e !important; color: white !important; }
+        .status-warn-yellow { background-color: #eab308 !important; color: #1f2937 !important; }
+        .status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
 
         /* Монітор системи фіксований внизу */
         .debug-panel {
@@ -191,6 +183,7 @@
             <a href="admin.html" class="admin-menu-btn">⚙️</a>
         </div>
 
+        <!-- Картка авторизації -->
         <div id="login-card" class="screen welcome-focus">
             <div class="card-title">Вхід для ПД</div>
             <div class="card-subtitle">Введіть пароль вашого околотка для переходу до графіка.</div>
@@ -200,6 +193,7 @@
             <button class="btn-submit" onclick="executeLogin()">Увійти в кабінет</button>
         </div>
 
+        <!-- Робочий кабінет майстра (з'являється після входу) -->
         <div id="cabinet-card" class="screen hidden">
             <div class="card-title" id="cabinet-header-title">Кабінет ПД</div>
             <div class="card-subtitle">Клацніть на брівку пікета, щоб позначити виконання робіт.</div>
@@ -216,7 +210,7 @@
 
             <div id="diagram-render-zone" class="railway-canvas"></div>
             
-            <button class="btn-submit" style="background:#1d4ed8; margin-top:20px;" onclick="saveMowingProgress()">Синхронізувати з хмарою</button>
+            <button class="btn-submit" onclick="saveMowingProgress()">Синхронізувати з хмарою</button>
         </div>
     </div>
 
@@ -296,7 +290,8 @@
 
         function getPiketAnalysis(peregonName, trackType, km, pk) {
             if (!mowingData || mowingData.length === 0) return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
-            const record = mowingData.find(m => m.object_name === peregonName && m.track_type === trackType && parseInt(m.km) === km && parseInt(m.piket) === pk);
+            // Виправлено object_name на peregon відповідно до схеми БД
+            const record = mowingData.find(m => m.peregon === peregonName && m.track_type === trackType && parseInt(m.km) === km && parseInt(m.piket) === pk);
             if (!record || record.status !== 'green') return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
             if (!record.date) return { colorClass: 'status-clear-green', label: 'Обкошено', days: '0 дн.' };
 
@@ -319,7 +314,7 @@
             let maxKm = Math.max(...tracksData.map(s => parseInt(s.end_km)));
 
             for (let km = minKm; km <= maxKm; km++) {
-                if (allowedKm && !allowedKm.includes(km)) continue; // Фільтрація по ручному вводу КМ
+                if (allowedKm && !allowedKm.includes(km)) continue;
 
                 const kmSign = document.createElement('div');
                 kmSign.className = 'km-signboard';
@@ -346,7 +341,6 @@
                     nodeRow.className = 'piket-rail-node';
                     if (stationConfig) nodeRow.classList.add('station-piket-row');
 
-                    // Бокове поле зліва (Світлофори Парна)
                     const leftMargin = document.createElement('div');
                     leftMargin.className = 'info-margin margin-left';
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'парна');
@@ -357,24 +351,22 @@
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
                     leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
+                    leftBank.dataset.initialClass = leftSide.colorClass;
                     if (finalLeftConfig) {
                         leftBank.onclick = () => togglePiketSelection(leftBank, finalLeftConfig.name, finalLeftConfig.track_type, km, pk);
                     }
                     nodeRow.appendChild(leftBank);
 
-                    // Колія Парна
                     const leftTrack = document.createElement('div');
                     leftTrack.className = 'rail-line-visual';
                     leftTrack.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(leftTrack);
 
-                    // Центральний сердечник пікета
                     const centerPiket = document.createElement('div');
                     centerPiket.className = 'piket-center-core';
                     centerPiket.innerText = pk;
                     nodeRow.appendChild(centerPiket);
 
-                    // Колія Непарна
                     const rightTrack = document.createElement('div');
                     rightTrack.className = 'rail-line-visual';
                     rightTrack.innerHTML = '<span></span><span></span><span></span><span></span>';
@@ -384,12 +376,12 @@
                     const rightBank = document.createElement('div');
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
                     rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
+                    rightBank.dataset.initialClass = rightSide.colorClass;
                     if (finalRightConfig) {
                         rightBank.onclick = () => togglePiketSelection(rightBank, finalRightConfig.name, finalRightConfig.track_type, km, pk);
                     }
                     nodeRow.appendChild(rightBank);
 
-                    // Бокове поле справа (Світлофори Непарна)
                     const rightMargin = document.createElement('div');
                     rightMargin.className = 'info-margin margin-right';
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'непарна');
@@ -411,17 +403,21 @@
             buildMasterDiagram(allowed);
         }
 
-        function togglePiketSelection(element, objectName, trackType, km, piket) {
-            const isSelected = element.classList.contains('piket-selected');
+        function togglePiketSelection(element, peregonName, trackType, km, piket) {
+            const isSelected = element.classList.contains('status-clear-green') && !element.classList.contains(element.dataset.initialClass);
             
             if (isSelected) {
-                element.classList.remove('piket-selected');
-                selectedPiketsToSave = selectedPiketsToSave.filter(p => !(p.object_name === objectName && p.track_type === trackType && p.km === km && p.piket === piket));
+                // Повертаємо початковий незакошений колір зі схеми
+                element.className = `mowing-bank-zone ${element.dataset.initialClass}`;
+                element.querySelector('div').innerText = element.dataset.initialClass === 'status-warn-yellow' ? 'Увага' : 'Не обкошено';
+                selectedPiketsToSave = selectedPiketsToSave.filter(p => !(p.peregon === peregonName && p.track_type === trackType && p.km === km && p.piket === piket));
             } else {
-                element.classList.add('piket-selected');
+                // Перефарбовуємо в зелений «Матча» при тапанні
+                element.className = 'mowing-bank-zone status-clear-green';
+                element.querySelector('div').innerText = 'Обкошено';
                 selectedPiketsToSave.push({
                     pd: currentPD,
-                    object_name: objectName,
+                    peregon: peregonName, // Змінено з object_name на peregon
                     track_type: trackType,
                     km: km,
                     piket: piket,
@@ -453,7 +449,6 @@
                 alert("Роботу успішно зафіксовано!");
                 
                 selectedPiketsToSave = [];
-                // Перезавантажуємо кабінет
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${currentPD}`, { headers });
                 mowingData = await resMowing.json();
