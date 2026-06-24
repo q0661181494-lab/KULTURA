@@ -18,18 +18,18 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* Верхня навігація */
+        /* Навігація */
         .nav-container { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 600px; }
         .nav-btn { flex: 1; background: #fff; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .nav-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
         .settings-btn { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; cursor: pointer; }
 
-        /* Контейнери інтерфейсу */
+        /* Картки інтерфейсу */
         .card { background: var(--card-bg); border-radius: 16px; padding: 25px; width: 100%; max-width: 600px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid rgba(0, 139, 116, 0.1); margin-bottom: 20px; }
         .card-title { font-size: 20px; font-weight: bold; color: var(--primary-color); margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
         .card-subtitle { font-size: 13px; color: #64748b; margin-bottom: 20px; }
 
-        /* Форми та випадаючі списки */
+        /* Елементи форм */
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; font-weight: 800; font-size: 12px; margin-bottom: 8px; color: var(--primary-color); letter-spacing: 0.5px; }
         .form-control { width: 100%; padding: 12px; border: 1px solid var(--primary-color); border-radius: 10px; font-size: 15px; outline: none; background: #fff; color: var(--text-color); }
@@ -37,14 +37,14 @@
         .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
         .btn-submit:hover { background: var(--primary-hover); }
 
-        /* Контейнер вибору кілометрів */
+        /* Випадаючий список кілометрів */
         .km-dropdown { border: 1px solid var(--primary-color); border-radius: 10px; padding: 12px; cursor: pointer; background: #f8fafc; }
         .km-dropdown-title { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; }
         .km-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color); }
         .km-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; background: #fff; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; }
 
-        /* Монітор самоаудиту системи */
-        .monitor { width: 100%; max-width: 600px; background: #f8fafc; border-radius: 10px; padding: 15px; font-family: monospace; font-size: 12px; border: 1px solid var(--border-color); }
+        /* Монітор самоаудиту */
+        .monitor { width: 100%; max-width: 600px; background: #f8fafc; border-radius: 10px; padding: 15px; font-family: monospace; font-size: 12px; border: 1px solid var(--border-color); margin-top: 10px; }
         .monitor-title { font-weight: bold; color: #475569; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .monitor-logs { max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
         .log-row { display: flex; gap: 8px; }
@@ -77,7 +77,7 @@
 
     <div id="cabinet-card" class="card hidden">
         <div class="card-title">🧑‍🔧 Кабінет: <span id="pd-title-name">ПД-XX</span></div>
-        <div class="card-subtitle">Оберіть діляннку, дату та відмітьте потрібні кілометри.</div>
+        <div class="card-subtitle">Оберіть ділянку, дату та відмітьте потрібні кілометри.</div>
 
         <form id="mowing-form" onsubmit="handleFormSubmit(event)">
             <div class="form-group">
@@ -116,27 +116,29 @@
     </div>
 
     <div class="monitor">
-        <div class="monitor-title">💻 МОНІТОР СИСТЕМИ</div>
+        <div class="monitor-title">💻 МОНІТОР САМОАУДИТУ СИСТЕМИ</div>
         <div id="monitor-logs" class="monitor-logs"></div>
     </div>
 
     <script>
-        // Ініціалізація клієнта Supabase за вашим URL
+        // Конфігурація підключення до Supabase
         const SUPABASE_URL = "https://zcyntywoftcahfjwqldr.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh"; // Замініть на ваш реальний anon key
+        const SUPABASE_ANON_KEY = "sb_publishable_0_punk_0ckyXmGdYawyA_g_JRl_O-mh";
         
-        const supabase = @supabase/supabase-js.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Зміна назви змінної клієнта, щоб уникнути конфлікту із глобальним об'єктом window.supabase
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentPD = "";
         let linesConfigList = []; 
         let checkedKilometers = [];
 
-        // Встановлення поточної дати
+        // Автоматичне виставлення сьогоднішньої дати
         document.getElementById('date-input').valueAsDate = new Date();
 
-        // Система логування на екран
+        // Функція виводу логів у монітор на екрані
         function logToMonitor(text, status = 'info') {
             const container = document.getElementById('monitor-logs');
+            if (!container) return;
             const time = new Date().toLocaleTimeString();
             let styleClass = 'log-msg-info';
             
@@ -151,7 +153,7 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // Авторизація за алгоритмом повторення цифр (1313, 1414...)
+        // Авторизація за маскою дублювання (1313, 1414...)
         async function executeLogin() {
             const inputPass = document.getElementById('password-input').value.trim();
             
@@ -170,10 +172,10 @@
             await fetchActiveLines();
         }
 
-        // Завантаження довідника з lines_config
+        // Завантаження перегонів з бази lines_config за ідентифікатором ПД
         async function fetchActiveLines() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('lines_config')
                     .select('*')
                     .eq('pd', currentPD);
@@ -187,7 +189,7 @@
                     return;
                 }
 
-                // Отримуємо унікальні назви перегонів/станцій з колонки 'name'
+                // Витягуємо унікальні назви з поля "name"
                 const uniquePeregons = [...new Set(linesConfigList.map(item => item.name))];
                 
                 const selectElement = document.getElementById('peregon-select');
@@ -207,7 +209,7 @@
             }
         }
 
-        // Синхронізація випадаючого списку колій
+        // Оновлення списку колій при виборі конкретного перегону
         function syncTracksDropdown() {
             const selectedName = document.getElementById('peregon-select').value;
             const trackSelect = document.getElementById('track-select');
@@ -221,7 +223,6 @@
                 return;
             }
 
-            // Фільтруємо колії по вибраній назві ділянки
             const filteredTracks = linesConfigList.filter(item => item.name === selectedName);
             
             trackSelect.innerHTML = '<option value="">Оберіть колію...</option>';
@@ -235,7 +236,7 @@
             logToMonitor(`Обрано перегін: ${selectedName}`, "info");
         }
 
-        // Динамічна генерація чекбоксів кілометрів на основі меж з бази даних
+        // Генерація списку чекбоксів кілометрів (від start_km до end_km)
         function generateKmCheckboxes() {
             const selectedName = document.getElementById('peregon-select').value;
             const selectedTrack = document.getElementById('track-select').value;
@@ -246,7 +247,6 @@
 
             if (!selectedName || !selectedTrack) return;
 
-            // Шукаємо точний рядок конфігурації
             const config = linesConfigList.find(item => item.name === selectedName && item.track_type === selectedTrack);
 
             if (!config) {
@@ -259,7 +259,6 @@
 
             logToMonitor(`Завантажено кілометри: з ${start} по ${end}`, "success");
 
-            // Будуємо сітку чекбоксів
             for (let km = start; km <= end; km++) {
                 const itemLabel = document.createElement('label');
                 itemLabel.className = 'km-item';
@@ -282,7 +281,7 @@
             document.getElementById('km-count-label').innerText = `обрано: ${count}`;
         }
 
-        // Запис даних про обкошування в таблицю mowing
+        // Відправка масиву відмічених кілометрів до таблиці mowing
         async function handleFormSubmit(event) {
             event.preventDefault();
 
@@ -291,24 +290,23 @@
 
             if (checkedKilometers.length === 0) {
                 logToMonitor("Помилка: Не обрано жодного кілометра!", "error");
-                alert("Будь ласка, оберіть хоча б один кілометр з у списку.");
+                alert("Будь ласка, оберіть хоча б один кілометр зі списку.");
                 return;
             }
 
-            // Формуємо масив записів відповідно до структури вашої таблиці mowing
             const dataToUpload = checkedKilometers.map(kmNum => ({
                 pd: currentPD,
                 peregon: peregonValue,
                 track_type: trackValue,
                 km: kmNum,
-                piket: 1, // Базове значення або розширте логіку за потребою
+                piket: 1, 
                 status: 'обкошено'
             }));
 
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('mowing')
-                    .upsert(dataToUpload); // Для коректної роботи виконайте SQL-запит нижче
+                    .upsert(dataToUpload);
 
                 if (error) throw error;
 
