@@ -22,7 +22,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* ВІДНОВЛЕНА НАВІГАЦІЯ */
+        /* НАВІГАЦІЯ */
         .nav-container { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 600px; }
         .nav-btn { flex: 1; background: #fff; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .nav-btn:hover { background: #f8fafc; }
@@ -44,10 +44,24 @@
 
         .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* МОНІТОР */
-        .monitor { width: 100%; max-width: 600px; background: #1e293b; color: #f8fafc; border-radius: 10px; padding: 15px; font-family: monospace; font-size: 12px; margin-top: 10px; }
-        .log-msg-error { color: #f87171; }
-        .log-msg-success { color: #4ade80; }
+        /* ІМПОРТОВАНІ СТИЛІ МОНІТОРА СИСТЕМИ З INDEX */
+        .debug-panel {
+            width: 100%;
+            max-width: 580px;
+            margin-top: 24px; 
+            padding: 10px; 
+            background-color: rgba(230, 244, 234, 0.8); 
+            backdrop-filter: blur(4px);
+            border: 1px solid #c2e7d9; 
+            color: #115e59; 
+            border-radius: 12px; 
+            font-size: 11px; 
+            font-family: monospace; 
+            box-shadow: 0 -2px 10px rgba(11,94,89,0.03);
+            box-sizing: border-box;
+        }
+        .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .debug-scroll { max-height: 60px; overflow-y: auto; text-align: left; }
         
         .hidden { display: none !important; }
     </style>
@@ -92,9 +106,9 @@
         </form>
     </div>
 
-    <div class="monitor">
-        <div style="font-weight:bold; margin-bottom:5px;">💻 СИСТЕМНИЙ МОНІТОР</div>
-        <div id="monitor-logs"></div>
+    <div class="debug-panel">
+        <div class="debug-title">🖥️ Монітор системи</div>
+        <div id="monitor-logs" class="debug-scroll"></div>
     </div>
 
     <script>
@@ -105,16 +119,17 @@
         function log(text, type = 'info') {
             const el = document.getElementById('monitor-logs');
             const div = document.createElement('div');
-            div.className = type === 'error' ? 'log-msg-error' : (type === 'success' ? 'log-msg-success' : '');
+            if (type === 'error') div.style.color = '#dc2626';
+            if (type === 'success') div.style.color = '#16a34a';
             div.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
-            el.prepend(div);
+            el.appendChild(div);
+            el.scrollTop = el.scrollHeight;
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
             log("Система ініціалізована...", "info");
             try {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                // Швидка перевірка зв'язку
                 const { error } = await supabaseClient.from('lines_config').select('pd').limit(1);
                 if (error) throw error;
                 log("Підключення до хмари активне", "success");
@@ -132,9 +147,7 @@
                 return;
             }
             
-            // Очищення паролю
             passInput.value = "";
-            
             const pd = `ПД-${pass.slice(0, 2)}`;
             log(`Спроба входу для ${pd}...`);
 
