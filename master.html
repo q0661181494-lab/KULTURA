@@ -183,7 +183,6 @@
             <a href="admin.html" class="admin-menu-btn">⚙️</a>
         </div>
 
-        <!-- Картка авторизації -->
         <div id="login-card" class="screen welcome-focus">
             <div class="card-title">Вхід для ПД</div>
             <div class="card-subtitle">Введіть пароль вашого околотка для переходу до графіка.</div>
@@ -193,7 +192,6 @@
             <button class="btn-submit" onclick="executeLogin()">Увійти в кабінет</button>
         </div>
 
-        <!-- Робочий кабінет майстра (з'являється після входу) -->
         <div id="cabinet-card" class="screen hidden">
             <div class="card-title" id="cabinet-header-title">Кабінет ПД</div>
             <div class="card-subtitle">Клацніть на брівку пікета, щоб позначити виконання робіт.</div>
@@ -290,7 +288,6 @@
 
         function getPiketAnalysis(peregonName, trackType, km, pk) {
             if (!mowingData || mowingData.length === 0) return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
-            // Виправлено object_name на peregon відповідно до схеми БД
             const record = mowingData.find(m => m.peregon === peregonName && m.track_type === trackType && parseInt(m.km) === km && parseInt(m.piket) === pk);
             if (!record || record.status !== 'green') return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
             if (!record.date) return { colorClass: 'status-clear-green', label: 'Обкошено', days: '0 дн.' };
@@ -407,17 +404,15 @@
             const isSelected = element.classList.contains('status-clear-green') && !element.classList.contains(element.dataset.initialClass);
             
             if (isSelected) {
-                // Повертаємо початковий незакошений колір зі схеми
                 element.className = `mowing-bank-zone ${element.dataset.initialClass}`;
                 element.querySelector('div').innerText = element.dataset.initialClass === 'status-warn-yellow' ? 'Увага' : 'Не обкошено';
                 selectedPiketsToSave = selectedPiketsToSave.filter(p => !(p.peregon === peregonName && p.track_type === trackType && p.km === km && p.piket === piket));
             } else {
-                // Перефарбовуємо в зелений «Матча» при тапанні
                 element.className = 'mowing-bank-zone status-clear-green';
                 element.querySelector('div').innerText = 'Обкошено';
                 selectedPiketsToSave.push({
                     pd: currentPD,
-                    peregon: peregonName, // Змінено з object_name на peregon
+                    peregon: peregonName, 
                     track_type: trackType,
                     km: km,
                     piket: piket,
@@ -442,10 +437,11 @@
             logSys(`Збереження робіт у хмару (${recordsToSend.length} шт.)...`, "info");
             
             try {
-                const { error } = await supabaseClient.from('mowing').insert(recordsToSend);
+                // Виправлено помилку: замість insert використовується метод upsert()
+                const { error } = await supabaseClient.from('mowing').upsert(recordsToSend);
                 if (error) throw error;
 
-                logSys("Дані успішно завантажено в базу даних!", "success");
+                logSys("Дані успішно синхронізовано методом UPSERT!", "success");
                 alert("Роботу успішно зафіксовано!");
                 
                 selectedPiketsToSave = [];
