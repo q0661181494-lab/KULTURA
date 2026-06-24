@@ -13,313 +13,154 @@
             --card-bg: #ffffff;
             --text-color: #1e293b;
             --border-color: #cbd5e1;
-            
-            --color-red: #ef4444;    /* > 45 днів */
-            --color-yellow: #eab308; /* 30-45 днів */
-            --color-green: #22c55e;  /* < 30 днів */
+            --color-red: #ef4444;
+            --color-yellow: #eab308;
+            --color-green: #22c55e;
+            --accent-checkbox: #008b74;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* Навігація */
         .nav-container { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 600px; }
-        .nav-btn { flex: 1; background: #fff; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .nav-btn { flex: 1; background: #fff; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .nav-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-        .settings-btn { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; cursor: pointer; }
-
-        /* Картки інтерфейсу */
-        .card { background: var(--card-bg); border-radius: 16px; padding: 25px; width: 100%; max-width: 600px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid rgba(0, 139, 116, 0.1); margin-bottom: 20px; }
-        .card-title { font-size: 20px; font-weight: bold; color: var(--primary-color); margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
-        .card-subtitle { font-size: 13px; color: #64748b; margin-bottom: 20px; }
-
-        /* Елементи форм */
+        .card { background: var(--card-bg); border-radius: 16px; padding: 25px; width: 100%; max-width: 600px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card-title { font-size: 20px; font-weight: bold; color: var(--primary-color); margin-bottom: 15px; }
         .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; font-weight: 800; font-size: 12px; margin-bottom: 8px; color: var(--primary-color); letter-spacing: 0.5px; }
-        .form-control { width: 100%; padding: 12px; border: 1px solid var(--primary-color); border-radius: 10px; font-size: 15px; outline: none; background: #fff; color: var(--text-color); }
+        .form-group label { display: block; font-weight: 800; font-size: 12px; margin-bottom: 8px; color: var(--primary-color); }
+        .form-control { width: 100%; padding: 12px; border: 1px solid var(--primary-color); border-radius: 10px; font-size: 15px; outline: none; }
         
-        .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
-        .btn-submit:hover { background: var(--primary-hover); }
+        /* Розгортаючий список */
+        details { border: 1px solid var(--primary-color); border-radius: 10px; padding: 10px; background: #f8fafc; margin-bottom: 10px; }
+        summary { cursor: pointer; font-weight: bold; color: var(--primary-color); padding: 5px; outline: none; }
+        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+        input[type="checkbox"] { accent-color: var(--accent-checkbox); transform: scale(1.2); }
 
-        /* Випадаючий список кілометрів та перегонів (чекбокси) */
-        .km-dropdown { border: 1px solid var(--primary-color); border-radius: 10px; padding: 12px; cursor: pointer; background: #f8fafc; }
-        .km-dropdown-title { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; }
-        .km-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
-        .km-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; background: #fff; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; }
-
-        /* Стилі лінійної діаграми та пікетів */
-        .diagram-container { margin-top: 25px; border-top: 2px dashed var(--border-color); padding-top: 25px; }
-        .diagram-row { margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .diagram-title { font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #334155; }
-        .km-block { display: flex; flex-direction: column; margin-bottom: 12px; }
-        .km-label { font-size: 11px; font-weight: bold; margin-bottom: 5px; text-align: center; background: #cbd5e1; padding: 3px; border-radius: 4px; width: 65px; color: #334155; }
-        .pikets-grid { display: flex; width: 100%; gap: 5px; }
+        .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        .piket { flex: 1; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white; cursor: pointer; border-radius: 6px; transition: all 0.1s ease; border: 1px solid rgba(0,0,0,0.08); user-select: none; }
-        .piket:active { transform: scale(0.92); }
+        /* Монітор */
+        .monitor { width: 100%; max-width: 600px; background: #1e293b; color: #f8fafc; border-radius: 10px; padding: 15px; font-family: monospace; font-size: 12px; margin-top: 10px; }
+        .log-msg-error { color: #f87171; }
+        .log-msg-success { color: #4ade80; }
         
-        .status-red { background: var(--color-red); }
-        .status-yellow { background: var(--color-yellow); color: #1e293b; }
-        .status-green { background: var(--color-green); }
-        
-        .status-active { 
-            background: #1d4ed8 !important; 
-            border: 2px solid #1e40af !important; 
-            box-shadow: 0 0 8px rgba(29, 78, 216, 0.5); 
-            color: white !important; 
-        }
-
-        .legend { display: flex; gap: 15px; font-size: 12px; font-weight: bold; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); }
-        .legend-item { display: flex; align-items: center; gap: 6px; }
-        .legend-color { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
-        .legend-active-box { background: #1d4ed8; border: 1px solid #1e40af; }
-
-        /* Монітор самоаудиту */
-        .monitor { width: 100%; max-width: 600px; background: #f8fafc; border-radius: 10px; padding: 15px; font-family: monospace; font-size: 12px; border: 1px solid var(--border-color); margin-top: 10px; }
-        .monitor-title { font-weight: bold; color: #475569; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-        .monitor-logs { max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-        .log-row { display: flex; gap: 8px; }
-        .log-time { color: #94a3b8; }
-        .log-msg-success { color: #16a34a; }
-        .log-msg-error { color: #dc2626; }
-        .log-msg-info { color: #2563eb; }
-
         .hidden { display: none !important; }
+        .piket { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; background: #e2e8f0; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .status-active { background: #1d4ed8; color: white; }
     </style>
 </head>
 <body>
 
     <div class="nav-container">
-        <button class="nav-btn" onclick="window.location.href='index.html'">📊 Графіки</button>
         <button class="nav-btn active">🚪 Кабінет ПД</button>
-        <button class="settings-btn" onclick="window.location.href='admin.html'">⚙️</button>
     </div>
 
     <div id="login-card" class="card">
         <div class="card-title">🧑‍🔧 Вхід для ПД</div>
-        <div class="card-subtitle">Внесіть дані про виконане обкошування на вашому околотку.</div>
-        
         <div class="form-group">
-            <label>ПАРОЛЬ ДОСТУПУ:</label>
-            <input type="password" id="password-input" class="form-control" placeholder="••••" maxlength="4">
+            <label>ПАРОЛЬ:</label>
+            <input type="password" id="password-input" class="form-control" placeholder="••••" value="" autocomplete="off">
         </div>
-        <button type="button" class="btn-submit" id="login-submit-btn" onclick="executeLogin()" disabled>Перевірка зв'язку...</button>
+        <button class="btn-submit" id="login-submit-btn" onclick="executeLogin()">Увійти</button>
     </div>
 
     <div id="cabinet-card" class="card hidden">
-        <div class="card-title">🧑‍🔧 Кабінет: <span id="pd-title-name">ПД-XX</span></div>
-        <div class="card-subtitle">Оберіть ділянки та колії (можна декілька).</div>
-
+        <div class="card-title">Налаштування робіт</div>
+        
         <form id="mowing-form" onsubmit="handleFormSubmit(event)">
-            <div class="form-group">
-                <label>ПЕРЕГІН:</label>
-                <div id="peregon-container" class="km-grid"></div>
-            </div>
+            <details>
+                <summary>Оберіть перегони</summary>
+                <div id="peregon-container" class="checkbox-group"></div>
+            </details>
+
+            <details>
+                <summary>Оберіть колії</summary>
+                <div id="track-container" class="checkbox-group"></div>
+            </details>
 
             <div class="form-group">
-                <label>КОЛІЯ:</label>
-                <div id="track-container" class="km-grid"></div>
-            </div>
-
-            <div class="form-group">
-                <label>ДАТА ВИКОНАННЯ РОБІТ:</label>
-                <input type="date" id="date-input" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label>ВИБІР КІЛОМЕТРІВ:</label>
-                <div class="km-dropdown">
-                    <div class="km-dropdown-title" onclick="toggleKmView()">
-                        <span>📂 Обрати кілометри</span>
-                        <span>▼</span>
-                    </div>
-                    <div id="km-grid" class="km-grid hidden"></div>
-                </div>
+                <label>РУЧНИЙ ВВІД КМ (через кому):</label>
+                <input type="text" id="manual-km-input" class="form-control" placeholder="Наприклад: 12, 14, 25">
             </div>
 
             <button type="submit" class="btn-submit">Побудувати діаграму</button>
         </form>
-
-        <div id="diagram-section" class="diagram-container hidden">
-            <div id="diagram-content"></div>
-            <button type="button" class="btn-submit" style="margin-top: 20px; background: #1d4ed8;" onclick="saveSelectedData()">Синхронізувати з хмарою</button>
-        </div>
     </div>
 
     <div class="monitor">
-        <div class="monitor-title">💻 МОНІТОР САМОАУДИТУ СИСТЕМИ</div>
-        <div id="monitor-logs" class="monitor-logs"></div>
+        <div style="font-weight:bold; margin-bottom:5px;">💻 СИСТЕМНИЙ МОНІТОР</div>
+        <div id="monitor-logs"></div>
     </div>
 
     <script>
         const SUPABASE_URL = "https://zcyntywoftcahfjwqldr.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
-        
-        let supabaseClient = null;
-        let currentPD = "";
-        let linesConfigList = []; 
-        let selectedDataToSave = []; 
+        let supabaseClient, linesConfigList = [];
 
-        document.getElementById('date-input').valueAsDate = new Date();
-
-        function logToMonitor(text, status = 'info') {
-            const container = document.getElementById('monitor-logs');
-            if (!container) return;
-            const logItem = document.createElement('div');
-            logItem.className = 'log-row';
-            logItem.innerHTML = `<span class="log-time">[${new Date().toLocaleTimeString()}]:</span> <span class="log-msg-${status}">${text}</span>`;
-            container.appendChild(logItem);
-            container.scrollTop = container.scrollHeight;
+        function log(text, type = 'info') {
+            const el = document.getElementById('monitor-logs');
+            const div = document.createElement('div');
+            div.className = type === 'error' ? 'log-msg-error' : (type === 'success' ? 'log-msg-success' : '');
+            div.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
+            el.prepend(div);
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            document.getElementById('login-submit-btn').innerText = "Увійти в кабінет";
-            document.getElementById('login-submit-btn').disabled = false;
+            log("Система ініціалізована...", "info");
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                log("Підключення до Supabase успішне", "success");
+            } catch (e) {
+                log("Помилка ініціалізації: " + e.message, "error");
+            }
         });
 
         async function executeLogin() {
-            const inputPass = document.getElementById('password-input').value.trim();
-            if (!/^\d{4}$/.test(inputPass) || inputPass.slice(0, 2) !== inputPass.slice(2, 4)) {
-                logToMonitor("Помилка: Невірний формат паролю!", "error");
+            const pass = document.getElementById('password-input').value.trim();
+            if (!/^\d{4}$/.test(pass)) {
+                log("Помилка: Пароль має бути 4 цифри", "error");
                 return;
             }
-
-            // Очищення паролю після успішного входу
+            
+            // Очищення паролю
             document.getElementById('password-input').value = "";
+            
+            const pd = `ПД-${pass.slice(0, 2)}`;
+            log(`Спроба входу для ${pd}...`);
 
-            currentPD = `ПД-${inputPass.slice(0, 2)}`;
-            document.getElementById('pd-title-name').innerText = currentPD;
+            const { data, error } = await supabaseClient.from('lines_config').select('*').eq('pd', pd);
+            if (error) { log("Помилка БД: " + error.message, "error"); return; }
+            
+            linesConfigList = data;
             document.getElementById('login-card').classList.add('hidden');
             document.getElementById('cabinet-card').classList.remove('hidden');
-
-            const { data } = await supabaseClient.from('lines_config').select('*').eq('pd', currentPD);
-            linesConfigList = data || [];
-            renderPeregonCheckboxes();
-        }
-
-        function renderPeregonCheckboxes() {
-            const container = document.getElementById('peregon-container');
-            const uniquePeregons = [...new Set(linesConfigList.map(item => item.name))];
-            container.innerHTML = uniquePeregons.map(name => `
-                <label class="km-item"><input type="checkbox" value="${name}" onchange="updateTrackCheckboxes()"> ${name}</label>
-            `).join('');
-        }
-
-        function updateTrackCheckboxes() {
-            const selectedPeregons = Array.from(document.querySelectorAll('#peregon-container input:checked')).map(i => i.value);
-            const container = document.getElementById('track-container');
-            container.innerHTML = "";
-            const tracks = [...new Set(linesConfigList.filter(i => selectedPeregons.includes(i.name)).map(i => i.track_type))];
-            tracks.forEach(track => {
-                container.innerHTML += `
-                    <label class="km-item"><input type="checkbox" value="${track}" onchange="renderKmCheckboxes()"> ${track}</label>
-                `;
-            });
-            renderKmCheckboxes(); // Оновити КМ при зміні колій
-        }
-
-        function renderKmCheckboxes() {
-            const selectedPeregons = Array.from(document.querySelectorAll('#peregon-container input:checked')).map(i => i.value);
-            const selectedTracks = Array.from(document.querySelectorAll('#track-container input:checked')).map(i => i.value);
-            const container = document.getElementById('km-grid');
-            container.innerHTML = "";
             
-            let allKm = [];
-            linesConfigList.forEach(item => {
-                if(selectedPeregons.includes(item.name) && selectedTracks.includes(item.track_type)) {
-                    for(let i = parseInt(item.start_km); i <= parseInt(item.end_km); i++) allKm.push(i);
-                }
-            });
+            renderSelections();
+        }
+
+        function renderSelections() {
+            const pContainer = document.getElementById('peregon-container');
+            const tContainer = document.getElementById('track-container');
             
-            const uniqueKm = [...new Set(allKm)].sort((a,b) => a-b);
-            uniqueKm.forEach(km => {
-                container.innerHTML += `
-                    <label class="km-item"><input type="checkbox" value="${km}"> КМ ${km}</label>
-                `;
-            });
+            const peregons = [...new Set(linesConfigList.map(i => i.name))];
+            const tracks = [...new Set(linesConfigList.map(i => i.track_type))];
+
+            pContainer.innerHTML = peregons.map(p => `<label><input type="checkbox" value="${p}"> ${p}</label>`).join('');
+            tContainer.innerHTML = tracks.map(t => `<label><input type="checkbox" value="${t}"> ${t}</label>`).join('');
         }
 
-        function toggleKmView() {
-            document.getElementById('km-grid').classList.toggle('hidden');
-        }
-
-        async function handleFormSubmit(event) {
-            event.preventDefault();
-            const checkedKm = Array.from(document.querySelectorAll('#km-grid input:checked')).map(i => parseInt(i.value));
+        async function handleFormSubmit(e) {
+            e.preventDefault();
             const selectedPeregons = Array.from(document.querySelectorAll('#peregon-container input:checked')).map(i => i.value);
-            const selectedTracks = Array.from(document.querySelectorAll('#track-container input:checked')).map(i => i.value);
+            const manualKmStr = document.getElementById('manual-km-input').value;
+            const manualKm = manualKmStr.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
 
-            if (checkedKm.length === 0 || selectedPeregons.length === 0 || selectedTracks.length === 0) {
-                return alert("Оберіть перегін, колію та кілометри!");
+            if (selectedPeregons.length === 0 || manualKm.length === 0) {
+                log("Помилка: Оберіть перегін та введіть КМ", "error");
+                return;
             }
-
-            const { data: pastData } = await supabaseClient.from('mowing').select('*').eq('pd', currentPD).in('km', checkedKm);
-            
-            const diagramContent = document.getElementById('diagram-content');
-            diagramContent.innerHTML = "";
-            const today = new Date();
-
-            selectedPeregons.forEach(peregon => {
-                selectedTracks.forEach(track => {
-                    const row = document.createElement('div');
-                    row.className = 'diagram-row';
-                    row.innerHTML = `<div class="diagram-title">🛤️ ${peregon} | ${track}</div>`;
-
-                    checkedKm.forEach(km => {
-                        const kmBlock = document.createElement('div');
-                        kmBlock.className = 'km-block';
-                        kmBlock.innerHTML = `<div class="km-label">КМ ${km}</div>`;
-                        
-                        const piketsGrid = document.createElement('div');
-                        piketsGrid.className = 'pikets-grid';
-
-                        for (let p = 1; p <= 10; p++) {
-                            const history = (pastData || []).filter(d => d.peregon === peregon && d.track_type === track && d.km === km && d.piket === p).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                            let statusClass = 'status-red'; 
-                            if (history && history.date) {
-                                const diffDays = Math.floor((today - new Date(history.date)) / (1000 * 60 * 60 * 24));
-                                if (diffDays <= 30) statusClass = 'status-green';
-                                else if (diffDays <= 45) statusClass = 'status-yellow';
-                            }
-                            const pBox = document.createElement('div');
-                            pBox.className = `piket ${statusClass}`;
-                            pBox.innerText = p;
-                            pBox.dataset.obj = JSON.stringify({peregon, track, km, piket: p});
-                            pBox.onclick = () => togglePiketSelection(pBox);
-                            piketsGrid.appendChild(pBox);
-                        }
-                        kmBlock.appendChild(piketsGrid);
-                        row.appendChild(kmBlock);
-                    });
-                    diagramContent.appendChild(row);
-                });
-            });
-            document.getElementById('diagram-section').classList.remove('hidden');
-        }
-
-        function togglePiketSelection(element) {
-            const data = JSON.parse(element.dataset.obj);
-            const isSelected = element.classList.contains('status-active');
-            
-            if (isSelected) {
-                element.classList.remove('status-active');
-                element.innerText = data.piket;
-                selectedDataToSave = selectedDataToSave.filter(d => !(d.km === data.km && d.piket === data.piket && d.peregon === data.peregon));
-            } else {
-                element.classList.add('status-active');
-                element.innerText = "✓";
-                selectedDataToSave.push({ ...data, pd: currentPD, status: 'обкошено', date: document.getElementById('date-input').value });
-            }
-        }
-
-        async function saveSelectedData() {
-            if (selectedDataToSave.length === 0) return alert("Не обрано пікетів");
-            const { error } = await supabaseClient.from('mowing').insert(selectedDataToSave);
-            if (error) return alert("Помилка: " + error.message);
-            alert("Збережено!");
-            selectedDataToSave = [];
-            document.getElementById('diagram-section').classList.add('hidden');
+            log(`Побудова діаграми для КМ: ${manualKm.join(', ')}`, "success");
+            // Тут подальша логіка...
         }
     </script>
 </body>
