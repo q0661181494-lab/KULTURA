@@ -7,52 +7,72 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --primary-color: #008b74;
-            --primary-hover: #006e5c;
-            --bg-color: #f0fdf4;
-            --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --border-color: #cbd5e1;
+            --primary: #008b74;
+            --bg: #f0fdf4;
+            --card: #ffffff;
+            --text: #1e293b;
+            --border: #cbd5e1;
+            
+            /* Кольори старіння колії */
+            --color-red: #ef4444;    /* > 45 днів або немає даних */
+            --color-yellow: #eab308; /* 30 - 45 днів */
+            --color-green: #22c55e;  /* < 30 днів (обкошено) */
+            --color-active: #22c55e; /* При відмітці стає зеленим */
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* Навігація */
-        .nav-container { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 600px; }
-        .nav-btn { flex: 1; background: #fff; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .nav-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-        .settings-btn { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; cursor: pointer; }
+        .nav-container { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 700px; }
+        .nav-btn { flex: 1; background: #fff; border: 1px solid var(--border); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .nav-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Картки інтерфейсу */
-        .card { background: var(--card-bg); border-radius: 16px; padding: 25px; width: 100%; max-width: 600px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid rgba(0, 139, 116, 0.1); margin-bottom: 20px; }
-        .card-title { font-size: 20px; font-weight: bold; color: var(--primary-color); margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
-        .card-subtitle { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+        .card { background: var(--card); border-radius: 16px; padding: 25px; width: 100%; max-width: 700px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card-title { font-size: 20px; font-weight: bold; color: var(--primary); margin-bottom: 15px; }
 
-        /* Елементи форм */
         .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; font-weight: 800; font-size: 12px; margin-bottom: 8px; color: var(--primary-color); letter-spacing: 0.5px; }
-        .form-control { width: 100%; padding: 12px; border: 1px solid var(--primary-color); border-radius: 10px; font-size: 15px; outline: none; background: #fff; color: var(--text-color); }
+        .form-group label { display: block; font-weight: bold; font-size: 12px; margin-bottom: 8px; color: var(--primary); }
         
-        .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
-        .btn-submit:hover { background: var(--primary-hover); }
+        .form-control { width: 100%; padding: 12px; border: 1px solid var(--primary); border-radius: 10px; font-size: 15px; outline: none; }
+        
+        /* Чекбокси вибору ділянок */
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid var(--border); }
+        .checkbox-label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px; font-weight: 600; padding: 5px 10px; background: #fff; border: 1px solid var(--border); border-radius: 6px; }
+        .checkbox-label input { cursor: pointer; }
 
-        /* Випадаючий список кілометрів */
-        .km-dropdown { border: 1px solid var(--primary-color); border-radius: 10px; padding: 12px; cursor: pointer; background: #f8fafc; }
-        .km-dropdown-title { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; }
-        .km-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color); }
-        .km-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; background: #fff; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; }
+        .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-build { background: #334155; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 15px; }
 
-        /* Монітор самоаудиту */
-        .monitor { width: 100%; max-width: 600px; background: #f8fafc; border-radius: 10px; padding: 15px; font-family: monospace; font-size: 12px; border: 1px solid var(--border-color); margin-top: 10px; }
-        .monitor-title { font-weight: bold; color: #475569; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-        .monitor-logs { max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-        .log-row { display: flex; gap: 8px; }
-        .log-time { color: #94a3b8; }
-        .log-msg-success { color: #16a34a; }
-        .log-msg-error { color: #dc2626; }
-        .log-msg-info { color: #2563eb; }
+        /* Лінійна діаграма */
+        .diagram-container { margin-top: 20px; border-top: 2px dashed var(--border); padding-top: 20px; }
+        .diagram-row { margin-bottom: 20px; }
+        .diagram-title { font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #334155; }
+        .km-block { display: flex; flex-direction: column; margin-bottom: 10px; }
+        .km-label { font-size: 12px; font-weight: bold; margin-bottom: 4px; text-align: center; background: #e2e8f0; padding: 2px; border-radius: 4px; }
+        .pikets-grid { display: flex; width: 100%; gap: 2px; }
+        
+        .piket { flex: 1; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white; cursor: pointer; border-radius: 4px; transition: all 0.15s ease; border: 1px solid rgba(0,0,0,0.1); }
+        .piket:active { transform: scale(0.9); }
+        
+        .status-red { background: var(--color-red); }
+        .status-yellow { background: var(--color-yellow); color: #000; }
+        .status-green { background: var(--color-green); }
+        
+        /* Стиль для відміченого пікету (стає зеленим із контуром) */
+        .status-active { 
+            background: var(--color-active) !important; 
+            border: 2px solid #15803d !important; 
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.6); 
+            color: white !important; 
+        }
 
+        .legend { display: flex; gap: 15px; font-size: 12px; font-weight: bold; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-color { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
+        .legend-active-box { border: 2px solid #15803d; box-shadow: 0 0 4px rgba(34, 197, 94, 0.5); }
+
+        .monitor { width: 100%; max-width: 700px; background: #1e293b; color: #34d399; border-radius: 10px; padding: 15px; font-family: monospace; font-size: 12px; margin-top: 10px; }
+        .monitor-logs { max-height: 150px; overflow-y: auto; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -61,261 +81,246 @@
     <div class="nav-container">
         <button class="nav-btn">📊 Графіки</button>
         <button class="nav-btn active">🧑‍🔧 Майстер</button>
-        <button class="settings-btn">⚙️</button>
     </div>
 
     <div id="login-card" class="card">
-        <div class="card-title">🧑‍🔧 Вхід для ПД</div>
-        <div class="card-subtitle">Внесіть дані про виконане обкошування на вашому околотку.</div>
-        
+        <div class="card-title">🧑‍🔧 Авторизація майстра</div>
         <div class="form-group">
-            <label>ПАРОЛЬ ДОСТУПУ:</label>
-            <input type="password" id="password-input" class="form-control" placeholder="••••" maxlength="4">
+            <label>ПАРОЛЬ ДОСТУПУ (номер ПД дублем):</label>
+            <input type="password" id="password-input" class="form-control" placeholder="Наприклад: 1313">
         </div>
-        <button type="button" class="btn-submit" onclick="executeLogin()">Увійти в кабінет</button>
+        <button type="button" class="btn-submit" onclick="executeLogin()">Увійти в систему</button>
     </div>
 
     <div id="cabinet-card" class="card hidden">
-        <div class="card-title">🧑‍🔧 Кабінет: <span id="pd-title-name">ПД-XX</span></div>
-        <div class="card-subtitle">Оберіть ділянку, дату та відмітьте потрібні кілометри.</div>
-
-        <form id="mowing-form" onsubmit="handleFormSubmit(event)">
-            <div class="form-group">
-                <label>ПЕРЕГІН:</label>
-                <select id="peregon-select" class="form-control" onchange="syncTracksDropdown()" required>
-                    <option value="">Оберіть перегін...</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>КОЛІЯ:</label>
-                <select id="track-select" class="form-control" onchange="generateKmCheckboxes()" required disabled>
-                    <option value="">Спочатку оберіть перегін</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>ДАТА ВИКОНАННЯ РОБІТ:</label>
-                <input type="date" id="date-input" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label>ВИБІР КІЛОМЕТРІВ:</label>
-                <div class="km-dropdown">
-                    <div class="km-dropdown-title" onclick="toggleKmView()">
-                        <span>📂 Показати список кілометрів (<span id="km-count-label">обрано: 0</span>)</span>
-                        <span>▼</span>
-                    </div>
-                    <div id="km-grid" class="km-grid hidden">
-                        </div>
+        <div class="card-title">Околоток: <span id="pd-title-name"></span></div>
+        
+        <div class="form-group">
+            <label>1. ВИБЕРІТЬ ПЕРЕГІН / ДІЛЯНКУ (можна декілька):</label>
+            <div id="peregons-container" class="checkbox-group">
                 </div>
-            </div>
+        </div>
 
-            <button type="submit" class="btn-submit">Внести дані (відкрити діаграму)</button>
-        </form>
+        <div class="form-group">
+            <label>2. ВИБЕРІТЬ КОЛІЮ:</label>
+            <div class="checkbox-group">
+                <label class="checkbox-label"><input type="checkbox" class="track-cb" value="непарна"> Непарна</label>
+                <label class="checkbox-label"><input type="checkbox" class="track-cb" value="парна"> Парна</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>3. ВВЕДІТЬ КІЛОМЕТРИ ЧЕРЕЗ КОМУ:</label>
+            <input type="text" id="km-input" class="form-control" placeholder="Наприклад: 24, 25, 29">
+        </div>
+
+        <div class="form-group">
+            <label>4. ДАТА ВИКОНАННЯ РОБІТ:</label>
+            <input type="date" id="date-input" class="form-control">
+        </div>
+
+        <button type="button" class="btn-build" onclick="buildDiagram()">Побудувати діаграму для тапання</button>
+
+        <div id="diagram-section" class="diagram-container hidden">
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color status-green"></div> Свіже (до 30 днів)</div>
+                <div class="legend-item"><div class="legend-color status-yellow"></div> Потребує уваги (30-45 днів)</div>
+                <div class="legend-item"><div class="legend-color status-red"></div> Протерміновано / Немає (>45 днів)</div>
+                <div class="legend-item"><div class="legend-color status-green legend-active-box"></div> ✓ Відмічено зараз</div>
+            </div>
+            
+            <div id="diagram-content"></div>
+            
+            <button type="button" class="btn-submit" onclick="saveData()">Зберегти результати в базу</button>
+        </div>
     </div>
 
     <div class="monitor">
-        <div class="monitor-title">💻 МОНІТОР САМОАУДИТУ СИСТЕМИ</div>
+        <div style="color:#cbd5e1; margin-bottom:5px; font-weight:bold;">💻 МОНІТОР СИНХРОНІЗАЦІЇ ХМАРИ:</div>
         <div id="monitor-logs" class="monitor-logs"></div>
     </div>
 
     <script>
-        // Конфігурація підключення до Supabase
         const SUPABASE_URL = "https://zcyntywoftcahfjwqldr.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
-        
-        // Ініціалізація клієнта
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentPD = "";
-        let linesConfigList = []; 
-        let checkedKilometers = [];
+        let selectedDataToSave = []; 
 
-        // Автоматичне виставлення сьогоднішньої дати
+        // Встановлюємо поточну дату за замовчуванням
         document.getElementById('date-input').valueAsDate = new Date();
 
-        // Функція виводу логів у монітор на екрані
-        function logToMonitor(text, status = 'info') {
-            const container = document.getElementById('monitor-logs');
-            if (!container) return;
-            const time = new Date().toLocaleTimeString();
-            let styleClass = 'log-msg-info';
-            
-            if (status === 'success') styleClass = 'log-msg-success';
-            if (status === 'error') styleClass = 'log-msg-error';
-
-            const logItem = document.createElement('div');
-            logItem.className = 'log-row';
-            logItem.innerHTML = `<span class="log-time">[${time}]:</span> <span class="${styleClass}">${text}</span>`;
-            
-            container.appendChild(logItem);
-            container.scrollTop = container.scrollHeight;
+        function log(msg) {
+            const el = document.getElementById('monitor-logs');
+            el.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+            el.scrollTop = el.scrollHeight;
         }
 
-        // Авторизація за маскою дублювання (1313, 1414...)
         async function executeLogin() {
-            const inputPass = document.getElementById('password-input').value.trim();
-            
-            if (!/^\d{4}$/.test(inputPass) || inputPass.slice(0, 2) !== inputPass.slice(2, 4)) {
-                logToMonitor("Помилка: Невірний формат паролю!", "error");
-                return;
+            const pass = document.getElementById('password-input').value.trim();
+            if (!/^\d{4}$/.test(pass) || pass.slice(0, 2) !== pass.slice(2, 4)) {
+                alert("Невірний формат паролю! Спробуйте ще раз."); return;
             }
 
-            currentPD = `ПД-${inputPass.slice(0, 2)}`;
-            logToMonitor(`Синхронізація хмари для ${currentPD}...`, "info");
-
+            currentPD = `ПД-${pass.slice(0, 2)}`;
             document.getElementById('pd-title-name').innerText = currentPD;
+            log(`Успішний вхід: ${currentPD}`);
+            
             document.getElementById('login-card').classList.add('hidden');
             document.getElementById('cabinet-card').classList.remove('hidden');
-
-            await fetchActiveLines();
-        }
-
-        // Завантаження перегонів з бази lines_config за ідентифікатором ПД
-        async function fetchActiveLines() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('lines_config')
-                    .select('*')
-                    .eq('pd', currentPD);
-
-                if (error) throw error;
-
-                linesConfigList = data || [];
-                
-                if (linesConfigList.length === 0) {
-                    logToMonitor(`Помилка: Для ${currentPD} не знайдено ділянок в lines_config`, "error");
-                    return;
-                }
-
-                // Витягуємо унікальні назви з поля "name"
-                const uniquePeregons = [...new Set(linesConfigList.map(item => item.name))];
-                
-                const selectElement = document.getElementById('peregon-select');
-                selectElement.innerHTML = '<option value="">Оберіть перегін...</option>';
-                
-                uniquePeregons.forEach(peregonName => {
-                    if(peregonName) {
-                        selectElement.innerHTML += `<option value="${peregonName}">${peregonName}</option>`;
-                    }
-                });
-
-                logToMonitor(`Знайдено ділянок: ${uniquePeregons.length}. Будуємо меню...`, "success");
-                logToMonitor("Вхід виконано успішно", "success");
-
-            } catch (err) {
-                logToMonitor(`Помилка зв'язку: ${err.message || err}`, "error");
-            }
-        }
-
-        // Оновлення списку колій при виборі конкретного перегону
-        function syncTracksDropdown() {
-            const selectedName = document.getElementById('peregon-select').value;
-            const trackSelect = document.getElementById('track-select');
             
-            document.getElementById('km-grid').innerHTML = "";
-            updateKmBadge(0);
+            await loadPeregons();
+        }
 
-            if (!selectedName) {
-                trackSelect.innerHTML = '<option value="">Спочатку оберіть перегін</option>';
-                trackSelect.disabled = true;
+        async function loadPeregons() {
+            log("Запит перегонів з конфігурації лінії...");
+            const { data, error } = await supabase.from('lines_config').select('name').eq('pd', currentPD);
+            
+            if (error) { log(`Помилка завантаження перегонів: ${error.message}`); return; }
+            
+            const unique = [...new Set(data.map(item => item.name))].filter(Boolean);
+            const container = document.getElementById('peregons-container');
+            container.innerHTML = "";
+            
+            unique.forEach(name => {
+                container.innerHTML += `<label class="checkbox-label"><input type="checkbox" class="peregon-cb" value="${name}"> ${name}</label>`;
+            });
+            log(`Завантажено перегонів: ${unique.length}`);
+        }
+
+        async function buildDiagram() {
+            selectedDataToSave = []; 
+
+            const peregons = Array.from(document.querySelectorAll('.peregon-cb:checked')).map(cb => cb.value);
+            const tracks = Array.from(document.querySelectorAll('.track-cb:checked')).map(cb => cb.value);
+            const kmRaw = document.getElementById('km-input').value;
+            
+            if (peregons.length === 0 || tracks.length === 0 || kmRaw.trim() === "") {
+                alert("Помилка: Оберіть перегін, колію та впишіть кілометри через кому!");
                 return;
             }
 
-            const filteredTracks = linesConfigList.filter(item => item.name === selectedName);
-            
-            trackSelect.innerHTML = '<option value="">Оберіть колію...</option>';
-            filteredTracks.forEach(item => {
-                if(item.track_type) {
-                    trackSelect.innerHTML += `<option value="${item.track_type}">${item.track_type}</option>`;
-                }
+            const kms = kmRaw.split(',').map(k => parseInt(k.trim())).filter(k => !isNaN(k));
+            log(`Аналіз стану для км: ${kms.join(', ')}...`);
+
+            // Завантажуємо історію обкошування з бази для розрахунку дат старіння
+            const { data: pastData, error } = await supabase
+                .from('mowing')
+                .select('*')
+                .eq('pd', currentPD)
+                .in('peregon', peregons)
+                .in('track_type', tracks)
+                .in('km', kms);
+
+            if (error) log(`Помилка отримання журналів: ${error.message}`);
+
+            const diagramContent = document.getElementById('diagram-content');
+            diagramContent.innerHTML = "";
+            const today = new Date();
+
+            peregons.forEach(peregon => {
+                tracks.forEach(track => {
+                    const row = document.createElement('div');
+                    row.className = 'diagram-row';
+                    row.innerHTML = `<div class="diagram-title">🛤️ Ділянка: ${peregon} | Колія: ${track}</div>`;
+
+                    kms.forEach(km => {
+                        const kmBlock = document.createElement('div');
+                        kmBlock.className = 'km-block';
+                        kmBlock.innerHTML = `<div class="km-label">КМ ${km}</div>`;
+                        
+                        const piketsGrid = document.createElement('div');
+                        piketsGrid.className = 'pikets-grid';
+
+                        for (let p = 1; p <= 10; p++) {
+                            // Знаходимо найсвіжіший запис обкошування для цього пікету
+                            const history = (pastData || [])
+                                .filter(d => d.peregon === peregon && d.track_type === track && d.km === km && d.piket === p)
+                                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+
+                            let statusClass = 'status-red'; 
+                            
+                            if (history && history.created_at) {
+                                const diffDays = Math.floor((today - new Date(history.created_at)) / (1000 * 60 * 60 * 24));
+                                if (diffDays <= 30) statusClass = 'status-green';
+                                else if (diffDays <= 45) statusClass = 'status-yellow';
+                                else statusClass = 'status-red';
+                            }
+
+                            const pBox = document.createElement('div');
+                            pBox.className = `piket ${statusClass}`;
+                            pBox.innerText = p;
+                            pBox.dataset.peregon = peregon;
+                            pBox.dataset.track = track;
+                            pBox.dataset.km = km;
+                            pBox.dataset.piket = p;
+                            pBox.dataset.originalClass = statusClass; // запам'ятовуємо старий колір
+                            
+                            pBox.onclick = () => togglePiket(pBox);
+                            piketsGrid.appendChild(pBox);
+                        }
+                        
+                        kmBlock.appendChild(piketsGrid);
+                        row.appendChild(kmBlock);
+                    });
+
+                    diagramContent.appendChild(row);
+                });
             });
 
-            trackSelect.disabled = false;
-            logToMonitor(`Обрано перегін: ${selectedName}`, "info");
+            document.getElementById('diagram-section').classList.remove('hidden');
+            log("Діаграму успішно побудовано. Можна відмічати пікети тапанням.");
         }
 
-        // Генерація списку чекбоксів кілометрів (від start_km до end_km)
-        function generateKmCheckboxes() {
-            const selectedName = document.getElementById('peregon-select').value;
-            const selectedTrack = document.getElementById('track-select').value;
-            const kmGrid = document.getElementById('km-grid');
-
-            kmGrid.innerHTML = "";
-            updateKmBadge(0);
-
-            if (!selectedName || !selectedTrack) return;
-
-            const config = linesConfigList.find(item => item.name === selectedName && item.track_type === selectedTrack);
-
-            if (!config) {
-                logToMonitor("Не вдалося знайти межі кілометражу для ділянки", "error");
-                return;
-            }
-
-            const start = parseInt(config.start_km);
-            const end = parseInt(config.end_km);
-
-            logToMonitor(`Завантажено кілометри: з ${start} по ${end}`, "success");
-
-            for (let km = start; km <= end; km++) {
-                const itemLabel = document.createElement('label');
-                itemLabel.className = 'km-item';
-                itemLabel.innerHTML = `<input type="checkbox" value="${km}" onchange="recalculateCheckedKm()"> KM ${km}`;
-                kmGrid.appendChild(itemLabel);
-            }
-        }
-
-        function toggleKmView() {
-            document.getElementById('km-grid').classList.toggle('hidden');
-        }
-
-        function recalculateCheckedKm() {
-            const activeBoxes = document.querySelectorAll('#km-grid input[type="checkbox"]:checked');
-            checkedKilometers = Array.from(activeBoxes).map(box => parseInt(box.value));
-            updateKmBadge(checkedKilometers.length);
-        }
-
-        function updateKmBadge(count) {
-            document.getElementById('km-count-label').innerText = `обрано: ${count}`;
-        }
-
-        // Відправка масиву відмічених кілометрів до таблиці mowing
-        async function handleFormSubmit(event) {
-            event.preventDefault();
-
-            const peregonValue = document.getElementById('peregon-select').value;
-            const trackValue = document.getElementById('track-select').value;
-
-            if (checkedKilometers.length === 0) {
-                logToMonitor("Помилка: Не обрано жодного кілометра!", "error");
-                alert("Будь ласка, оберіть хоча б один кілометр зі списку.");
-                return;
-            }
-
-            const dataToUpload = checkedKilometers.map(kmNum => ({
+        function togglePiket(element) {
+            const isSelected = element.classList.contains('status-active');
+            
+            const pData = {
                 pd: currentPD,
-                peregon: peregonValue,
-                track_type: trackValue,
-                km: kmNum,
-                piket: 1, 
-                status: 'обкошено'
-            }));
+                peregon: element.dataset.peregon,
+                track_type: element.dataset.track,
+                km: parseInt(element.dataset.km),
+                piket: parseInt(element.dataset.piket),
+                status: 'обкошено',
+                created_at: new Date(document.getElementById('date-input').value).toISOString()
+            };
 
-            try {
-                const { error } = await supabaseClient
-                    .from('mowing')
-                    .upsert(dataToUpload);
+            if (isSelected) {
+                // Скасування виділення: повертаємо початковий колір старіння
+                element.classList.remove('status-active');
+                element.innerText = element.dataset.piket;
+                selectedDataToSave = selectedDataToSave.filter(d => 
+                    !(d.peregon === pData.peregon && d.track_type === pData.track_type && d.km === pData.km && d.piket === pData.piket)
+                );
+            } else {
+                // Відмітка: ПІКЕТ СТАЄ ЗЕЛЕНИМ з контуром та галочкою
+                element.classList.add('status-active');
+                element.innerText = "✓";
+                selectedDataToSave.push(pData);
+            }
+            
+            log(`Готово до збереження: ${selectedDataToSave.length} пік.`);
+        }
 
-                if (error) throw error;
+        async function saveData() {
+            if (selectedDataToSave.length === 0) {
+                alert("Ви не вибрали жодного пікету для збереження!");
+                return;
+            }
 
-                logToMonitor(`Дані успішно збережено в таблицю mowing! Записано км: ${checkedKilometers.join(', ')}`, "success");
-                alert("Дані успішно внесено в журнал!");
+            log(`Запис даних в таблицю mowing... Кількість: ${selectedDataToSave.length}`);
 
-            } catch (err) {
-                logToMonitor(`Не вдалося виконати збереження: ${err.message || err}`, "error");
-                alert(`Помилка під час відправки даних:\n${err.message || err}`);
+            const { error } = await supabase.from('mowing').insert(selectedDataToSave);
+
+            if (error) {
+                log(`🚨 ПОМИЛКА БАЗИ: ${error.message}`);
+                alert(`Помилка синхронізації: ${error.message}\nПеревірте RLS політики таблиці mowing.`);
+            } else {
+                log("✅ Усі відмітки успішно синхронізовано з хмарою!");
+                alert("Дані успішно збережено в журнал обкошування!");
+                // Перебудовуємо сітку, щоб зафіксувати нові зелені кольори з бази
+                buildDiagram(); 
             }
         }
     </script>
