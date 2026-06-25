@@ -169,15 +169,63 @@
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
-        /* Монітор системи фіксований внизу */
+        /* Монітор системи фіксований внизу (Схований за замовчуванням під екран) */
         .debug-panel {
-            flex-shrink: 0; width: 100%; max-width: 580px; position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; 
-            background-color: rgba(230, 244, 234, 0.95); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 15px rgba(11,94,89,0.1); box-sizing: border-box;
+            flex-shrink: 0; 
+            width: 100%; 
+            max-width: 580px; 
+            position: fixed; 
+            bottom: -210px; /* Сховано під екран */
+            left: 50%; 
+            transform: translateX(-50%); 
+            z-index: 9999; 
+            padding: 10px; 
+            background-color: rgba(230, 244, 234, 0.98); 
+            backdrop-filter: blur(6px); 
+            border: 1px solid #c2e7d9; 
+            color: #115e59; 
+            border-radius: 12px 12px 0 0; 
+            font-size: 11px; 
+            font-family: monospace; 
+            box-shadow: 0 -4px 20px rgba(11,94,89,0.15); 
+            box-sizing: border-box;
+            transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
+        
+        .debug-panel.active {
+            bottom: 0px; /* Висувається вгору */
+        }
+
         @media (max-width: 600px) { .debug-panel { width: calc(100% - 20px); } }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 60px; overflow-y: auto; text-align: left; }
         
+        /* Ледь помітна кнопка виклику монітора у лівому нижньому кутку */
+        .debug-toggle-btn {
+            position: fixed;
+            bottom: 4px;
+            left: 4px;
+            width: 26px;
+            height: 26px;
+            background: rgba(148, 163, 184, 0.12); /* Дуже прозора */
+            color: #475569;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: background 0.2s, opacity 0.2s;
+            opacity: 0.6;
+        }
+        .debug-toggle-btn:hover {
+            background: rgba(148, 163, 184, 0.35);
+            opacity: 1;
+        }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -217,36 +265,36 @@
             
             <button class="btn-submit" onclick="saveMowingProgress()">Синхронізувати з хмарою</button>
             
-            <!-- Кнопка відкриття модалки очищення -->
             <button class="btn-submit" onclick="toggleClearModal(true)" style="background: transparent; border: 2px solid #ef4444; color: #ef4444; margin-top: 12px; box-shadow: none;">🗑️ Очистити інформацію</button>
         </div>
     </div>
 
-    <!-- МОДАЛЬНЕ ВІКНО ОЧИЩЕННЯ ДАНИХ -->
     <div id="clear-data-modal" class="modal-overlay">
         <div class="modal-box">
             <div class="card-title" style="color: #dc2626; font-size: 16px; margin-bottom: 12px;">🗑️ Видалення даних</div>
             
-            <!-- Чекбокс вибору всього ПД -->
             <label class="checkbox-container">
                 <input type="checkbox" id="clear-all-pd-checkbox" onchange="handleClearCheckboxChange()">
                 Очистити ВЕСЬ околоток
             </label>
 
-            <!-- Поле вводу конкретного кілометра -->
             <div class="form-group" id="clear-km-group">
                 <label style="color: #dc2626;">Або введіть номер кілометра:</label>
                 <input type="number" id="clear-km-input" class="form-control" style="border-color: #fca5a5;" placeholder="Наприклад: 69">
             </div>
 
-            <!-- Кнопки управління -->
             <button class="btn-submit" onclick="executeDataClear()" style="background: #dc2626; margin-top: 8px;">Підтвердити видалення</button>
             <button class="btn-submit" onclick="toggleClearModal(false)" style="background: #94a3b8; margin-top: 8px;">Скасувати</button>
         </div>
     </div>
 
-    <div class="debug-panel">
-        <div class="debug-title">🖥️ Монітор системи</div>
+    <button class="debug-toggle-btn" onclick="toggleDebugPanel()">🛠️</button>
+
+    <div class="debug-panel" id="system-debug-panel">
+        <div class="debug-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>🖥️ Монітор системи</span>
+            <span onclick="toggleDebugPanel()" style="cursor:pointer; padding: 0 4px; font-weight: bold; color: #dc2626;">[Сховати]</span>
+        </div>
         <div id="debug-console" class="debug-scroll"></div>
     </div>
 
@@ -272,6 +320,11 @@
             div.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
             con.appendChild(div);
             con.scrollTop = con.scrollHeight;
+        }
+
+        function toggleDebugPanel() {
+            const panel = document.getElementById('system-debug-panel');
+            panel.classList.toggle('active');
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -494,7 +547,7 @@
             }
         }
 
-        /* ЛОГІКА МОДАЛЬНОГО ВІКНА ОЧИЩЕННЯ ДАНИХ */
+        /* ЛОГІКА МОДАЛЬНОГО ВІКНО ОЧИЩЕННЯ ДАНИХ */
         function toggleClearModal(show) {
             const modal = document.getElementById('clear-data-modal');
             if (show) {
@@ -513,7 +566,7 @@
             const kmInput = document.getElementById('clear-km-input');
             if (isChecked) {
                 kmInput.value = "";
-                kmInput.disabled = true; // Блокуємо поле вводу КМ, якщо обрано весь околоток
+                kmInput.disabled = true;
             } else {
                 kmInput.disabled = false;
             }
@@ -544,7 +597,7 @@
 
             if (!confirm(confirmMessage)) return;
 
-            toggleClearModal(false); // Закриваємо модалку
+            toggleClearModal(false);
             logSys("Запуск процедури очищення даних у хмарі...", "info");
 
             const headers = { 
