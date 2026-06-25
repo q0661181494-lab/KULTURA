@@ -437,7 +437,6 @@
             logSys(`Збереження робіт у хмару (${recordsToSend.length} шт.)...`, "info");
             
             try {
-                // Виправлено помилку: замість insert використовується метод upsert()
                 const { error } = await supabaseClient.from('mowing').upsert(recordsToSend);
                 if (error) throw error;
 
