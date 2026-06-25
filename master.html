@@ -138,7 +138,6 @@
         .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; border-radius: 6px; }
         .station-piket-row { background-color: #f1f5f9 !important; border-left: 3px solid #0d9488; border-right: 3px solid #0d9488; }
         .station-piket-row .piket-center-core { background: #0d9488 !important; color: white !important; border-color: #0f766e !important; }
-        .station-boundary-delimiter { background: #f0fdf4; border: 2px dashed #0d9488; border-radius: 8px; padding: 6px; margin: 12px 0 12px 0; text-align: center; font-weight: 800; font-size: 12px; color: #0d9488; letter-spacing: 0.5px; text-transform: uppercase; }
         
         .info-margin { width: 50px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: bold; color: #0f766e; box-sizing: border-box; }
         .margin-left { justify-content: flex-end; padding-right: 4px; }
@@ -162,7 +161,7 @@
         .status-warn-yellow { background-color: #eab308 !important; color: #1f2937 !important; }
         .status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
 
-        /* Монітор системи фіксований внизу */
+        /* Монітор системи */
         .debug-panel {
             flex-shrink: 0; width: 100%; max-width: 580px; position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; 
             background-color: rgba(230, 244, 234, 0.95); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 15px rgba(11,94,89,0.1); box-sizing: border-box;
@@ -288,7 +287,15 @@
 
         function getPiketAnalysis(peregonName, trackType, km, pk) {
             if (!mowingData || mowingData.length === 0) return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
-            const record = mowingData.find(m => m.peregon === peregonName && m.track_type === trackType && parseInt(m.km) === km && parseInt(m.piket) === pk);
+            
+            // Суворе порівняння перегону, кілометра, пікета та точного типу колії
+            const record = mowingData.find(m => 
+                m.peregon === peregonName && 
+                m.track_type === trackType && 
+                parseInt(m.km) === km && 
+                parseInt(m.piket) === pk
+            );
+            
             if (!record || record.status !== 'green') return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
             if (!record.date) return { colorClass: 'status-clear-green', label: 'Обкошено', days: '0 дн.' };
 
@@ -324,15 +331,22 @@
                 container.appendChild(headersRow);
 
                 for (let pk = 1; pk <= 10; pk++) {
-                    const leftConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('парна')); 
-                    const rightConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('непарна'));
-                    const stationConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.includes('станція'));
+                    // Шукаємо конфігурацію окремо для парної та непарної колії
+                    let leftConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('парна')); 
+                    let rightConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('непарна'));
+                    
+                    // Шукаємо станцію на цьому км
+                    const stationConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.toLowerCase().includes('станція'));
 
-                    const finalLeftConfig = stationConfig || leftConfig;
-                    const finalRightConfig = stationConfig || rightConfig;
+                    let finalLeftName = leftConfig ? leftConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
+                    let finalRightName = rightConfig ? rightConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
+                    
+                    // Гарантуємо унікальний текстовий маркер колії для бази даних
+                    let finalLeftTrackType = leftConfig ? leftConfig.track_type : "парна колія станції";
+                    let finalRightTrackType = rightConfig ? rightConfig.track_type : "непарна колія станції";
 
-                    const leftSide = finalLeftConfig ? getPiketAnalysis(finalLeftConfig.name, finalLeftConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
-                    const rightSide = finalRightConfig ? getPiketAnalysis(finalRightConfig.name, finalRightConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+                    const leftSide = getPiketAnalysis(finalLeftName, finalLeftTrackType, km, pk);
+                    const rightSide = getPiketAnalysis(finalRightName, finalRightTrackType, km, pk);
 
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
@@ -349,9 +363,7 @@
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
                     leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
                     leftBank.dataset.initialClass = leftSide.colorClass;
-                    if (finalLeftConfig) {
-                        leftBank.onclick = () => togglePiketSelection(leftBank, finalLeftConfig.name, finalLeftConfig.track_type, km, pk);
-                    }
+                    leftBank.onclick = () => togglePiketSelection(leftBank, finalLeftName, finalLeftTrackType, km, pk);
                     nodeRow.appendChild(leftBank);
 
                     const leftTrack = document.createElement('div');
@@ -374,9 +386,7 @@
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
                     rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
                     rightBank.dataset.initialClass = rightSide.colorClass;
-                    if (finalRightConfig) {
-                        rightBank.onclick = () => togglePiketSelection(rightBank, finalRightConfig.name, finalRightConfig.track_type, km, pk);
-                    }
+                    rightBank.onclick = () => togglePiketSelection(rightBank, finalRightName, finalRightTrackType, km, pk);
                     nodeRow.appendChild(rightBank);
 
                     const rightMargin = document.createElement('div');
@@ -440,7 +450,7 @@
                 const { error } = await supabaseClient.from('mowing').upsert(recordsToSend);
                 if (error) throw error;
 
-                logSys("Дані успішно синхронізовано методом UPSERT!", "success");
+                logSys("Дані успішно синхронізовано роздільно!", "success");
                 alert("Роботу успішно зафіксовано!");
                 
                 selectedPiketsToSave = [];
