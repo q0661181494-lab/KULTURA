@@ -533,14 +533,14 @@
             drawDoubleTrackDiagram();
         }
  
-        function getPiketAnalysis(peregonName, trackType, km, pk) {
+        function getPiketAnalysis(pdName, peregonName, trackType, km, pk) {
             if (!mowingData || mowingData.length === 0) {
                 return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
             }
  
-            // ЗМІНЕНО: Пошук тепер здійснюється суворо за нормалізованим типом колії (парна/непарна)
+            // ВИПРАВЛЕНО: Додано суворий пошук за композитним ключем, включаючи ПД (pd)
             const cloudRecord = mowingData.find(m => 
-                m.peregon === peregonName && m.track_type === trackType &&
+                m.pd === pdName && m.peregon === peregonName && m.track_type === trackType &&
                 parseInt(m.km) === km && parseInt(m.piket) === pk
             );
  
@@ -637,7 +637,6 @@
                 container.appendChild(headersRow);
  
                 for (let pk = 1; pk <= 10; pk++) {
-                    // ЗМІНЕНО: Побудова конфігурації розділена жорстко за напрямками
                     let leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('парна')); 
                     let rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('непарна'));
                     const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.toLowerCase().includes('станція'));
@@ -645,12 +644,12 @@
                     let finalLeftName = leftConfig ? leftConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
                     let finalRightName = rightConfig ? rightConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
 
-                    // ЗМІНЕНО: Пошук в масиві хмари mowingData суворо за значеннями "парна" та "непарна"
                     let finalLeftTrackType = "парна";
                     let finalRightTrackType = "непарна";
  
-                    const leftSide = getPiketAnalysis(finalLeftName, finalLeftTrackType, km, pk);
-                    const rightSide = getPiketAnalysis(finalRightName, finalRightTrackType, km, pk);
+                    // ВИПРАВЛЕНО: Передаємо fullPdName першим параметром для коректної фільтрації околотку
+                    const leftSide = getPiketAnalysis(fullPdName, finalLeftName, finalLeftTrackType, km, pk);
+                    const rightSide = getPiketAnalysis(fullPdName, finalRightName, finalRightTrackType, km, pk);
  
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
