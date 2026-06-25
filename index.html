@@ -538,8 +538,9 @@
                 return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
             }
  
+            // ЗМІНЕНО: Пошук тепер здійснюється суворо за нормалізованим типом колії (парна/непарна)
             const cloudRecord = mowingData.find(m => 
-                m.object_name === peregonName && m.track_type === trackType &&
+                m.peregon === peregonName && m.track_type === trackType &&
                 parseInt(m.km) === km && parseInt(m.piket) === pk
             );
  
@@ -601,7 +602,7 @@
                 selectedPeregons.forEach(pName => {
                     const stationTokens = pName.split('-').map(s => s.trim().toLowerCase());
                     tracksData.forEach(t => {
-                        if (t.type && t.type.includes('станція')) {
+                        if (t.type && t.type.toLowerCase().includes('станція')) {
                             const isDotichna = stationTokens.some(token => t.name.toLowerCase().includes(token));
                             if (isDotichna) {
                                 const sStart = parseInt(t.start_km);
@@ -636,15 +637,20 @@
                 container.appendChild(headersRow);
  
                 for (let pk = 1; pk <= 10; pk++) {
-                    const leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('парна')); 
-                    const rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.includes('непарна'));
-                    const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.includes('станція'));
+                    // ЗМІНЕНО: Побудова конфігурації розділена жорстко за напрямками
+                    let leftConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('парна')); 
+                    let rightConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('непарна'));
+                    const stationConfig = segmentsToRender.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.toLowerCase().includes('станція'));
  
-                    const finalLeftConfig = stationConfig || leftConfig;
-                    const finalRightConfig = stationConfig || rightConfig;
+                    let finalLeftName = leftConfig ? leftConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
+                    let finalRightName = rightConfig ? rightConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
+
+                    // ЗМІНЕНО: Пошук в масиві хмари mowingData суворо за значеннями "парна" та "непарна"
+                    let finalLeftTrackType = "парна";
+                    let finalRightTrackType = "непарна";
  
-                    const leftSide = finalLeftConfig ? getPiketAnalysis(finalLeftConfig.name, finalLeftConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
-                    const rightSide = finalRightConfig ? getPiketAnalysis(finalRightConfig.name, finalRightConfig.track_type, km, pk) : { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
+                    const leftSide = getPiketAnalysis(finalLeftName, finalLeftTrackType, km, pk);
+                    const rightSide = getPiketAnalysis(finalRightName, finalRightTrackType, km, pk);
  
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
