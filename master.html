@@ -161,7 +161,7 @@
         .status-warn-yellow { background-color: #eab308 !important; color: #1f2937 !important; }
         .status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
 
-        /* Монітор системи */
+        /* Монітор системи фіксований внизу */
         .debug-panel {
             flex-shrink: 0; width: 100%; max-width: 580px; position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; 
             background-color: rgba(230, 244, 234, 0.95); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 15px rgba(11,94,89,0.1); box-sizing: border-box;
@@ -288,7 +288,7 @@
         function getPiketAnalysis(peregonName, trackType, km, pk) {
             if (!mowingData || mowingData.length === 0) return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
             
-            // Суворе порівняння перегону, кілометра, пікета та точного типу колії
+            // Завжди суворо шукаємо за ключовими словами 'парна' або 'непарна'
             const record = mowingData.find(m => 
                 m.peregon === peregonName && 
                 m.track_type === trackType && 
@@ -331,19 +331,16 @@
                 container.appendChild(headersRow);
 
                 for (let pk = 1; pk <= 10; pk++) {
-                    // Шукаємо конфігурацію окремо для парної та непарної колії
                     let leftConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('парна')); 
                     let rightConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('непарна'));
-                    
-                    // Шукаємо станцію на цьому км
                     const stationConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.toLowerCase().includes('станція'));
 
                     let finalLeftName = leftConfig ? leftConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
                     let finalRightName = rightConfig ? rightConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
                     
-                    // Гарантуємо унікальний текстовий маркер колії для бази даних
-                    let finalLeftTrackType = leftConfig ? leftConfig.track_type : "парна колія станції";
-                    let finalRightTrackType = rightConfig ? rightConfig.track_type : "непарна колія станції";
+                    // СУВОРО СТАБІЛІЗУЄМО ЗНАЧЕННЯ ДЛЯ БАЗИ ТА ПОШУКУ ТУТ:
+                    let finalLeftTrackType = "парна";
+                    let finalRightTrackType = "непарна";
 
                     const leftSide = getPiketAnalysis(finalLeftName, finalLeftTrackType, km, pk);
                     const rightSide = getPiketAnalysis(finalRightName, finalRightTrackType, km, pk);
