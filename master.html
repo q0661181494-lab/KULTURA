@@ -208,6 +208,8 @@
             <div id="diagram-render-zone" class="railway-canvas"></div>
             
             <button class="btn-submit" onclick="saveMowingProgress()">Синхронізувати з хмарою</button>
+            
+            <button class="btn-submit" onclick="openClearDataMenu()" style="background: transparent; border: 2px solid #ef4444; color: #ef4444; margin-top: 12px; box-shadow: none;">🗑️ Очистити інформацію</button>
         </div>
     </div>
 
@@ -288,7 +290,6 @@
         function getPiketAnalysis(peregonName, trackType, km, pk) {
             if (!mowingData || mowingData.length === 0) return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
             
-            // Завжди суворо шукаємо за ключовими словами 'парна' або 'непарна'
             const record = mowingData.find(m => 
                 m.peregon === peregonName && 
                 m.track_type === trackType && 
@@ -338,7 +339,6 @@
                     let finalLeftName = leftConfig ? leftConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
                     let finalRightName = rightConfig ? rightConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
                     
-                    // СУВОРО СТАБІЛІЗУЄМО ЗНАЧЕННЯ ДЛЯ БАЗИ ТА ПОШУКУ ТУТ:
                     let finalLeftTrackType = "парна";
                     let finalRightTrackType = "непарна";
 
@@ -448,7 +448,7 @@
                 if (error) throw error;
 
                 logSys("Дані успішно синхронізовано роздільно!", "success");
-                alert("Роботу успішно зафіксовано!");
+                alert("Роботу успешно зафіксовано!");
                 
                 selectedPiketsToSave = [];
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
@@ -459,6 +459,61 @@
             } catch (e) {
                 logSys("Помилка збереження: " + e.message, "error");
                 alert("Помилка синхронізації: " + e.message);
+            }
+        }
+
+        /* НОВА ФУНКЦІЯ: Очищення інформації про обкошування */
+        async function openClearDataMenu() {
+            const choice = prompt("Оберіть режим очищення:\nВведіть '1' — щоб очистити ВЕСЬ околоток\nВведіть номер кілометра (наприклад: 69) — щоб очистити конкретний км");
+            
+            if (!choice) return;
+
+            let url = `${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(currentPD)}`;
+            let confirmMessage = "";
+
+            if (choice.trim() === '1') {
+                confirmMessage = `Ви впевнені, що хочете ПОВНІСТЮ ОЧИСТИТИ ВСІ дані про обкошування для ${currentPD}? Цю дію неможливо скасувати!`;
+            } else {
+                const kmNum = parseInt(choice.trim());
+                if (isNaN(kmNum)) {
+                    alert("Помилка: введіть коректне число (номер кілометра) або '1'!");
+                    return;
+                }
+                url += `&km=eq.${kmNum}`;
+                confirmMessage = `Ви впевнені, що хочете повністю видалити дані про обкошування на ${kmNum} кілометрі для ${currentPD}?`;
+            }
+
+            if (!confirm(confirmMessage)) return;
+
+            logSys("Запуск процедури очищення даних у хмарі...", "info");
+
+            const headers = { 
+                'apikey': fullKey, 
+                'authorization': 'Bearer ' + fullKey,
+                'Content-Type': 'application/json'
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: headers
+                });
+
+                if (response.ok) {
+                    logSys("Дані успішно видалено з бази даних!", "success");
+                    alert("Дані успішно очищено з хмари!");
+                    
+                    selectedPiketsToSave = [];
+                    const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${currentPD}`, { headers });
+                    mowingData = await resMowing.json();
+                    
+                    filterDiagramByKm();
+                } else {
+                    throw new Error("Помилка сервера при виконанні операції DELETE");
+                }
+            } catch (e) {
+                logSys("Помилка очищення даних: " + e.message, "error");
+                alert("Не вдалося видалити дані: " + e.message);
             }
         }
     </script>
