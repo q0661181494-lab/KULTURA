@@ -13,107 +13,25 @@
             --card-bg: #ffffff;
             --text-color: #1e293b;
             --border-color: #cbd5e1;
-            
-            --color-red: #ef4444;    /* > 45 днів */
-            --color-yellow: #eab308; /* 30-45 днів */
-            --color-green: #22c55e;  /* < 30 днів */
-            --accent-checkbox: #008b74;
+            --color-red: #ef4444;    
+            --color-yellow: #eab308; 
+            --color-green: #22c55e;  
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        
-        html, body { height: 100%; margin: 0; padding: 0; background-color: var(--bg-color); }
-        
-        body { 
-            color: var(--text-color); 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh;
-            position: relative;
-        }
+        html, body { height: 100%; background-color: var(--bg-color); }
+        body { color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; position: relative; }
 
-        .main-content {
-            flex: 1 0 auto;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 12px 12px 110px 12px;
-        }
+        .main-content { flex: 1 0 auto; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 12px 12px 110px 12px; }
         
-        /* Навігаційне меню */
-        .nav-menu { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 6px; 
-            margin-bottom: 12px; 
-            display: flex; 
-            gap: 6px; 
-            box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); 
-            width: 100%; 
-            max-width: 580px;
-            box-sizing: border-box; 
-            align-items: center; 
-            border: 1px solid #d1fae5; 
-        }
-        
-        .nav-link { 
-            flex: 1; 
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center; 
-            font-weight: bold; 
-            font-size: 14px; 
-            color: #115e59; 
-            text-decoration: none; 
-            border-radius: 8px; 
-            background: #f0fdf4; 
-            cursor: pointer; 
-            border: none;
-        }
-        
-        .admin-menu-btn { 
-            width: 42px; 
-            height: 42px; 
-            background-color: #f0fdf4; 
-            color: #115e59; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 18px; 
-            border: none; 
-            flex-shrink: 0; 
-            text-decoration: none; 
-            cursor: pointer;
-        }
-        
+        .nav-menu { background: white; border-radius: 12px; padding: 6px; margin-bottom: 12px; display: flex; gap: 6px; box-shadow: 0 4px 10px rgba(11, 94, 89, 0.06); width: 100%; max-width: 580px; align-items: center; border: 1px solid #d1fae5; }
+        .nav-link { flex: 1; height: 42px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: #115e59; text-decoration: none; border-radius: 8px; background: #f0fdf4; cursor: pointer; border: none; }
+        .admin-menu-btn { width: 42px; height: 42px; background-color: #f0fdf4; color: #115e59; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: none; flex-shrink: 0; text-decoration: none; cursor: pointer; }
         .nav-link:hover, .admin-menu-btn:hover { background-color: #e6f4ea; }
         .nav-link.active, .admin-menu-btn.active { background-color: #115e59 !important; color: white !important; pointer-events: none; }
 
-        /* Картки інтерфейсу */
-        .screen { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 16px; 
-            box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); 
-            width: 100%; 
-            max-width: 580px;
-            box-sizing: border-box; 
-            margin-bottom: 24px; 
-            border: 1px solid #d1fae5;
-        }
-        
-        .screen.welcome-focus {
-            margin-top: 10px;
-            transform: scale(1.02);
-            box-shadow: 0 20px 40px rgba(11, 94, 89, 0.12);
-            border-color: #a7f3d0;
-            padding: 30px 20px;
-        }
-
+        .screen { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); width: 100%; max-width: 580px; margin-bottom: 24px; border: 1px solid #d1fae5; }
+        .screen.welcome-focus { margin-top: 10px; transform: scale(1.02); box-shadow: 0 20px 40px rgba(11, 94, 89, 0.12); border-color: #a7f3d0; padding: 30px 20px; }
         .card-title { font-size: 18px; font-weight: 800; color: #115e59; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.8px; text-align: center; }
         .card-subtitle { color: #0f766e; font-size: 13px; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
@@ -121,16 +39,12 @@
         .form-group label { display: block; font-weight: 700; font-size: 11px; margin-bottom: 4px; color: #115e59; text-transform: uppercase; letter-spacing: 0.5px; }
         .form-control { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; outline: none; background: #fff; color: #115e59; font-weight: 500; }
         .form-control:focus { border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2); }
-        
         .secure-numeric-input { -webkit-text-security: disc !important; text-security: disc !important; }
-        
         .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: background 0.2s; }
         .btn-submit:hover { background: var(--primary-hover); }
 
-        /* Стилі діаграми */
         .railway-canvas { display: flex; flex-direction: column; width: 100%; margin-top: 12px; }
         .km-signboard { background: #e6f4ea; border: 2px solid #115e59; border-radius: 8px; padding: 8px; margin: 18px 0 8px 0; text-align: center; font-weight: 900; font-size: 14px; color: #115e59; letter-spacing: 1px; text-transform: uppercase; }
-        
         .track-headers-row { display: flex; width: 100%; margin-bottom: 6px; font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; text-align: center; opacity: 0.8; }
         .header-margin-space { width: 50px; }
         .header-left-track { flex: 1; padding-right: 16px; }
@@ -151,15 +65,7 @@
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; cursor: pointer; transition: background-color 0.15s, transform 0.1s; user-select: none; }
         .mowing-bank-zone:active { transform: scale(0.96); }
 
-        /* Оновлені стилі для чужих колій (гарно видно кольори, але клік заблоковано) */
-        .inactive-bank {
-            opacity: 0.65;
-            cursor: not-allowed !important;
-            filter: grayscale(15%);
-            pointer-events: none;
-            border: 1px dashed #94a3b8;
-        }
-
+        .inactive-bank { opacity: 0.65; cursor: not-allowed !important; filter: grayscale(15%); pointer-events: none; border: 1px dashed #94a3b8; }
         .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
         
         .rail-line-visual { width: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: #cbd5e1; }
@@ -173,14 +79,12 @@
         .status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
         .status-unknown { background-color: #f1f5f9 !important; color: #64748b !important; border: 1px dashed #cbd5e1; }
 
-        /* Модалка очищення */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-box { background: white; padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #fee2e2; }
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
-        /* Монітор системи */
         .debug-panel { flex-shrink: 0; width: 100%; max-width: 580px; position: fixed; bottom: -210px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; background-color: rgba(230, 244, 234, 0.98); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px 12px 0 0; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 20px rgba(11,94,89,0.15); box-sizing: border-box; transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
         .debug-panel.active { bottom: 0px; }
         @media (max-width: 600px) { .debug-panel { width: calc(100% - 20px); } }
@@ -226,7 +130,6 @@
             <div id="diagram-render-zone" class="railway-canvas"></div>
             
             <button class="btn-submit" onclick="saveMowingProgress()">Синхронізувати з хмарою</button>
-            
             <button class="btn-submit" onclick="toggleClearModal(true)" style="background: transparent; border: 2px solid #ef4444; color: #ef4444; margin-top: 12px; box-shadow: none;">🗑️ Очистити інформацію</button>
         </div>
     </div>
@@ -248,7 +151,6 @@
     </div>
 
     <button class="debug-toggle-btn" onclick="toggleDebugPanel()">🛠️</button>
-
     <div class="debug-panel" id="system-debug-panel">
         <div class="debug-title" style="display: flex; justify-content: space-between; align-items: center;">
             <span>🖥️ Монітор системи</span>
@@ -277,8 +179,7 @@
             if(status === 'success') div.style.color = '#16a34a';
             if(status === 'error') div.style.color = '#dc2626';
             div.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
-            con.appendChild(div);
-            con.scrollTop = con.scrollHeight;
+            con.prepend(div); // Додаємо нові записи зверху
         }
 
         function toggleDebugPanel() {
@@ -330,15 +231,44 @@
             }
         }
 
-        function getPiketAnalysis(peregonName, trackType, km, pk, ownerPd) {
+        // УТИЛІТИ ДЛЯ НАДІЙНОГО ФІЛЬТРУВАННЯ (Ігнорує пробіли, реєстр, змішані букви)
+        function cleanPd(pdStr) {
+            return pdStr ? pdStr.trim().toUpperCase() : "";
+        }
+
+        function sanitizeTrackType(str) {
+            if (!str) return '';
+            let s = str.toLowerCase().replace(/\s+/g, '');
+            const map = {'e':'е', 'a':'а', 'o':'о', 'p':'р', 'c':'с', 'x':'х', 'i':'і', 'y':'у'};
+            return s.split('').map(c => map[c] || c).join('');
+        }
+
+        function isLeftTrack(str) {
+            if (!str) return false;
+            let s = sanitizeTrackType(str);
+            if (s.includes('парна') && s.includes('непарна')) return true; // Якщо вказано обидві
+            if (s.includes('непарн') || s === '1' || s.includes('1колія')) return false;
+            if (s.includes('парн') || s === '2' || s.includes('2колія')) return true;
+            return false;
+        }
+
+        function isRightTrack(str) {
+            if (!str) return false;
+            let s = sanitizeTrackType(str);
+            if (s.includes('парна') && s.includes('непарна')) return true; // Якщо вказано обидві
+            if (s.includes('непарн') || s === '1' || s.includes('1колія')) return true;
+            return false;
+        }
+
+        // АНАЛІЗ ПІКЕТУ (Відв'язано від назви перегону для надійності)
+        function getPiketAnalysis(trackType, km, pk, ownerPd) {
             if (!ownerPd) return { colorClass: 'status-unknown', label: 'Немає даних', days: '' };
 
             const record = globalMowingData.find(m => 
-                m.pd === ownerPd && 
-                m.peregon === peregonName && 
-                m.track_type === trackType && 
+                cleanPd(m.pd) === cleanPd(ownerPd) && 
                 parseInt(m.km) === km && 
-                parseInt(m.piket) === pk
+                parseInt(m.piket) === pk &&
+                (trackType === 'парна' ? isLeftTrack(m.track_type) : isRightTrack(m.track_type))
             );
             
             if (!record || record.status !== 'green') return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
@@ -350,33 +280,14 @@
             return { colorClass: 'status-clear-green', label: 'Обкошено', days: `${diffDays} дн.` };
         }
 
-        // --- БРОНЬОВАНИЙ ФІЛЬТР КОЛІЙ (Ігнорує опечатки, пробіли, регістр та англійські букви) ---
-        function sanitizeTrackType(str) {
-            if (!str) return '';
-            let s = str.toLowerCase().replace(/\s+/g, '');
-            // Замінюємо англійські букви на схожі українські, щоб уникнути помилок вводу
-            const map = {'e':'е', 'a':'а', 'o':'о', 'p':'р', 'c':'с', 'x':'х', 'i':'і', 'y':'у'};
-            return s.split('').map(c => map[c] || c).join('');
-        }
-        
-        function isLeftTrack(str) {
-            let s = sanitizeTrackType(str);
-            return s === 'парна' || s === '2коліяпарна' || (s.includes('парна') && !s.includes('непарна'));
-        }
-        
-        function isRightTrack(str) {
-            let s = sanitizeTrackType(str);
-            return s === 'непарна' || s === '1коліянепарна' || s.includes('непарна');
-        }
-
         function buildMasterDiagram(allowedKm = null) {
             const container = document.getElementById('diagram-render-zone');
             container.innerHTML = "";
 
-            const myConfigs = globalTracksData.filter(t => t.pd === currentPD);
+            const myConfigs = globalTracksData.filter(t => cleanPd(t.pd) === currentPD);
             
             if (myConfigs.length === 0) {
-                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>`;
+                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів у базі.</p>`;
                 return;
             }
 
@@ -398,44 +309,56 @@
 
                 for (let pk = 1; pk <= 10; pk++) {
                     
-                    // --- ТОЧНИЙ ФІЛЬТР ДЛЯ СТАНЦІЙ (Враховує межі start_pk та end_pk) ---
+                    // ТОЧНИЙ ФІЛЬТР ДЛЯ ПІКЕТІВ ТА СТАНЦІЙ
                     let configsForPk = globalTracksData.filter(s => {
                         let sKm = parseInt(s.start_km);
                         let eKm = parseInt(s.end_km);
-                        let sPk = parseInt(s.start_pk) || 1;
-                        let ePk = parseInt(s.end_pk) || 10;
+                        if (isNaN(sKm) || isNaN(eKm)) return false;
+
+                        let sPk = parseInt(s.start_pk); sPk = isNaN(sPk) ? 1 : sPk;
+                        let ePk = parseInt(s.end_pk); ePk = isNaN(ePk) ? 10 : ePk;
                         
                         if (km < sKm || km > eKm) return false;
-                        if (km === sKm && pk < sPk) return false;
-                        if (km === eKm && pk > ePk) return false;
+                        if (sKm === eKm) {
+                            if (pk < sPk || pk > ePk) return false;
+                        } else {
+                            if (km === sKm && pk < sPk) return false;
+                            if (km === eKm && pk > ePk) return false;
+                        }
                         return true;
                     });
 
-                    let leftConfig = configsForPk.find(s => sanitizeTrackType(s.type) !== 'станція' && isLeftTrack(s.track_type));
-                    let rightConfig = configsForPk.find(s => sanitizeTrackType(s.type) !== 'станція' && isRightTrack(s.track_type));
+                    // Розділяємо звичайні колії та станції
+                    let leftConfigs = configsForPk.filter(s => sanitizeTrackType(s.type) !== 'станція' && isLeftTrack(s.track_type));
+                    let rightConfigs = configsForPk.filter(s => sanitizeTrackType(s.type) !== 'станція' && isRightTrack(s.track_type));
                     
-                    let leftStationConfig = configsForPk.find(s => sanitizeTrackType(s.type) === 'станція' && isLeftTrack(s.track_type));
-                    let rightStationConfig = configsForPk.find(s => sanitizeTrackType(s.type) === 'станція' && isRightTrack(s.track_type));
+                    // Станція може не мати типу колії, тоді вона накладається на обидві
+                    let leftStationConfigs = configsForPk.filter(s => sanitizeTrackType(s.type) === 'станція' && (isLeftTrack(s.track_type) || !s.track_type));
+                    let rightStationConfigs = configsForPk.filter(s => sanitizeTrackType(s.type) === 'станція' && (isRightTrack(s.track_type) || !s.track_type));
                     
+                    // ПРІОРИТЕТ ВЛАСНИКА (Якщо адмін помилково дав колію обом ПД, поточний ПД бачить її як свою)
+                    let leftConfig = leftConfigs.find(s => cleanPd(s.pd) === currentPD) || leftConfigs[0];
+                    let rightConfig = rightConfigs.find(s => cleanPd(s.pd) === currentPD) || rightConfigs[0];
+                    
+                    let leftStationConfig = leftStationConfigs.find(s => cleanPd(s.pd) === currentPD) || leftStationConfigs[0];
+                    let rightStationConfig = rightStationConfigs.find(s => cleanPd(s.pd) === currentPD) || rightStationConfigs[0];
+
                     let finalLeftConfig = leftStationConfig || leftConfig;
                     let finalRightConfig = rightStationConfig || rightConfig;
 
                     let finalLeftName = finalLeftConfig ? finalLeftConfig.name : "Невідомо";
                     let finalRightName = finalRightConfig ? finalRightConfig.name : "Невідомо";
                     
-                    let finalLeftTrackType = "парна";
-                    let finalRightTrackType = "непарна";
-
                     let leftOwnerPd = finalLeftConfig ? finalLeftConfig.pd : null;
                     let rightOwnerPd = finalRightConfig ? finalRightConfig.pd : null;
 
-                    let isLeftMine = leftOwnerPd === currentPD;
-                    let isRightMine = rightOwnerPd === currentPD;
+                    let isLeftMine = cleanPd(leftOwnerPd) === currentPD;
+                    let isRightMine = cleanPd(rightOwnerPd) === currentPD;
                     
                     let isStationPk = !!leftStationConfig || !!rightStationConfig;
 
-                    const leftSide = getPiketAnalysis(finalLeftName, finalLeftTrackType, km, pk, leftOwnerPd);
-                    const rightSide = getPiketAnalysis(finalRightName, finalRightTrackType, km, pk, rightOwnerPd);
+                    const leftSide = getPiketAnalysis('парна', km, pk, leftOwnerPd);
+                    const rightSide = getPiketAnalysis('непарна', km, pk, rightOwnerPd);
 
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
@@ -454,7 +377,7 @@
                     if (isLeftMine) {
                         leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
                         leftBank.dataset.initialClass = leftSide.colorClass;
-                        leftBank.onclick = () => togglePiketSelection(leftBank, finalLeftName, finalLeftTrackType, km, pk);
+                        leftBank.onclick = () => togglePiketSelection(leftBank, finalLeftName, 'парна', km, pk);
                     } else {
                         leftBank.classList.add('inactive-bank');
                         let ownerLabel = leftOwnerPd ? `(${leftOwnerPd})` : '';
@@ -484,7 +407,7 @@
                     if (isRightMine) {
                         rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
                         rightBank.dataset.initialClass = rightSide.colorClass;
-                        rightBank.onclick = () => togglePiketSelection(rightBank, finalRightName, finalRightTrackType, km, pk);
+                        rightBank.onclick = () => togglePiketSelection(rightBank, finalRightName, 'непарна', km, pk);
                     } else {
                         rightBank.classList.add('inactive-bank');
                         let ownerLabel = rightOwnerPd ? `(${rightOwnerPd})` : '';
@@ -532,7 +455,6 @@
                     status: 'green'
                 });
             }
-            logSys(`Оновлень до збереження: ${selectedPiketsToSave.length}`, "info");
         }
 
         async function saveMowingProgress() {
