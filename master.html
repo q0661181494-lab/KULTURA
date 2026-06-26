@@ -13,8 +13,9 @@
             --card-bg: #ffffff;
             --text-color: #1e293b;
             --border-color: #cbd5e1;
-            /* Контрастний колір Індіго для меж станцій */
-            --station-color: #6366f1;
+            
+            /* Контрастний помаранчевий колір для меж станцій */
+            --station-color: #f97316;
             
             --color-red: #ef4444;    /* > 45 днів */
             --color-yellow: #eab308; /* 30-45 днів */
@@ -64,9 +65,9 @@
         .margin-left { justify-content: flex-end; padding-right: 4px; }
         .margin-right { justify-content: flex-start; padding-left: 4px; }
 
-        /* СТИЛІ ІНДІГО ДЛЯ МЕЖ СТАНЦІЙ НА БОКОВИХ ПОЛЯХ */
-        .station-bracket-left { background-color: rgba(99, 102, 241, 0.12) !important; border-left: 4px solid var(--station-color) !important; border-radius: 6px 0 0 6px; }
-        .station-bracket-right { background-color: rgba(99, 102, 241, 0.12) !important; border-right: 4px solid var(--station-color) !important; border-radius: 0 6px 6px 0; }
+        /* ПОМАРАНЧЕВІ СТИЛІ ДЛЯ МЕЖ СТАНЦІЙ НА БОКОВИХ ПОЛЯХ */
+        .station-bracket-left { background-color: rgba(249, 115, 22, 0.12) !important; border-left: 4px solid var(--station-color) !important; border-radius: 6px 0 0 6px; }
+        .station-bracket-right { background-color: rgba(249, 115, 22, 0.12) !important; border-right: 4px solid var(--station-color) !important; border-radius: 0 6px 6px 0; }
 
         .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #ffffff; padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #475569; min-width: 42px; box-sizing: border-box; z-index: 5; }
         .signal-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%; margin-right: 4px; box-shadow: 0 0 6px #22c55e; }
@@ -89,14 +90,12 @@
         .status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
         .status-unknown { background-color: #f1f5f9 !important; color: #64748b !important; border: 1px dashed #cbd5e1; }
 
-        /* Модалка очищення */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-box { background: white; padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #fee2e2; }
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
-        /* Монітор системи */
         .debug-panel { flex-shrink: 0; width: 100%; max-width: 580px; position: fixed; bottom: -210px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; background-color: rgba(230, 244, 234, 0.98); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px 12px 0 0; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 20px rgba(11,94,89,0.15); box-sizing: border-box; transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
         .debug-panel.active { bottom: 0px; }
         @media (max-width: 600px) { .debug-panel { width: calc(100% - 20px); } }
@@ -358,7 +357,7 @@
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
 
-                    // ================= ЛІВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + ІНДІГО) =================
+                    // ================= ЛІВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + СТАНЦІЯ) =================
                     const leftMargin = document.createElement('div');
                     leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isLeftTrack(s.track_type));
@@ -410,7 +409,7 @@
                     }
                     nodeRow.appendChild(rightBank);
 
-                    // ================= ПРАВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + ІНДІГО) =================
+                    // ================= ПРАВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + СТАНЦІЯ) =================
                     const rightMargin = document.createElement('div');
                     rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isRightTrack(s.track_type));
