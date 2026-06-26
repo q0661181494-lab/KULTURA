@@ -157,7 +157,7 @@
             opacity: 0.55;
             cursor: not-allowed !important;
             filter: grayscale(30%);
-            pointer-events: none; /* Блокує будь-які кліки */
+            pointer-events: none;
             border: 1px dashed #cbd5e1;
         }
 
@@ -312,14 +312,12 @@
 
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
-                // Завантажуємо глобальну картину, щоб бачити суміжні колії інших ПД
                 const resTracks = await fetch(`${baseDbUrl}/rest/v1/lines_config`, { headers });
                 globalTracksData = await resTracks.json();
 
                 const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
                 globalMowingData = await resMowing.json();
 
-                // Сигнали можемо тягнути теж глобально або для поточного ПД
                 const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals`, { headers });
                 signalsData = await resSignals.json();
 
@@ -334,7 +332,6 @@
         }
 
         function getPiketAnalysis(peregonName, trackType, km, pk, ownerPd) {
-            // Якщо для цієї колії немає визначеного господаря в базі, виводимо нейтральний статус
             if (!ownerPd) return { colorClass: 'status-unknown', label: 'Немає даних', days: '' };
 
             const record = globalMowingData.find(m => 
@@ -358,7 +355,6 @@
             const container = document.getElementById('diagram-render-zone');
             container.innerHTML = "";
 
-            // Визначаємо межі кілометрів виключно за тими ділянками, де поточний ПД має хоч якусь колію
             const myConfigs = globalTracksData.filter(t => t.pd === currentPD);
             
             if (myConfigs.length === 0) {
@@ -383,9 +379,23 @@
                 container.appendChild(headersRow);
 
                 for (let pk = 1; pk <= 10; pk++) {
-                    // Шукаємо конфігурацію лівої та правої колії глобально для цього кілометра
-                    let leftConfig = globalTracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('парна')); 
-                    let rightConfig = globalTracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('непарна'));
+                    
+                    // ВИПРАВЛЕНО: Жорстко блокуємо слово "непарна" при пошуку "парна"
+                    let leftConfig = globalTracksData.find(s => 
+                        km >= parseInt(s.start_km) && 
+                        km <= parseInt(s.end_km) && 
+                        s.track_type && 
+                        s.track_type.toLowerCase().includes('парна') && 
+                        !s.track_type.toLowerCase().includes('непарна')
+                    ); 
+                    
+                    let rightConfig = globalTracksData.find(s => 
+                        km >= parseInt(s.start_km) && 
+                        km <= parseInt(s.end_km) && 
+                        s.track_type && 
+                        s.track_type.toLowerCase().includes('непарна')
+                    );
+                    
                     const stationConfig = globalTracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.toLowerCase().includes('станція'));
 
                     let finalLeftName = leftConfig ? leftConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
@@ -394,7 +404,6 @@
                     let finalLeftTrackType = "парна";
                     let finalRightTrackType = "непарна";
 
-                    // Визначаємо, кому саме належить колія (щоб заблокувати клік чужого ПД)
                     let leftOwnerPd = leftConfig ? leftConfig.pd : (stationConfig ? stationConfig.pd : null);
                     let rightOwnerPd = rightConfig ? rightConfig.pd : (stationConfig ? stationConfig.pd : null);
 
@@ -419,12 +428,10 @@
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
                     
                     if (isLeftMine) {
-                        // Моя колія: активна, клікабельна
                         leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
                         leftBank.dataset.initialClass = leftSide.colorClass;
                         leftBank.onclick = () => togglePiketSelection(leftBank, finalLeftName, finalLeftTrackType, km, pk);
                     } else {
-                        // Чужа колія: заблокована, з підписом власника
                         leftBank.classList.add('inactive-bank');
                         let ownerLabel = leftOwnerPd ? `(${leftOwnerPd})` : '';
                         leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; font-weight: bold; margin-top:2px; color: #334155;">${leftSide.days} ${ownerLabel}</div>`;
@@ -451,12 +458,10 @@
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
                     
                     if (isRightMine) {
-                        // Моя колія: активна, клікабельна
                         rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
                         rightBank.dataset.initialClass = rightSide.colorClass;
                         rightBank.onclick = () => togglePiketSelection(rightBank, finalRightName, finalRightTrackType, km, pk);
                     } else {
-                        // Чужа колія: заблокована, з підписом власника
                         rightBank.classList.add('inactive-bank');
                         let ownerLabel = rightOwnerPd ? `(${rightOwnerPd})` : '';
                         rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; font-weight: bold; margin-top:2px; color: #334155;">${rightSide.days} ${ownerLabel}</div>`;
@@ -495,7 +500,7 @@
                 element.className = 'mowing-bank-zone status-clear-green';
                 element.querySelector('div').innerText = 'Обкошено';
                 selectedPiketsToSave.push({
-                    pd: currentPD, // Завжди записується для того, хто зараз авторизований
+                    pd: currentPD,
                     peregon: peregonName, 
                     track_type: trackType,
                     km: km,
@@ -528,7 +533,6 @@
                 alert("Роботу успішно зафіксовано!");
                 
                 selectedPiketsToSave = [];
-                // Після збереження оновлюємо глобальні дані, щоб діаграма перемалювалася коректно
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
                 globalMowingData = await resMowing.json();
@@ -540,7 +544,6 @@
             }
         }
 
-        /* ОЧИЩЕННЯ ДАНИХ (Видаляє записи тільки поточного ПД) */
         function toggleClearModal(show) {
             const modal = document.getElementById('clear-data-modal');
             if (show) {
@@ -565,7 +568,6 @@
             const isClearAllPd = document.getElementById('clear-all-pd-checkbox').checked;
             const kmValue = document.getElementById('clear-km-input').value.trim();
             
-            // Важливо: Запит завжди обмежується видаленням тільки даних currentPD
             let url = `${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(currentPD)}`;
             let confirmMessage = "";
 
