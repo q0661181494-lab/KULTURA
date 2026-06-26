@@ -69,7 +69,7 @@
         .station-bracket-left { background-color: rgba(37, 99, 235, 0.08) !important; border-left: 4px solid var(--station-color) !important; border-radius: 6px 0 0 6px; }
         .station-bracket-right { background-color: rgba(37, 99, 235, 0.08) !important; border-right: 4px solid var(--station-color) !important; border-radius: 0 6px 6px 0; }
 
-        .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #ffffff; padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #475569; min-width: 42px; box-sizing: border-box; z-index: 5; cursor: help; }
+        .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #ffffff; padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #475569; min-width: 42px; box-sizing: border-box; z-index: 5; cursor: pointer; }
         .signal-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%; margin-right: 4px; box-shadow: 0 0 6px #22c55e; }
 
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; cursor: pointer; transition: background-color 0.15s, transform 0.1s; user-select: none; }
@@ -90,12 +90,14 @@
         .status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
         .status-unknown { background-color: #f1f5f9 !important; color: #64748b !important; border: 1px dashed #cbd5e1; }
 
+        /* Стилі для модалки очищення */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-box { background: white; padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #fee2e2; }
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
+        /* Стилі для монітора системи */
         .debug-panel { flex-shrink: 0; width: 100%; max-width: 580px; position: fixed; bottom: -210px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; background-color: rgba(230, 244, 234, 0.98); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px 12px 0 0; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 20px rgba(11,94,89,0.15); box-sizing: border-box; transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
         .debug-panel.active { bottom: 0px; }
         @media (max-width: 600px) { .debug-panel { width: calc(100% - 20px); } }
@@ -103,6 +105,12 @@
         .debug-scroll { max-height: 60px; overflow-y: auto; text-align: left; }
         .debug-toggle-btn { position: fixed; bottom: 4px; left: 4px; width: 26px; height: 26px; background: rgba(148, 163, 184, 0.12); color: #475569; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; user-select: none; transition: background 0.2s, opacity 0.2s; opacity: 0.6; }
         .debug-toggle-btn:hover { background: rgba(148, 163, 184, 0.35); opacity: 1; }
+
+        /* НОВІ СТИЛІ ДЛЯ СНАКБАРУ СИГНАЛІВ ЗНИЗУ ЕКРАНА */
+        .signal-toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 100000; border: 1px solid #475569; display: flex; align-items: center; gap: 10px; transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: 90%; max-width: 400px; }
+        .signal-toast.show { bottom: 20px; }
+        .signal-toast-accent { background: #3b82f6; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px #3b82f6; flex-shrink: 0; }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -161,6 +169,11 @@
         </div>
     </div>
 
+    <div id="signal-toast-notification" class="signal-toast" onclick="hideSignalToast()">
+        <div class="signal-toast-accent"></div>
+        <span id="signal-toast-text">Опис сигналу</span>
+    </div>
+
     <button class="debug-toggle-btn" onclick="toggleDebugPanel()">🛠️</button>
 
     <div class="debug-panel" id="system-debug-panel">
@@ -181,6 +194,7 @@
         let signalsData = [];
         let currentPD = "";
         let selectedPiketsToSave = []; 
+        let toastTimeoutId = null;
 
         document.getElementById('work-date-input').valueAsDate = new Date();
 
@@ -196,6 +210,27 @@
 
         function toggleDebugPanel() {
             document.getElementById('system-debug-panel').classList.toggle('active');
+        }
+
+        // ФУНКЦІЯ ОПЕРАТИВНОГО ПОКАЗУ ПРИМІТКИ СИГНАЛУ
+        function showSignalToast(name, km, pk, typeText) {
+            const toast = document.getElementById('signal-toast-notification');
+            const txt = document.getElementById('signal-toast-text');
+            
+            // Якщо поле signal_type пусте або не вказано - виводимо базову назву
+            const comment = (typeText && typeText !== 'не вказано' && typeText.trim() !== '') ? `: ${typeText}` : '';
+            txt.innerText = `Сигнал ${name} (КМ ${km}, ПК ${pk})${comment}`;
+            
+            toast.classList.add('show');
+            
+            if (toastTimeoutId) clearTimeout(toastTimeoutId);
+            toastTimeoutId = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000); // Закриваємо за 5 секунд автоматично
+        }
+
+        function hideSignalToast() {
+            document.getElementById('signal-toast-notification').classList.remove('show');
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -357,14 +392,14 @@
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
 
-                    // ================= ЛІВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + СТАНЦІЯ СИНІЙ) =================
+                    // ================= ЛІВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + СТАНЦІЯ) =================
                     const leftMargin = document.createElement('div');
                     leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isLeftTrack(s.track_type));
                     
-                    /* ВІДНОВЛЕНО: Додано атрибут title для випливаючої примітки при наведенні/натисканні */
                     if (leftSignal) {
-                        leftMargin.innerHTML = `<span class="signal-badge" title="Сигнал ${leftSignal.signal_name}, км ${km}, пікет ${pk}">${leftSignal.signal_name}</span>`;
+                        /* ДОДАНО: Заміна на функцію onclick для обробки натискання з signal_type */
+                        leftMargin.innerHTML = `<span class="signal-badge" title="Сигнал ${leftSignal.signal_name}" onclick="showSignalToast('${leftSignal.signal_name}', ${km}, ${pk}, '${leftSignal.signal_type || ''}')">${leftSignal.signal_name}</span>`;
                     }
                     nodeRow.appendChild(leftMargin);
 
@@ -413,14 +448,14 @@
                     }
                     nodeRow.appendChild(rightBank);
 
-                    // ================= ПРАВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + СТАНЦІЯ СИНІЙ) =================
+                    // ================= ПРАВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + СТАНЦІЯ) =================
                     const rightMargin = document.createElement('div');
                     rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isRightTrack(s.track_type));
                     
-                    /* ВІДНОВЛЕНО: Додано атрибут title для випливаючої примітки при наведенні/натисканні */
                     if (rightSignal) {
-                        rightMargin.innerHTML = `<span class="signal-badge" title="Сигнал ${rightSignal.signal_name}, км ${km}, пікет ${pk}">${rightSignal.signal_name}</span>`;
+                        /* ДОДАНО: Заміна на функцію onclick для обробки натискання з signal_type */
+                        rightMargin.innerHTML = `<span class="signal-badge" title="Сигнал ${rightSignal.signal_name}" onclick="showSignalToast('${rightSignal.signal_name}', ${km}, ${pk}, '${rightSignal.signal_type || ''}')">${rightSignal.signal_name}</span>`;
                     }
                     nodeRow.appendChild(rightMargin);
 
