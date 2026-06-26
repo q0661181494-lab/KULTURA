@@ -123,16 +123,12 @@
         .form-control:focus { border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2); }
         .form-control:disabled { background: #f1f5f9; color: #94a3b8; border-color: #cbd5e1; }
         
-        /* Спеціальний фікс стилю для маскування пароля в полі типу 'tel' */
-        .secure-numeric-input {
-            -webkit-text-security: disc !important; /* Для Safari, Chrome, Android, iOS */
-            text-security: disc !important;         /* Стандарт */
-        }
+        .secure-numeric-input { -webkit-text-security: disc !important; text-security: disc !important; }
         
         .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: background 0.2s; }
         .btn-submit:hover { background: var(--primary-hover); }
 
-        /* Стилі залізничної двоколійної діаграми */
+        /* Стилі діаграми */
         .railway-canvas { display: flex; flex-direction: column; width: 100%; margin-top: 12px; }
         .km-signboard { background: #e6f4ea; border: 2px solid #115e59; border-radius: 8px; padding: 8px; margin: 18px 0 8px 0; text-align: center; font-weight: 900; font-size: 14px; color: #115e59; letter-spacing: 1px; text-transform: uppercase; }
         
@@ -156,6 +152,15 @@
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; cursor: pointer; transition: background-color 0.15s, transform 0.1s; user-select: none; }
         .mowing-bank-zone:active { transform: scale(0.96); }
 
+        /* Стилі для колій інших ПД (Напівпрозорі, неклікабельні) */
+        .inactive-bank {
+            opacity: 0.55;
+            cursor: not-allowed !important;
+            filter: grayscale(30%);
+            pointer-events: none; /* Блокує будь-які кліки */
+            border: 1px dashed #cbd5e1;
+        }
+
         .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
         
         .rail-line-visual { width: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: #cbd5e1; }
@@ -167,71 +172,23 @@
         .status-clear-green { background-color: #22c55e !important; color: white !important; }
         .status-warn-yellow { background-color: #eab308 !important; color: #1f2937 !important; }
         .status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
+        .status-unknown { background-color: #f1f5f9 !important; color: #64748b !important; border: 1px dashed #cbd5e1; }
 
-        /* Стилі кастомного модального вікна очищення */
+        /* Модалка очищення */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-box { background: white; padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #fee2e2; }
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
-        /* Монітор системи фіксований внизу (Схований за замовчуванням під екран) */
-        .debug-panel {
-            flex-shrink: 0; 
-            width: 100%; 
-            max-width: 580px; 
-            position: fixed; 
-            bottom: -210px; /* Сховано під екран */
-            left: 50%; 
-            transform: translateX(-50%); 
-            z-index: 9999; 
-            padding: 10px; 
-            background-color: rgba(230, 244, 234, 0.98); 
-            backdrop-filter: blur(6px); 
-            border: 1px solid #c2e7d9; 
-            color: #115e59; 
-            border-radius: 12px 12px 0 0; 
-            font-size: 11px; 
-            font-family: monospace; 
-            box-shadow: 0 -4px 20px rgba(11,94,89,0.15); 
-            box-sizing: border-box;
-            transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        
-        .debug-panel.active {
-            bottom: 0px; /* Висувається вгору */
-        }
-
+        /* Монітор системи */
+        .debug-panel { flex-shrink: 0; width: 100%; max-width: 580px; position: fixed; bottom: -210px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; background-color: rgba(230, 244, 234, 0.98); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px 12px 0 0; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 20px rgba(11,94,89,0.15); box-sizing: border-box; transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .debug-panel.active { bottom: 0px; }
         @media (max-width: 600px) { .debug-panel { width: calc(100% - 20px); } }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 60px; overflow-y: auto; text-align: left; }
-        
-        /* Ледь помітна кнопка виклику монітора у лівому нижньому кутку екрана */
-        .debug-toggle-btn {
-            position: fixed;
-            bottom: 4px;
-            left: 4px;
-            width: 26px;
-            height: 26px;
-            background: rgba(148, 163, 184, 0.12); /* Дуже прозора */
-            color: #475569;
-            border: none;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            z-index: 9998;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            transition: background 0.2s, opacity 0.2s;
-            opacity: 0.6;
-        }
-        .debug-toggle-btn:hover {
-            background: rgba(148, 163, 184, 0.35);
-            opacity: 1;
-        }
-
+        .debug-toggle-btn { position: fixed; bottom: 4px; left: 4px; width: 26px; height: 26px; background: rgba(148, 163, 184, 0.12); color: #475569; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; user-select: none; transition: background 0.2s, opacity 0.2s; opacity: 0.6; }
+        .debug-toggle-btn:hover { background: rgba(148, 163, 184, 0.35); opacity: 1; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -255,7 +212,7 @@
 
         <div id="cabinet-card" class="screen hidden">
             <div class="card-title" id="cabinet-header-title">Кабінет ПД</div>
-            <div class="card-subtitle">Клацніть на брівку пікета, щоб позначити виконання робіт.</div>
+            <div class="card-subtitle">Ваші колії активні для редагування. Колії сусідів доступні для перегляду.</div>
             
             <div class="form-group">
                 <label>Дата виконання робіт:</label>
@@ -264,7 +221,7 @@
 
             <div class="form-group">
                 <label>Фільтр КМ (ручний ввід через кому / порожньо - весь околоток):</label>
-                <input type="text" id="manual-km-input" class="form-control" placeholder="Наприклад: 5, 6, 12" oninput="filterDiagramByKm()">
+                <input type="text" id="manual-km-input" class="form-control" placeholder="Наприклад: 69, 70" oninput="filterDiagramByKm()">
             </div>
 
             <div id="diagram-render-zone" class="railway-canvas"></div>
@@ -278,17 +235,14 @@
     <div id="clear-data-modal" class="modal-overlay">
         <div class="modal-box">
             <div class="card-title" style="color: #dc2626; font-size: 16px; margin-bottom: 12px;">🗑️ Видалення даних</div>
-            
             <label class="checkbox-container">
                 <input type="checkbox" id="clear-all-pd-checkbox" onchange="handleClearCheckboxChange()">
                 Очистити ВЕСЬ околоток
             </label>
-
             <div class="form-group" id="clear-km-group">
                 <label style="color: #dc2626;">Або введіть номер кілометра:</label>
                 <input type="number" id="clear-km-input" class="form-control" style="border-color: #fca5a5;" placeholder="Наприклад: 69">
             </div>
-
             <button class="btn-submit" onclick="executeDataClear()" style="background: #dc2626; margin-top: 8px;">Підтвердити видалення</button>
             <button class="btn-submit" onclick="toggleClearModal(false)" style="background: #94a3b8; margin-top: 8px;">Скасувати</button>
         </div>
@@ -309,8 +263,8 @@
         const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
         let supabaseClient;
 
-        let tracksData = []; 
-        let mowingData = [];
+        let globalTracksData = []; 
+        let globalMowingData = [];
         let signalsData = [];
         let currentPD = "";
         let selectedPiketsToSave = []; 
@@ -329,15 +283,14 @@
         }
 
         function toggleDebugPanel() {
-            const panel = document.getElementById('system-debug-panel');
-            panel.classList.toggle('active');
+            document.getElementById('system-debug-panel').classList.toggle('active');
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
             logSys("Система ініціалізована...", "info");
             try {
                 supabaseClient = window.supabase.createClient(baseDbUrl, fullKey);
-                logSys("Зв'язок із хмарою Supabase встановлено.", "success");
+                logSys("Зв'язок із хмарою встановлено.", "success");
             } catch (e) {
                 logSys("Помилка підключення: " + e.message, "error");
             }
@@ -354,34 +307,38 @@
             currentPD = `ПД-${pass.slice(0, 2)}`;
             passInput.value = ""; 
             
-            logSys(`Завантаження конфігурації для ${currentPD}...`, "info");
+            logSys(`Авторизація: ${currentPD}... Завантаження всієї ділянки...`, "info");
             document.getElementById('cabinet-header-title').innerText = `Кабінет: ${currentPD}`;
 
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
-                const resTracks = await fetch(`${baseDbUrl}/rest/v1/lines_config?pd=eq.${currentPD}`, { headers });
-                tracksData = await resTracks.json();
+                // Завантажуємо глобальну картину, щоб бачити суміжні колії інших ПД
+                const resTracks = await fetch(`${baseDbUrl}/rest/v1/lines_config`, { headers });
+                globalTracksData = await resTracks.json();
 
-                const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${currentPD}`, { headers });
-                mowingData = await resMowing.json();
+                const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
+                globalMowingData = await resMowing.json();
 
-                const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals?pd=eq.${currentPD}`, { headers });
+                // Сигнали можемо тягнути теж глобально або для поточного ПД
+                const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals`, { headers });
                 signalsData = await resSignals.json();
 
                 document.getElementById('login-card').classList.add('hidden');
                 document.getElementById('cabinet-card').classList.remove('hidden');
                 
-                logSys("Дані успішно синхронізовано. Будуємо автоматичну діаграму...", "success");
+                logSys("Дані успішно синхронізовано. Будуємо діаграму...", "success");
                 buildMasterDiagram();
             } catch (e) {
                 logSys("Помилка завантаження даних: " + e.message, "error");
             }
         }
 
-        function getPiketAnalysis(peregonName, trackType, km, pk) {
-            if (!mowingData || mowingData.length === 0) return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
-            
-            const record = mowingData.find(m => 
+        function getPiketAnalysis(peregonName, trackType, km, pk, ownerPd) {
+            // Якщо для цієї колії немає визначеного господаря в базі, виводимо нейтральний статус
+            if (!ownerPd) return { colorClass: 'status-unknown', label: 'Немає даних', days: '' };
+
+            const record = globalMowingData.find(m => 
+                m.pd === ownerPd && 
                 m.peregon === peregonName && 
                 m.track_type === trackType && 
                 parseInt(m.km) === km && 
@@ -401,13 +358,16 @@
             const container = document.getElementById('diagram-render-zone');
             container.innerHTML = "";
 
-            if (tracksData.length === 0) {
-                container.innerHTML = "<p style='color:red; text-align:center;'>Конфігурацію ділянок не знайдено.</p>";
+            // Визначаємо межі кілометрів виключно за тими ділянками, де поточний ПД має хоч якусь колію
+            const myConfigs = globalTracksData.filter(t => t.pd === currentPD);
+            
+            if (myConfigs.length === 0) {
+                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>`;
                 return;
             }
 
-            let minKm = Math.min(...tracksData.map(s => parseInt(s.start_km)));
-            let maxKm = Math.max(...tracksData.map(s => parseInt(s.end_km)));
+            let minKm = Math.min(...myConfigs.map(s => parseInt(s.start_km)));
+            let maxKm = Math.max(...myConfigs.map(s => parseInt(s.end_km)));
 
             for (let km = minKm; km <= maxKm; km++) {
                 if (allowedKm && !allowedKm.includes(km)) continue;
@@ -423,9 +383,10 @@
                 container.appendChild(headersRow);
 
                 for (let pk = 1; pk <= 10; pk++) {
-                    let leftConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('парна')); 
-                    let rightConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('непарна'));
-                    const stationConfig = tracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.toLowerCase().includes('станція'));
+                    // Шукаємо конфігурацію лівої та правої колії глобально для цього кілометра
+                    let leftConfig = globalTracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('парна')); 
+                    let rightConfig = globalTracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.track_type && s.track_type.toLowerCase().includes('непарна'));
+                    const stationConfig = globalTracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.toLowerCase().includes('станція'));
 
                     let finalLeftName = leftConfig ? leftConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
                     let finalRightName = rightConfig ? rightConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
@@ -433,8 +394,15 @@
                     let finalLeftTrackType = "парна";
                     let finalRightTrackType = "непарна";
 
-                    const leftSide = getPiketAnalysis(finalLeftName, finalLeftTrackType, km, pk);
-                    const rightSide = getPiketAnalysis(finalRightName, finalRightTrackType, km, pk);
+                    // Визначаємо, кому саме належить колія (щоб заблокувати клік чужого ПД)
+                    let leftOwnerPd = leftConfig ? leftConfig.pd : (stationConfig ? stationConfig.pd : null);
+                    let rightOwnerPd = rightConfig ? rightConfig.pd : (stationConfig ? stationConfig.pd : null);
+
+                    let isLeftMine = leftOwnerPd === currentPD;
+                    let isRightMine = rightOwnerPd === currentPD;
+
+                    const leftSide = getPiketAnalysis(finalLeftName, finalLeftTrackType, km, pk, leftOwnerPd);
+                    const rightSide = getPiketAnalysis(finalRightName, finalRightTrackType, km, pk, rightOwnerPd);
 
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
@@ -446,12 +414,21 @@
                     if (leftSignal) leftMargin.innerHTML = `<span class="signal-badge">${leftSignal.signal_name}</span>`;
                     nodeRow.appendChild(leftMargin);
 
-                    // Брівка Парна (Ліва)
+                    // ================= БРІВКА ПАРНА (ЛІВА) =================
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
-                    leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
-                    leftBank.dataset.initialClass = leftSide.colorClass;
-                    leftBank.onclick = () => togglePiketSelection(leftBank, finalLeftName, finalLeftTrackType, km, pk);
+                    
+                    if (isLeftMine) {
+                        // Моя колія: активна, клікабельна
+                        leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
+                        leftBank.dataset.initialClass = leftSide.colorClass;
+                        leftBank.onclick = () => togglePiketSelection(leftBank, finalLeftName, finalLeftTrackType, km, pk);
+                    } else {
+                        // Чужа колія: заблокована, з підписом власника
+                        leftBank.classList.add('inactive-bank');
+                        let ownerLabel = leftOwnerPd ? `(${leftOwnerPd})` : '';
+                        leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; font-weight: bold; margin-top:2px; color: #334155;">${leftSide.days} ${ownerLabel}</div>`;
+                    }
                     nodeRow.appendChild(leftBank);
 
                     const leftTrack = document.createElement('div');
@@ -469,12 +446,21 @@
                     rightTrack.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(rightTrack);
 
-                    // Брівка Непарна (Права)
+                    // ================= БРІВКА НЕПАРНА (ПРАВА) =================
                     const rightBank = document.createElement('div');
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
-                    rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
-                    rightBank.dataset.initialClass = rightSide.colorClass;
-                    rightBank.onclick = () => togglePiketSelection(rightBank, finalRightName, finalRightTrackType, km, pk);
+                    
+                    if (isRightMine) {
+                        // Моя колія: активна, клікабельна
+                        rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
+                        rightBank.dataset.initialClass = rightSide.colorClass;
+                        rightBank.onclick = () => togglePiketSelection(rightBank, finalRightName, finalRightTrackType, km, pk);
+                    } else {
+                        // Чужа колія: заблокована, з підписом власника
+                        rightBank.classList.add('inactive-bank');
+                        let ownerLabel = rightOwnerPd ? `(${rightOwnerPd})` : '';
+                        rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; font-weight: bold; margin-top:2px; color: #334155;">${rightSide.days} ${ownerLabel}</div>`;
+                    }
                     nodeRow.appendChild(rightBank);
 
                     const rightMargin = document.createElement('div');
@@ -509,7 +495,7 @@
                 element.className = 'mowing-bank-zone status-clear-green';
                 element.querySelector('div').innerText = 'Обкошено';
                 selectedPiketsToSave.push({
-                    pd: currentPD,
+                    pd: currentPD, // Завжди записується для того, хто зараз авторизований
                     peregon: peregonName, 
                     track_type: trackType,
                     km: km,
@@ -517,7 +503,7 @@
                     status: 'green'
                 });
             }
-            logSys(`Зараз обрано пікетів для оновлення: ${selectedPiketsToSave.length}`, "info");
+            logSys(`Оновлень до збереження: ${selectedPiketsToSave.length}`, "info");
         }
 
         async function saveMowingProgress() {
@@ -532,19 +518,20 @@
                 date: dateValue
             }));
 
-            logSys(`Збереження робіт у хмару (${recordsToSend.length} шт.)...`, "info");
+            logSys(`Збереження у хмару (${recordsToSend.length} записів)...`, "info");
             
             try {
                 const { error } = await supabaseClient.from('mowing').upsert(recordsToSend);
                 if (error) throw error;
 
-                logSys("Дані успішно синхронізовано роздільно!", "success");
+                logSys("Синхронізація успішна!", "success");
                 alert("Роботу успішно зафіксовано!");
                 
                 selectedPiketsToSave = [];
+                // Після збереження оновлюємо глобальні дані, щоб діаграма перемалювалася коректно
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
-                const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${currentPD}`, { headers });
-                mowingData = await resMowing.json();
+                const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
+                globalMowingData = await resMowing.json();
                 
                 filterDiagramByKm();
             } catch (e) {
@@ -553,7 +540,7 @@
             }
         }
 
-        /* ЛОГІКА МОДАЛЬНОГО ВІКНА ОЧИЩЕННЯ ДАНИХ */
+        /* ОЧИЩЕННЯ ДАНИХ (Видаляє записи тільки поточного ПД) */
         function toggleClearModal(show) {
             const modal = document.getElementById('clear-data-modal');
             if (show) {
@@ -570,68 +557,49 @@
         function handleClearCheckboxChange() {
             const isChecked = document.getElementById('clear-all-pd-checkbox').checked;
             const kmInput = document.getElementById('clear-km-input');
-            if (isChecked) {
-                kmInput.value = "";
-                kmInput.disabled = true;
-            } else {
-                kmInput.disabled = false;
-            }
+            kmInput.disabled = isChecked;
+            if (isChecked) kmInput.value = "";
         }
 
         async function executeDataClear() {
             const isClearAllPd = document.getElementById('clear-all-pd-checkbox').checked;
             const kmValue = document.getElementById('clear-km-input').value.trim();
             
+            // Важливо: Запит завжди обмежується видаленням тільки даних currentPD
             let url = `${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(currentPD)}`;
             let confirmMessage = "";
 
             if (isClearAllPd) {
-                confirmMessage = `Ви впевнені, що хочете ПОВНІСТЮ ОЧИСТИТИ ВСІ дані про обкошування для ${currentPD}? Цю дію неможливо скасувати!`;
+                confirmMessage = `Ви впевнені, що хочете ПОВНІСТЮ ОЧИСТИТИ ВСІ дані про обкошування для ${currentPD}?`;
             } else {
-                if (!kmValue) {
-                    alert("Будь ласка, введіть номер кілометра або оберіть очищення всього околотка!");
-                    return;
-                }
+                if (!kmValue) return alert("Введіть номер кілометра або оберіть весь околоток!");
                 const kmNum = parseInt(kmValue);
-                if (isNaN(kmNum)) {
-                    alert("Помилка: номер кілометра має бути числом!");
-                    return;
-                }
+                if (isNaN(kmNum)) return alert("Помилка: номер кілометра має бути числом!");
                 url += `&km=eq.${kmNum}`;
-                confirmMessage = `Ви впевнені, що хочете повністю видалити дані про обкошування на ${kmNum} кілометрі для ${currentPD}?`;
+                confirmMessage = `Ви впевнені, що хочете видалити свої дані про обкошування на ${kmNum} км? (Дані сусідів не постраждають)`;
             }
 
             if (!confirm(confirmMessage)) return;
 
             toggleClearModal(false);
-            logSys("Запуск процедури очищення даних у хмарі...", "info");
+            logSys("Видалення даних...", "info");
 
-            const headers = { 
-                'apikey': fullKey, 
-                'authorization': 'Bearer ' + fullKey,
-                'Content-Type': 'application/json'
-            };
+            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
 
             try {
-                const response = await fetch(url, {
-                    method: 'DELETE',
-                    headers: headers
-                });
-
+                const response = await fetch(url, { method: 'DELETE', headers: headers });
                 if (response.ok) {
-                    logSys("Дані успішно видалено з бази даних!", "success");
-                    alert("Дані успішно очищено з хмари!");
-                    
+                    logSys("Дані успішно видалено!", "success");
+                    alert("Ваші дані успішно очищено з хмари!");
                     selectedPiketsToSave = [];
-                    const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing?pd=eq.${currentPD}`, { headers });
-                    mowingData = await resMowing.json();
-                    
+                    const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
+                    globalMowingData = await resMowing.json();
                     filterDiagramByKm();
                 } else {
-                    throw new Error("Помилка сервера при виконанні операції DELETE");
+                    throw new Error("Помилка сервера при операції DELETE");
                 }
             } catch (e) {
-                logSys("Помилка очищення даних: " + e.message, "error");
+                logSys("Помилка очищення: " + e.message, "error");
                 alert("Не вдалося видалити дані: " + e.message);
             }
         }
