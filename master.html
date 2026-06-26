@@ -14,8 +14,8 @@
             --text-color: #1e293b;
             --border-color: #cbd5e1;
             
-            /* Суворий графітовий колір для меж станцій */
-            --station-color: #475569;
+            /* Інформаційний синій колір для меж станцій */
+            --station-color: #2563eb;
             
             --color-red: #ef4444;    /* > 45 днів */
             --color-yellow: #eab308; /* 30-45 днів */
@@ -65,9 +65,9 @@
         .margin-left { justify-content: flex-end; padding-right: 4px; }
         .margin-right { justify-content: flex-start; padding-left: 4px; }
 
-        /* ГРАФІТОВІ СТИЛІ ДЛЯ МЕЖ СТАНЦІЙ НА БОКОВИХ ПОЛЯХ */
-        .station-bracket-left { background-color: rgba(71, 85, 105, 0.08) !important; border-left: 4px solid var(--station-color) !important; border-radius: 6px 0 0 6px; }
-        .station-bracket-right { background-color: rgba(71, 85, 105, 0.08) !important; border-right: 4px solid var(--station-color) !important; border-radius: 0 6px 6px 0; }
+        /* СИНІ СТИЛІ ДЛЯ МЕЖ СТАНЦІЙ НА БОКОВИХ ПОЛЯХ */
+        .station-bracket-left { background-color: rgba(37, 99, 235, 0.08) !important; border-left: 4px solid var(--station-color) !important; border-radius: 6px 0 0 6px; }
+        .station-bracket-right { background-color: rgba(37, 99, 235, 0.08) !important; border-right: 4px solid var(--station-color) !important; border-radius: 0 6px 6px 0; }
 
         .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #ffffff; padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #475569; min-width: 42px; box-sizing: border-box; z-index: 5; }
         .signal-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%; margin-right: 4px; box-shadow: 0 0 6px #22c55e; }
@@ -357,7 +357,7 @@
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
 
-                    // ================= ЛІВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + СТАНЦІЯ ГРАФІТ) =================
+                    // ================= ЛІВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + СТАНЦІЯ СИНІЙ) =================
                     const leftMargin = document.createElement('div');
                     leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isLeftTrack(s.track_type));
@@ -409,7 +409,7 @@
                     }
                     nodeRow.appendChild(rightBank);
 
-                    // ================= ПРАВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + СТАНЦІЯ ГРАФІТ) =================
+                    // ================= ПРАВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ + СТАНЦІЯ СИНІЙ) =================
                     const rightMargin = document.createElement('div');
                     rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isRightTrack(s.track_type));
