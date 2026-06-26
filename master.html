@@ -68,7 +68,6 @@
         .station-bracket-left { background-color: rgba(37, 99, 235, 0.08) !important; border-left: 4px solid var(--station-color) !important; border-radius: 6px 0 0 6px; }
         .station-bracket-right { background-color: rgba(37, 99, 235, 0.08) !important; border-right: 4px solid var(--station-color) !important; border-radius: 0 6px 6px 0; }
 
-        /* Оновлений бейдж сигналу (захист від випадкових виділень тексту на телефонах) */
         .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #ffffff; padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #475569; min-width: 42px; box-sizing: border-box; z-index: 5; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
         .signal-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%; margin-right: 4px; box-shadow: 0 0 6px #22c55e; }
 
@@ -104,10 +103,11 @@
         .debug-toggle-btn { position: fixed; bottom: 4px; left: 4px; width: 26px; height: 26px; background: rgba(148, 163, 184, 0.12); color: #475569; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; user-select: none; transition: background 0.2s, opacity 0.2s; opacity: 0.6; }
         .debug-toggle-btn:hover { background: rgba(148, 163, 184, 0.35); opacity: 1; }
 
-        /* Плашка повідомлення знизу */
-        .signal-toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 100000; border: 1px solid #475569; display: flex; align-items: center; gap: 10px; transition: bottom 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.15); width: 90%; max-width: 400px; }
+        /* Плашка повідомлення знизу (збалансований дизайн для будь-якої довжини тексту) */
+        .signal-toast { position: fixed; bottom: -120px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; line-height: 1.4; box-shadow: 0 10px 30px rgba(0,0,0,0.25); z-index: 100000; border: 1px solid #475569; display: flex; align-items: center; gap: 12px; transition: bottom 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.15); width: 90%; max-width: 440px; }
         .signal-toast.show { bottom: 20px; }
         .signal-toast-accent { background: #3b82f6; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px #3b82f6; flex-shrink: 0; }
+        #signal-toast-text { flex: 1; word-break: break-word; }
 
         .hidden { display: none !important; }
     </style>
@@ -169,7 +169,7 @@
 
     <div id="signal-toast-notification" class="signal-toast" onclick="hideSignalToast()">
         <div class="signal-toast-accent"></div>
-        <span id="signal-toast-text">Опис сигналу</span>
+        <span id="signal-toast-text">Текст примітки</span>
     </div>
 
     <button class="debug-toggle-btn" onclick="toggleDebugPanel()">🛠️</button>
@@ -210,18 +210,19 @@
             document.getElementById('system-debug-panel').classList.toggle('active');
         }
 
-        // Безпечний виклик плашки
+        // ОНОВЛЕНО: Виводить ТІЛЬКИ чистий текст примітки
         function handleSignalClick(element) {
-            const name = element.getAttribute('data-name');
-            const km = element.getAttribute('data-km');
-            const pk = element.getAttribute('data-pk');
             const typeText = element.getAttribute('data-type');
 
             const toast = document.getElementById('signal-toast-notification');
             const txt = document.getElementById('signal-toast-text');
             
-            const comment = (typeText && typeText !== 'undefined' && typeText !== 'не вказано' && typeText.trim() !== '') ? `: ${typeText}` : '';
-            txt.innerText = `Сигнал ${name} (КМ ${km}, ПК ${pk})${comment}`;
+            // Валідація пустого рядка чи системних залишків
+            if (typeText && typeText !== 'undefined' && typeText !== 'не вказано' && typeText.trim() !== '') {
+                txt.innerText = typeText.trim();
+            } else {
+                txt.innerText = "Примітка відсутня";
+            }
             
             toast.classList.add('show');
             
@@ -327,7 +328,7 @@
             const myConfigs = globalTracksData.filter(t => cleanPd(t.pd) === currentPD);
             
             if (myConfigs.length === 0) {
-                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>`;
+                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>';`;
                 return;
             }
 
@@ -400,11 +401,7 @@
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isLeftTrack(s.track_type));
                     
                     if (leftSignal) {
-                        /* ВИПРАВЛЕНО: Безпечна передача через data-атрібути + додано ontouchstart для телефонів */
                         leftMargin.innerHTML = `<span class="signal-badge" 
-                            data-name="${leftSignal.signal_name}" 
-                            data-km="${km}" 
-                            data-pk="${pk}" 
                             data-type="${leftSignal.signal_type || ''}" 
                             onclick="handleSignalClick(this)" 
                             ontouchstart="handleSignalClick(this)">${leftSignal.signal_name}</span>`;
@@ -462,11 +459,7 @@
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isRightTrack(s.track_type));
                     
                     if (rightSignal) {
-                        /* ВИПРАВЛЕНО: Безпечна передача через data-атрібути + додано ontouchstart для телефонів */
                         rightMargin.innerHTML = `<span class="signal-badge" 
-                            data-name="${rightSignal.signal_name}" 
-                            data-km="${km}" 
-                            data-pk="${pk}" 
                             data-type="${rightSignal.signal_type || ''}" 
                             onclick="handleSignalClick(this)" 
                             ontouchstart="handleSignalClick(this)">${rightSignal.signal_name}</span>`;
