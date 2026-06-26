@@ -13,13 +13,15 @@
             --card-bg: #ffffff;
             --text-color: #1e293b;
             --border-color: #cbd5e1;
-            --color-red: #ef4444;    
-            --color-yellow: #eab308; 
-            --color-green: #22c55e;  
+            
+            --color-red: #ef4444;    /* > 45 днів */
+            --color-yellow: #eab308; /* 30-45 днів */
+            --color-green: #22c55e;  /* < 30 днів */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         html, body { height: 100%; background-color: var(--bg-color); }
+        
         body { color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; position: relative; }
 
         .main-content { flex: 1 0 auto; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 12px 12px 110px 12px; }
@@ -32,6 +34,7 @@
 
         .screen { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); width: 100%; max-width: 580px; margin-bottom: 24px; border: 1px solid #d1fae5; }
         .screen.welcome-focus { margin-top: 10px; transform: scale(1.02); box-shadow: 0 20px 40px rgba(11, 94, 89, 0.12); border-color: #a7f3d0; padding: 30px 20px; }
+
         .card-title { font-size: 18px; font-weight: 800; color: #115e59; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.8px; text-align: center; }
         .card-subtitle { color: #0f766e; font-size: 13px; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
@@ -40,11 +43,13 @@
         .form-control { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; outline: none; background: #fff; color: #115e59; font-weight: 500; }
         .form-control:focus { border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2); }
         .secure-numeric-input { -webkit-text-security: disc !important; text-security: disc !important; }
+        
         .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: background 0.2s; }
         .btn-submit:hover { background: var(--primary-hover); }
 
         .railway-canvas { display: flex; flex-direction: column; width: 100%; margin-top: 12px; }
         .km-signboard { background: #e6f4ea; border: 2px solid #115e59; border-radius: 8px; padding: 8px; margin: 18px 0 8px 0; text-align: center; font-weight: 900; font-size: 14px; color: #115e59; letter-spacing: 1px; text-transform: uppercase; }
+        
         .track-headers-row { display: flex; width: 100%; margin-bottom: 6px; font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; text-align: center; opacity: 0.8; }
         .header-margin-space { width: 50px; }
         .header-left-track { flex: 1; padding-right: 16px; }
@@ -66,6 +71,7 @@
         .mowing-bank-zone:active { transform: scale(0.96); }
 
         .inactive-bank { opacity: 0.65; cursor: not-allowed !important; filter: grayscale(15%); pointer-events: none; border: 1px dashed #94a3b8; }
+
         .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
         
         .rail-line-visual { width: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: #cbd5e1; }
@@ -151,6 +157,7 @@
     </div>
 
     <button class="debug-toggle-btn" onclick="toggleDebugPanel()">🛠️</button>
+
     <div class="debug-panel" id="system-debug-panel">
         <div class="debug-title" style="display: flex; justify-content: space-between; align-items: center;">
             <span>🖥️ Монітор системи</span>
@@ -179,7 +186,7 @@
             if(status === 'success') div.style.color = '#16a34a';
             if(status === 'error') div.style.color = '#dc2626';
             div.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
-            con.prepend(div); // Додаємо нові записи зверху
+            con.prepend(div);
         }
 
         function toggleDebugPanel() {
@@ -231,44 +238,33 @@
             }
         }
 
-        // УТИЛІТИ ДЛЯ НАДІЙНОГО ФІЛЬТРУВАННЯ (Ігнорує пробіли, реєстр, змішані букви)
-        function cleanPd(pdStr) {
-            return pdStr ? pdStr.trim().toUpperCase() : "";
-        }
-
-        function sanitizeTrackType(str) {
+        // --- БРОНЬОВАНИЙ ФІЛЬТР КОЛІЙ (Захист від помилок адміна) ---
+        function sanitizeString(str) {
             if (!str) return '';
             let s = str.toLowerCase().replace(/\s+/g, '');
             const map = {'e':'е', 'a':'а', 'o':'о', 'p':'р', 'c':'с', 'x':'х', 'i':'і', 'y':'у'};
             return s.split('').map(c => map[c] || c).join('');
         }
-
+        
         function isLeftTrack(str) {
-            if (!str) return false;
-            let s = sanitizeTrackType(str);
-            if (s.includes('парна') && s.includes('непарна')) return true; // Якщо вказано обидві
-            if (s.includes('непарн') || s === '1' || s.includes('1колія')) return false;
-            if (s.includes('парн') || s === '2' || s.includes('2колія')) return true;
-            return false;
+            let s = sanitizeString(str);
+            return s.includes('парна') && !s.includes('непарна');
         }
-
+        
         function isRightTrack(str) {
-            if (!str) return false;
-            let s = sanitizeTrackType(str);
-            if (s.includes('парна') && s.includes('непарна')) return true; // Якщо вказано обидві
-            if (s.includes('непарн') || s === '1' || s.includes('1колія')) return true;
-            return false;
+            let s = sanitizeString(str);
+            return s.includes('непарна');
         }
 
-        // АНАЛІЗ ПІКЕТУ (Відв'язано від назви перегону для надійності)
-        function getPiketAnalysis(trackType, km, pk, ownerPd) {
+        // --- ФІЛЬТР ОБКОШУВАННЯ (Відв'язано від назви перегону) ---
+        function getPiketAnalysis(targetTrackType, km, pk, ownerPd) {
             if (!ownerPd) return { colorClass: 'status-unknown', label: 'Немає даних', days: '' };
 
             const record = globalMowingData.find(m => 
-                cleanPd(m.pd) === cleanPd(ownerPd) && 
+                m.pd === ownerPd && 
                 parseInt(m.km) === km && 
                 parseInt(m.piket) === pk &&
-                (trackType === 'парна' ? isLeftTrack(m.track_type) : isRightTrack(m.track_type))
+                (targetTrackType === 'парна' ? isLeftTrack(m.track_type) : isRightTrack(m.track_type))
             );
             
             if (!record || record.status !== 'green') return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
@@ -284,10 +280,10 @@
             const container = document.getElementById('diagram-render-zone');
             container.innerHTML = "";
 
-            const myConfigs = globalTracksData.filter(t => cleanPd(t.pd) === currentPD);
+            const myConfigs = globalTracksData.filter(t => t.pd === currentPD);
             
             if (myConfigs.length === 0) {
-                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів у базі.</p>`;
+                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>`;
                 return;
             }
 
@@ -304,44 +300,37 @@
 
                 const headersRow = document.createElement('div');
                 headersRow.className = 'track-headers-row';
-                headersRow.innerHTML = `<div class="header-margin-space"></div><div class="header-left-track">ПАРНА</div><div class="header-center-space"></div><div class="header-right-track">НЕПАРНА</div><div class="header-margin-space"></div>`;
+                headersRow.innerHTML = `<div class="header-margin-space"></div><div class="header-left-track">ПАРНА (ПД-15)</div><div class="header-center-space"></div><div class="header-right-track">НЕПАРНА (ПД-14)</div><div class="header-margin-space"></div>`;
                 container.appendChild(headersRow);
 
                 for (let pk = 1; pk <= 10; pk++) {
                     
-                    // ТОЧНИЙ ФІЛЬТР ДЛЯ ПІКЕТІВ ТА СТАНЦІЙ
+                    // --- ТОЧНИЙ ФІЛЬТР СТАНЦІЙ (Строго по заданих пікетах) ---
                     let configsForPk = globalTracksData.filter(s => {
                         let sKm = parseInt(s.start_km);
                         let eKm = parseInt(s.end_km);
-                        if (isNaN(sKm) || isNaN(eKm)) return false;
-
                         let sPk = parseInt(s.start_pk); sPk = isNaN(sPk) ? 1 : sPk;
                         let ePk = parseInt(s.end_pk); ePk = isNaN(ePk) ? 10 : ePk;
                         
                         if (km < sKm || km > eKm) return false;
-                        if (sKm === eKm) {
-                            if (pk < sPk || pk > ePk) return false;
-                        } else {
-                            if (km === sKm && pk < sPk) return false;
-                            if (km === eKm && pk > ePk) return false;
-                        }
+                        if (km === sKm && pk < sPk) return false;
+                        if (km === eKm && pk > ePk) return false;
                         return true;
                     });
 
-                    // Розділяємо звичайні колії та станції
-                    let leftConfigs = configsForPk.filter(s => sanitizeTrackType(s.type) !== 'станція' && isLeftTrack(s.track_type));
-                    let rightConfigs = configsForPk.filter(s => sanitizeTrackType(s.type) !== 'станція' && isRightTrack(s.track_type));
+                    // Групуємо колії
+                    let leftConfigs = configsForPk.filter(s => sanitizeString(s.type) !== 'станція' && isLeftTrack(s.track_type));
+                    let rightConfigs = configsForPk.filter(s => sanitizeString(s.type) !== 'станція' && isRightTrack(s.track_type));
                     
-                    // Станція може не мати типу колії, тоді вона накладається на обидві
-                    let leftStationConfigs = configsForPk.filter(s => sanitizeTrackType(s.type) === 'станція' && (isLeftTrack(s.track_type) || !s.track_type));
-                    let rightStationConfigs = configsForPk.filter(s => sanitizeTrackType(s.type) === 'станція' && (isRightTrack(s.track_type) || !s.track_type));
+                    let leftStationConfigs = configsForPk.filter(s => sanitizeString(s.type) === 'станція' && isLeftTrack(s.track_type));
+                    let rightStationConfigs = configsForPk.filter(s => sanitizeString(s.type) === 'станція' && isRightTrack(s.track_type));
+
+                    // ПРІОРИТЕТ ВЛАСНИКА: Якщо є дублі, беремо запис того ПД, який зараз авторизований
+                    let leftConfig = leftConfigs.find(s => s.pd === currentPD) || leftConfigs[0];
+                    let rightConfig = rightConfigs.find(s => s.pd === currentPD) || rightConfigs[0];
                     
-                    // ПРІОРИТЕТ ВЛАСНИКА (Якщо адмін помилково дав колію обом ПД, поточний ПД бачить її як свою)
-                    let leftConfig = leftConfigs.find(s => cleanPd(s.pd) === currentPD) || leftConfigs[0];
-                    let rightConfig = rightConfigs.find(s => cleanPd(s.pd) === currentPD) || rightConfigs[0];
-                    
-                    let leftStationConfig = leftStationConfigs.find(s => cleanPd(s.pd) === currentPD) || leftStationConfigs[0];
-                    let rightStationConfig = rightStationConfigs.find(s => cleanPd(s.pd) === currentPD) || rightStationConfigs[0];
+                    let leftStationConfig = leftStationConfigs.find(s => s.pd === currentPD) || leftStationConfigs[0];
+                    let rightStationConfig = rightStationConfigs.find(s => s.pd === currentPD) || rightStationConfigs[0];
 
                     let finalLeftConfig = leftStationConfig || leftConfig;
                     let finalRightConfig = rightStationConfig || rightConfig;
@@ -352,8 +341,8 @@
                     let leftOwnerPd = finalLeftConfig ? finalLeftConfig.pd : null;
                     let rightOwnerPd = finalRightConfig ? finalRightConfig.pd : null;
 
-                    let isLeftMine = cleanPd(leftOwnerPd) === currentPD;
-                    let isRightMine = cleanPd(rightOwnerPd) === currentPD;
+                    let isLeftMine = leftOwnerPd === currentPD;
+                    let isRightMine = rightOwnerPd === currentPD;
                     
                     let isStationPk = !!leftStationConfig || !!rightStationConfig;
 
@@ -366,7 +355,7 @@
 
                     const leftMargin = document.createElement('div');
                     leftMargin.className = 'info-margin margin-left';
-                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'парна');
+                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isLeftTrack(s.track_type));
                     if (leftSignal) leftMargin.innerHTML = `<span class="signal-badge">${leftSignal.signal_name}</span>`;
                     nodeRow.appendChild(leftMargin);
 
@@ -417,7 +406,7 @@
 
                     const rightMargin = document.createElement('div');
                     rightMargin.className = 'info-margin margin-right';
-                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && s.track_type.toLowerCase().trim() === 'непарна');
+                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isRightTrack(s.track_type));
                     if (rightSignal) rightMargin.innerHTML = `<span class="signal-badge">${rightSignal.signal_name}</span>`;
                     nodeRow.appendChild(rightMargin);
 
@@ -455,6 +444,7 @@
                     status: 'green'
                 });
             }
+            logSys(`Оновлень до збереження: ${selectedPiketsToSave.length}`, "info");
         }
 
         async function saveMowingProgress() {
