@@ -121,7 +121,6 @@
         .form-group label { display: block; font-weight: 700; font-size: 11px; margin-bottom: 4px; color: #115e59; text-transform: uppercase; letter-spacing: 0.5px; }
         .form-control { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; outline: none; background: #fff; color: #115e59; font-weight: 500; }
         .form-control:focus { border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2); }
-        .form-control:disabled { background: #f1f5f9; color: #94a3b8; border-color: #cbd5e1; }
         
         .secure-numeric-input { -webkit-text-security: disc !important; text-security: disc !important; }
         
@@ -152,13 +151,13 @@
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; cursor: pointer; transition: background-color 0.15s, transform 0.1s; user-select: none; }
         .mowing-bank-zone:active { transform: scale(0.96); }
 
-        /* Стилі для колій інших ПД (Напівпрозорі, неклікабельні) */
+        /* Оновлені стилі для чужих колій (гарно видно кольори, але клік заблоковано) */
         .inactive-bank {
-            opacity: 0.55;
+            opacity: 0.65;
             cursor: not-allowed !important;
-            filter: grayscale(30%);
+            filter: grayscale(15%);
             pointer-events: none;
-            border: 1px dashed #cbd5e1;
+            border: 1px dashed #94a3b8;
         }
 
         .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
@@ -351,6 +350,25 @@
             return { colorClass: 'status-clear-green', label: 'Обкошено', days: `${diffDays} дн.` };
         }
 
+        // --- БРОНЬОВАНИЙ ФІЛЬТР КОЛІЙ (Ігнорує опечатки, пробіли, регістр та англійські букви) ---
+        function sanitizeTrackType(str) {
+            if (!str) return '';
+            let s = str.toLowerCase().replace(/\s+/g, '');
+            // Замінюємо англійські букви на схожі українські, щоб уникнути помилок вводу
+            const map = {'e':'е', 'a':'а', 'o':'о', 'p':'р', 'c':'с', 'x':'х', 'i':'і', 'y':'у'};
+            return s.split('').map(c => map[c] || c).join('');
+        }
+        
+        function isLeftTrack(str) {
+            let s = sanitizeTrackType(str);
+            return s === 'парна' || s === '2коліяпарна' || (s.includes('парна') && !s.includes('непарна'));
+        }
+        
+        function isRightTrack(str) {
+            let s = sanitizeTrackType(str);
+            return s === 'непарна' || s === '1коліянепарна' || s.includes('непарна');
+        }
+
         function buildMasterDiagram(allowedKm = null) {
             const container = document.getElementById('diagram-render-zone');
             container.innerHTML = "";
@@ -380,42 +398,48 @@
 
                 for (let pk = 1; pk <= 10; pk++) {
                     
-                    // ВИПРАВЛЕНО: Жорстко блокуємо слово "непарна" при пошуку "парна"
-                    let leftConfig = globalTracksData.find(s => 
-                        km >= parseInt(s.start_km) && 
-                        km <= parseInt(s.end_km) && 
-                        s.track_type && 
-                        s.track_type.toLowerCase().includes('парна') && 
-                        !s.track_type.toLowerCase().includes('непарна')
-                    ); 
-                    
-                    let rightConfig = globalTracksData.find(s => 
-                        km >= parseInt(s.start_km) && 
-                        km <= parseInt(s.end_km) && 
-                        s.track_type && 
-                        s.track_type.toLowerCase().includes('непарна')
-                    );
-                    
-                    const stationConfig = globalTracksData.find(s => km >= parseInt(s.start_km) && km <= parseInt(s.end_km) && s.type && s.type.toLowerCase().includes('станція'));
+                    // --- ТОЧНИЙ ФІЛЬТР ДЛЯ СТАНЦІЙ (Враховує межі start_pk та end_pk) ---
+                    let configsForPk = globalTracksData.filter(s => {
+                        let sKm = parseInt(s.start_km);
+                        let eKm = parseInt(s.end_km);
+                        let sPk = parseInt(s.start_pk) || 1;
+                        let ePk = parseInt(s.end_pk) || 10;
+                        
+                        if (km < sKm || km > eKm) return false;
+                        if (km === sKm && pk < sPk) return false;
+                        if (km === eKm && pk > ePk) return false;
+                        return true;
+                    });
 
-                    let finalLeftName = leftConfig ? leftConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
-                    let finalRightName = rightConfig ? rightConfig.name : (stationConfig ? stationConfig.name : "Невідомо");
+                    let leftConfig = configsForPk.find(s => sanitizeTrackType(s.type) !== 'станція' && isLeftTrack(s.track_type));
+                    let rightConfig = configsForPk.find(s => sanitizeTrackType(s.type) !== 'станція' && isRightTrack(s.track_type));
+                    
+                    let leftStationConfig = configsForPk.find(s => sanitizeTrackType(s.type) === 'станція' && isLeftTrack(s.track_type));
+                    let rightStationConfig = configsForPk.find(s => sanitizeTrackType(s.type) === 'станція' && isRightTrack(s.track_type));
+                    
+                    let finalLeftConfig = leftStationConfig || leftConfig;
+                    let finalRightConfig = rightStationConfig || rightConfig;
+
+                    let finalLeftName = finalLeftConfig ? finalLeftConfig.name : "Невідомо";
+                    let finalRightName = finalRightConfig ? finalRightConfig.name : "Невідомо";
                     
                     let finalLeftTrackType = "парна";
                     let finalRightTrackType = "непарна";
 
-                    let leftOwnerPd = leftConfig ? leftConfig.pd : (stationConfig ? stationConfig.pd : null);
-                    let rightOwnerPd = rightConfig ? rightConfig.pd : (stationConfig ? stationConfig.pd : null);
+                    let leftOwnerPd = finalLeftConfig ? finalLeftConfig.pd : null;
+                    let rightOwnerPd = finalRightConfig ? finalRightConfig.pd : null;
 
                     let isLeftMine = leftOwnerPd === currentPD;
                     let isRightMine = rightOwnerPd === currentPD;
+                    
+                    let isStationPk = !!leftStationConfig || !!rightStationConfig;
 
                     const leftSide = getPiketAnalysis(finalLeftName, finalLeftTrackType, km, pk, leftOwnerPd);
                     const rightSide = getPiketAnalysis(finalRightName, finalRightTrackType, km, pk, rightOwnerPd);
 
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
-                    if (stationConfig) nodeRow.classList.add('station-piket-row');
+                    if (isStationPk) nodeRow.classList.add('station-piket-row');
 
                     const leftMargin = document.createElement('div');
                     leftMargin.className = 'info-margin margin-left';
