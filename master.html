@@ -57,14 +57,16 @@
         .header-right-track { flex: 1; padding-left: 16px; }
 
         .piket-rail-node { display: flex; align-items: center; margin-bottom: 5px; height: 44px; position: relative; border-radius: 6px; }
-        .station-piket-row { background-color: #f1f5f9 !important; border-left: 3px solid #0d9488; border-right: 3px solid #0d9488; }
-        .station-piket-row .piket-center-core { background: #0d9488 !important; color: white !important; border-color: #0f766e !important; }
         
-        .info-margin { width: 50px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: bold; color: #0f766e; box-sizing: border-box; }
+        .info-margin { width: 50px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: bold; color: #0f766e; box-sizing: border-box; transition: background-color 0.2s; }
         .margin-left { justify-content: flex-end; padding-right: 4px; }
         .margin-right { justify-content: flex-start; padding-left: 4px; }
 
-        .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #ffffff; padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #475569; min-width: 42px; box-sizing: border-box; }
+        /* НОВІ СТИЛІ ДЛЯ ДУЖОК СТАНЦІЙ */
+        .station-bracket-left { background-color: rgba(13, 148, 136, 0.1); border-left: 4px solid #0d9488; border-radius: 6px 0 0 6px; }
+        .station-bracket-right { background-color: rgba(13, 148, 136, 0.1); border-right: 4px solid #0d9488; border-radius: 0 6px 6px 0; }
+
+        .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #ffffff; padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #475569; min-width: 42px; box-sizing: border-box; z-index: 5; }
         .signal-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%; margin-right: 4px; box-shadow: 0 0 6px #22c55e; }
 
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; cursor: pointer; transition: background-color 0.15s, transform 0.1s; user-select: none; }
@@ -238,7 +240,6 @@
             }
         }
 
-        // --- БРОНЬОВАНИЙ ФІЛЬТР КОЛІЙ (Захист від помилок адміна) ---
         function sanitizeString(str) {
             if (!str) return '';
             let s = str.toLowerCase().replace(/\s+/g, '');
@@ -256,7 +257,6 @@
             return s.includes('непарна');
         }
 
-        // --- ФІЛЬТР ОБКОШУВАННЯ (Відв'язано від назви перегону) ---
         function getPiketAnalysis(targetTrackType, km, pk, ownerPd) {
             if (!ownerPd) return { colorClass: 'status-unknown', label: 'Немає даних', days: '' };
 
@@ -300,12 +300,11 @@
 
                 const headersRow = document.createElement('div');
                 headersRow.className = 'track-headers-row';
-                headersRow.innerHTML = `<div class="header-margin-space"></div><div class="header-left-track">ПАРНА (ПД-15)</div><div class="header-center-space"></div><div class="header-right-track">НЕПАРНА (ПД-14)</div><div class="header-margin-space"></div>`;
+                headersRow.innerHTML = `<div class="header-margin-space"></div><div class="header-left-track">ПАРНА</div><div class="header-center-space"></div><div class="header-right-track">НЕПАРНА</div><div class="header-margin-space"></div>`;
                 container.appendChild(headersRow);
 
                 for (let pk = 1; pk <= 10; pk++) {
                     
-                    // --- ТОЧНИЙ ФІЛЬТР СТАНЦІЙ (Строго по заданих пікетах) ---
                     let configsForPk = globalTracksData.filter(s => {
                         let sKm = parseInt(s.start_km);
                         let eKm = parseInt(s.end_km);
@@ -318,14 +317,15 @@
                         return true;
                     });
 
-                    // Групуємо колії
+                    // Розділяємо звичайні колії та станції
                     let leftConfigs = configsForPk.filter(s => sanitizeString(s.type) !== 'станція' && isLeftTrack(s.track_type));
                     let rightConfigs = configsForPk.filter(s => sanitizeString(s.type) !== 'станція' && isRightTrack(s.track_type));
                     
-                    let leftStationConfigs = configsForPk.filter(s => sanitizeString(s.type) === 'станція' && isLeftTrack(s.track_type));
-                    let rightStationConfigs = configsForPk.filter(s => sanitizeString(s.type) === 'станція' && isRightTrack(s.track_type));
+                    // Якщо у станції не вказано тип колії (або вказано парну), вона потрапляє в ліву частину
+                    let leftStationConfigs = configsForPk.filter(s => sanitizeString(s.type) === 'станція' && (isLeftTrack(s.track_type) || !s.track_type || s.track_type.trim() === ''));
+                    // Якщо у станції не вказано тип колії (або вказано непарну), вона потрапляє в праву частину
+                    let rightStationConfigs = configsForPk.filter(s => sanitizeString(s.type) === 'станція' && (isRightTrack(s.track_type) || !s.track_type || s.track_type.trim() === ''));
 
-                    // ПРІОРИТЕТ ВЛАСНИКА: Якщо є дублі, беремо запис того ПД, який зараз авторизований
                     let leftConfig = leftConfigs.find(s => s.pd === currentPD) || leftConfigs[0];
                     let rightConfig = rightConfigs.find(s => s.pd === currentPD) || rightConfigs[0];
                     
@@ -344,17 +344,18 @@
                     let isLeftMine = leftOwnerPd === currentPD;
                     let isRightMine = rightOwnerPd === currentPD;
                     
-                    let isStationPk = !!leftStationConfig || !!rightStationConfig;
+                    let isLeftStation = !!leftStationConfig;
+                    let isRightStation = !!rightStationConfig;
 
                     const leftSide = getPiketAnalysis('парна', km, pk, leftOwnerPd);
                     const rightSide = getPiketAnalysis('непарна', km, pk, rightOwnerPd);
 
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
-                    if (isStationPk) nodeRow.classList.add('station-piket-row');
 
+                    // ================= БОКОВЕ ПОЛЕ СИГНАЛІВ (ЛІВЕ) =================
                     const leftMargin = document.createElement('div');
-                    leftMargin.className = 'info-margin margin-left';
+                    leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isLeftTrack(s.track_type));
                     if (leftSignal) leftMargin.innerHTML = `<span class="signal-badge">${leftSignal.signal_name}</span>`;
                     nodeRow.appendChild(leftMargin);
@@ -404,8 +405,9 @@
                     }
                     nodeRow.appendChild(rightBank);
 
+                    // ================= БОКОВЕ ПОЛЕ СИГНАЛІВ (ПРАВЕ) =================
                     const rightMargin = document.createElement('div');
-                    rightMargin.className = 'info-margin margin-right';
+                    rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isRightTrack(s.track_type));
                     if (rightSignal) rightMargin.innerHTML = `<span class="signal-badge">${rightSignal.signal_name}</span>`;
                     nodeRow.appendChild(rightMargin);
