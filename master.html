@@ -41,6 +41,11 @@
         .card-title { font-size: 18px; font-weight: 800; color: #115e59; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.8px; text-align: center; }
         .card-subtitle { color: #0f766e; font-size: 13px; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
+        /* Сегментований перемикач режимів */
+        .mode-tabs { display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; margin: 12px 0; gap: 4px; border: 1px solid #e2e8f0; }
+        .tab-btn { flex: 1; border: none; background: transparent; padding: 10px; font-weight: 700; font-size: 13px; color: #64748b; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .tab-btn.active { background: white; color: #115e59; box-shadow: 0 2px 6px rgba(11, 94, 89, 0.1); }
+
         .form-group { margin-bottom: 14px; }
         .form-group label { display: block; font-weight: 700; font-size: 11px; margin-bottom: 4px; color: #115e59; text-transform: uppercase; letter-spacing: 0.5px; }
         .form-control { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; outline: none; background: #fff; color: #115e59; font-weight: 500; }
@@ -91,9 +96,15 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
-        .modal-box { background: white; padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #fee2e2; }
+        .modal-box { background: white; padding: 24px; border-radius: 16px; width: 90%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #fee2e2; overflow-y: auto; max-height: 90vh; }
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
+
+        /* Стилі для каруселі/галереї мініатюр всередині модалки */
+        .preview-images-holder { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; justify-content: center; }
+        .preview-image-container { position: relative; display: inline-block; width: 80px; height: 80px; }
+        .preview-image-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .delete-img-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
         .debug-panel { flex-shrink: 0; width: 100%; max-width: 580px; position: fixed; bottom: -210px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; background-color: rgba(230, 244, 234, 0.98); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px 12px 0 0; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 20px rgba(11,94,89,0.15); box-sizing: border-box; transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
         .debug-panel.active { bottom: 0px; }
@@ -103,7 +114,6 @@
         .debug-toggle-btn { position: fixed; bottom: 4px; left: 4px; width: 26px; height: 26px; background: rgba(148, 163, 184, 0.12); color: #475569; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; user-select: none; transition: background 0.2s, opacity 0.2s; opacity: 0.6; }
         .debug-toggle-btn:hover { background: rgba(148, 163, 184, 0.35); opacity: 1; }
 
-        /* Плашка повідомлення знизу (збалансований дизайн для будь-якої довжини тексту) */
         .signal-toast { position: fixed; bottom: -120px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; line-height: 1.4; box-shadow: 0 10px 30px rgba(0,0,0,0.25); z-index: 100000; border: 1px solid #475569; display: flex; align-items: center; gap: 12px; transition: bottom 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.15); width: 90%; max-width: 440px; }
         .signal-toast.show { bottom: 20px; }
         .signal-toast-accent { background: #3b82f6; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px #3b82f6; flex-shrink: 0; }
@@ -131,9 +141,14 @@
         </div>
 
         <div id="cabinet-card" class="screen hidden">
-            <div class="card-title" id="cabinet-header-title">Кабінет ПД</div>
-            <div class="card-subtitle">Ваші колії активні для редагування. Колії сусідів доступні для перегляду.</div>
+            <div class="card-title" id="cabinet-header-title">Вітаємо</div>
+            <div class="card-subtitle">Керування ділянкою околотка та ведення журналів робіт.</div>
             
+            <div class="mode-tabs">
+                <button id="tab-mowing" class="tab-btn active" onclick="switchWorkMode('mowing')">🚜 Обкошування</button>
+                <button id="tab-notes" class="tab-btn" onclick="switchWorkMode('notes')">📝 Нотатки/фото</button>
+            </div>
+
             <div class="form-group">
                 <label>Дата виконання робіт:</label>
                 <input type="date" id="work-date-input" class="form-control">
@@ -146,8 +161,10 @@
 
             <div id="diagram-render-zone" class="railway-canvas"></div>
             
-            <button class="btn-submit" onclick="saveMowingProgress()">Синхронізувати з хмарою</button>
-            <button class="btn-submit" onclick="toggleClearModal(true)" style="background: transparent; border: 2px solid #ef4444; color: #ef4444; margin-top: 12px; box-shadow: none;">🗑️ Очистити інформацію</button>
+            <div id="mowing-actions-bar">
+                <button class="btn-submit" onclick="saveMowingProgress()">Синхронізувати з хмарою</button>
+                <button class="btn-submit" onclick="toggleClearModal(true)" style="background: transparent; border: 2px solid #ef4444; color: #ef4444; margin-top: 12px; box-shadow: none;">🗑️ Очистити інформацію</button>
+            </div>
         </div>
     </div>
 
@@ -164,6 +181,27 @@
             </div>
             <button class="btn-submit" onclick="executeDataClear()" style="background: #dc2626; margin-top: 8px;">Підтвердити видалення</button>
             <button class="btn-submit" onclick="toggleClearModal(false)" style="background: #94a3b8; margin-top: 8px;">Скасувати</button>
+        </div>
+    </div>
+
+    <div id="piket-notes-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="card-title" id="notes-modal-title" style="font-size: 16px; text-align: left; margin-bottom: 14px;">📝 Картка пікета</div>
+            
+            <div class="form-group">
+                <label>Текст нотатки / Зауваження:</label>
+                <textarea id="note-textarea" class="form-control" rows="4" placeholder="Введіть стан колії, зауваження чи складні місця..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Прикріпити фото (можна обрати кілька підряд):</label>
+                <input type="file" id="note-file-input" class="form-control" accept="image/*" multiple>
+                <div id="note-image-preview-zone" class="preview-images-holder"></div>
+            </div>
+
+            <button class="btn-submit" id="btn-save-note" onclick="executeSaveNote()">Зберегти зміни</button>
+            <button class="btn-submit" id="btn-delete-note" onclick="executeDeleteNote()" style="background: transparent; border: 2px solid #ef4444; color: #ef4444; margin-top: 8px; box-shadow: none;">🗑️ Видалити нотатку</button>
+            <button class="btn-submit" onclick="toggleNotesModal(false)" style="background: #94a3b8; margin-top: 8px;">Закрити</button>
         </div>
     </div>
 
@@ -189,10 +227,17 @@
 
         let globalTracksData = []; 
         let globalMowingData = [];
+        let globalNotesData = []; 
         let signalsData = [];
+        
         let currentPD = "";
+        let currentMode = "mowing"; 
         let selectedPiketsToSave = []; 
         let toastTimeoutId = null;
+
+        // Змінні для збереження поточної картки нотатки
+        let activeNoteKm = null, activeNotePk = null, activeNoteTrack = null, activeNotePeregon = null;
+        let activeNotePhotos = []; // Масив URL фотографій для поточного відкритого пікета
 
         document.getElementById('work-date-input').valueAsDate = new Date();
 
@@ -210,14 +255,19 @@
             document.getElementById('system-debug-panel').classList.toggle('active');
         }
 
-        // ОНОВЛЕНО: Виводить ТІЛЬКИ чистий текст примітки
+        function switchWorkMode(mode) {
+            currentMode = mode;
+            document.getElementById('tab-mowing').classList.toggle('active', mode === 'mowing');
+            document.getElementById('tab-notes').classList.toggle('active', mode === 'notes');
+            document.getElementById('mowing-actions-bar').classList.toggle('hidden', mode === 'notes');
+            filterDiagramByKm();
+        }
+
         function handleSignalClick(element) {
             const typeText = element.getAttribute('data-type');
-
             const toast = document.getElementById('signal-toast-notification');
             const txt = document.getElementById('signal-toast-text');
             
-            // Валідація пустого рядка чи системних залишків
             if (typeText && typeText !== 'undefined' && typeText !== 'не вказано' && typeText.trim() !== '') {
                 txt.innerText = typeText.trim();
             } else {
@@ -225,11 +275,8 @@
             }
             
             toast.classList.add('show');
-            
             if (toastTimeoutId) clearTimeout(toastTimeoutId);
-            toastTimeoutId = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 5000);
+            toastTimeoutId = setTimeout(() => { toast.classList.remove('show'); }, 5000);
         }
 
         function hideSignalToast() {
@@ -237,13 +284,9 @@
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
-            logSys("Система ініціалізована...", "info");
             try {
                 supabaseClient = window.supabase.createClient(baseDbUrl, fullKey);
-                logSys("Зв'язок із хмарою встановлено.", "success");
-            } catch (e) {
-                logSys("Помилка підключення: " + e.message, "error");
-            }
+            } catch (e) { logSys("Помилка підключення: " + e.message, "error"); }
         });
 
         async function executeLogin() {
@@ -257,8 +300,7 @@
             currentPD = `ПД-${pass.slice(0, 2)}`;
             passInput.value = ""; 
             
-            logSys(`Авторизація: ${currentPD}... Завантаження всієї ділянки...`, "info");
-            document.getElementById('cabinet-header-title').innerText = `Кабінет: ${currentPD}`;
+            document.getElementById('cabinet-header-title').innerText = `Вітаю, ${currentPD}`;
 
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
@@ -271,19 +313,17 @@
                 const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals`, { headers });
                 signalsData = await resSignals.json();
 
+                const resNotes = await fetch(`${baseDbUrl}/rest/v1/piket_notes?pd=eq.${encodeURIComponent(currentPD)}`, { headers });
+                globalNotesData = await resNotes.json();
+
                 document.getElementById('login-card').classList.add('hidden');
                 document.getElementById('cabinet-card').classList.remove('hidden');
                 
-                logSys("Дані успішно синхронізовано. Будуємо діаграму...", "success");
                 buildMasterDiagram();
-            } catch (e) {
-                logSys("Помилка завантаження даних: " + e.message, "error");
-            }
+            } catch (e) { logSys("Помилка завантаження даних: " + e.message, "error"); }
         }
 
-        function cleanPd(pdStr) {
-            return pdStr ? pdStr.trim().toUpperCase() : "";
-        }
+        function cleanPd(pdStr) { return pdStr ? pdStr.trim().toUpperCase() : ""; }
 
         function sanitizeString(str) {
             if (!str) return '';
@@ -292,29 +332,14 @@
             return s.split('').map(c => map[c] || c).join('');
         }
         
-        function isLeftTrack(str) {
-            let s = sanitizeString(str);
-            return s.includes('парна') && !s.includes('непарна');
-        }
-        
-        function isRightTrack(str) {
-            let s = sanitizeString(str);
-            return s.includes('непарна');
-        }
+        function isLeftTrack(str) { return sanitizeString(str).includes('парна') && !sanitizeString(str).includes('непарна'); }
+        function isRightTrack(str) { return sanitizeString(str).includes('непарна'); }
 
         function getPiketAnalysis(targetTrackType, km, pk, ownerPd) {
             if (!ownerPd) return { colorClass: 'status-unknown', label: 'Немає даних', days: '' };
-
-            const record = globalMowingData.find(m => 
-                cleanPd(m.pd) === cleanPd(ownerPd) && 
-                parseInt(m.km) === km && 
-                parseInt(m.piket) === pk &&
-                (targetTrackType === 'парна' ? isLeftTrack(m.track_type) : isRightTrack(m.track_type))
-            );
-            
+            const record = globalMowingData.find(m => cleanPd(m.pd) === cleanPd(ownerPd) && parseInt(m.km) === km && parseInt(m.piket) === pk && (targetTrackType === 'парна' ? isLeftTrack(m.track_type) : isRightTrack(m.track_type)));
             if (!record || record.status !== 'green') return { colorClass: 'status-overgrown-red', label: 'Не обкошено', days: '—' };
             if (!record.date) return { colorClass: 'status-clear-green', label: 'Обкошено', days: '0 дн.' };
-
             const diffDays = Math.ceil(Math.abs(new Date() - new Date(record.date)) / (1000 * 60 * 60 * 24));
             if (diffDays >= 45) return { colorClass: 'status-overgrown-red', label: 'Критично', days: `${diffDays} дн.` };
             if (diffDays >= 30) return { colorClass: 'status-warn-yellow', label: 'Увага', days: `${diffDays} дн.` };
@@ -326,9 +351,8 @@
             container.innerHTML = "";
 
             const myConfigs = globalTracksData.filter(t => cleanPd(t.pd) === currentPD);
-            
             if (myConfigs.length === 0) {
-                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>';`;
+                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>`;
                 return;
             }
 
@@ -349,13 +373,10 @@
                 container.appendChild(headersRow);
 
                 for (let pk = 1; pk <= 10; pk++) {
-                    
                     let configsForPk = globalTracksData.filter(s => {
-                        let sKm = parseInt(s.start_km);
-                        let eKm = parseInt(s.end_km);
-                        let sPk = parseInt(s.start_pk); sPk = isNaN(sPk) ? 1 : sPk;
-                        let ePk = parseInt(s.end_pk); ePk = isNaN(ePk) ? 10 : ePk;
-                        
+                        let sKm = parseInt(s.start_km), eKm = parseInt(s.end_km);
+                        let sPk = parseInt(s.start_pk), ePk = parseInt(s.end_pk);
+                        sPk = isNaN(sPk) ? 1 : sPk; ePk = isNaN(ePk) ? 10 : ePk;
                         if (km < sKm || km > eKm) return false;
                         if (km === sKm && pk < sPk) return false;
                         if (km === eKm && pk > ePk) return false;
@@ -364,13 +385,11 @@
 
                     let leftConfigs = configsForPk.filter(s => sanitizeString(s.type) !== 'станція' && isLeftTrack(s.track_type));
                     let rightConfigs = configsForPk.filter(s => sanitizeString(s.type) !== 'станція' && isRightTrack(s.track_type));
-                    
                     let leftStationConfigs = configsForPk.filter(s => sanitizeString(s.type) === 'станція' && (isLeftTrack(s.track_type) || !s.track_type || s.track_type.trim() === ''));
                     let rightStationConfigs = configsForPk.filter(s => sanitizeString(s.type) === 'станція' && (isRightTrack(s.track_type) || !s.track_type || s.track_type.trim() === ''));
 
                     let leftConfig = leftConfigs.find(s => cleanPd(s.pd) === currentPD) || leftConfigs[0];
                     let rightConfig = rightConfigs.find(s => cleanPd(s.pd) === currentPD) || rightConfigs[0];
-                    
                     let leftStationConfig = leftStationConfigs.find(s => cleanPd(s.pd) === currentPD) || leftStationConfigs[0];
                     let rightStationConfig = rightStationConfigs.find(s => cleanPd(s.pd) === currentPD) || rightStationConfigs[0];
 
@@ -379,13 +398,11 @@
 
                     let finalLeftName = finalLeftConfig ? finalLeftConfig.name : "Невідомо";
                     let finalRightName = finalRightConfig ? finalRightConfig.name : "Невідомо";
-                    
                     let leftOwnerPd = finalLeftConfig ? finalLeftConfig.pd : null;
                     let rightOwnerPd = finalRightConfig ? finalRightConfig.pd : null;
 
                     let isLeftMine = cleanPd(leftOwnerPd) === currentPD;
                     let isRightMine = cleanPd(rightOwnerPd) === currentPD;
-                    
                     let isLeftStation = !!leftStationConfig;
                     let isRightStation = !!rightStationConfig;
 
@@ -395,16 +412,12 @@
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
 
-                    // ================= ЛІВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ) =================
+                    // БОКОВЕ ПОЛЕ ЛІВЕ
                     const leftMargin = document.createElement('div');
                     leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isLeftTrack(s.track_type));
-                    
                     if (leftSignal) {
-                        leftMargin.innerHTML = `<span class="signal-badge" 
-                            data-type="${leftSignal.signal_type || ''}" 
-                            onclick="handleSignalClick(this)" 
-                            ontouchstart="handleSignalClick(this)">${leftSignal.signal_name}</span>`;
+                        leftMargin.innerHTML = `<span class="signal-badge" data-type="${leftSignal.signal_type || ''}" onclick="handleSignalClick(this)" ontouchstart="handleSignalClick(this)">${leftSignal.signal_name}</span>`;
                     }
                     nodeRow.appendChild(leftMargin);
 
@@ -412,57 +425,90 @@
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
                     
-                    if (isLeftMine) {
-                        leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
-                        leftBank.dataset.initialClass = leftSide.colorClass;
-                        leftBank.onclick = () => togglePiketSelection(leftBank, finalLeftName, 'парна', km, pk);
+                    if (currentMode === "mowing") {
+                        if (isLeftMine) {
+                            leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
+                            leftBank.dataset.initialClass = leftSide.colorClass;
+                            leftBank.onclick = () => togglePiketSelection(leftBank, finalLeftName, 'парна', km, pk);
+                        } else {
+                            leftBank.classList.add('inactive-bank');
+                            let ownerLabel = leftOwnerPd ? `(${leftOwnerPd})` : '';
+                            leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; font-weight: bold; margin-top:2px; color: #334155;">${leftSide.days} ${ownerLabel}</div>`;
+                        }
                     } else {
-                        leftBank.classList.add('inactive-bank');
-                        let ownerLabel = leftOwnerPd ? `(${leftOwnerPd})` : '';
-                        leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; font-weight: bold; margin-top:2px; color: #334155;">${leftSide.days} ${ownerLabel}</div>`;
+                        if (isLeftMine) {
+                            const note = globalNotesData.find(n => parseInt(n.km) === km && parseInt(n.piket) === pk && isLeftTrack(n.track_type));
+                            let icon = "➕";
+                            if (note) {
+                                let localPhotos = [];
+                                if (note.photo_url) {
+                                    try { localPhotos = JSON.parse(note.photo_url); if(!Array.isArray(localPhotos)) localPhotos = [note.photo_url]; } 
+                                    catch(e) { localPhotos = [note.photo_url]; }
+                                }
+                                const hasText = note.note_text && note.note_text.trim() !== "";
+                                const hasPhotos = localPhotos.length > 0;
+                                if (hasText && hasPhotos) icon = "📝📸";
+                                else if (hasText) icon = "📝";
+                                else if (hasPhotos) icon = "📸";
+                            }
+                            leftBank.innerHTML = `<div style="font-size:16px;">${icon}</div>`;
+                            leftBank.onclick = () => openNotesModal(finalLeftName, 'парна', km, pk, note);
+                        } else {
+                            leftBank.classList.add('inactive-bank');
+                            leftBank.innerHTML = `<div style="color:#94a3b8;">—</div>`;
+                        }
                     }
                     nodeRow.appendChild(leftBank);
 
-                    const leftTrack = document.createElement('div');
-                    leftTrack.className = 'rail-line-visual';
-                    leftTrack.innerHTML = '<span></span><span></span><span></span><span></span>';
-                    nodeRow.appendChild(leftTrack);
-
-                    const centerPiket = document.createElement('div');
-                    centerPiket.className = 'piket-center-core';
-                    centerPiket.innerText = pk;
-                    nodeRow.appendChild(centerPiket);
-
-                    const rightTrack = document.createElement('div');
-                    rightTrack.className = 'rail-line-visual';
-                    rightTrack.innerHTML = '<span></span><span></span><span></span><span></span>';
-                    nodeRow.appendChild(rightTrack);
+                    nodeRow.appendChild(document.createElement('div')).className = 'rail-line-visual';
+                    const centerPiket = document.createElement('div'); centerPiket.className = 'piket-center-core'; centerPiket.innerText = pk; nodeRow.appendChild(centerPiket);
+                    nodeRow.appendChild(document.createElement('div')).className = 'rail-line-visual';
 
                     // ================= БРІВКА НЕПАРНА (ПРАВА) =================
                     const rightBank = document.createElement('div');
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
                     
-                    if (isRightMine) {
-                        rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
-                        rightBank.dataset.initialClass = rightSide.colorClass;
-                        rightBank.onclick = () => togglePiketSelection(rightBank, finalRightName, 'непарна', km, pk);
+                    if (currentMode === "mowing") {
+                        if (isRightMine) {
+                            rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
+                            rightBank.dataset.initialClass = rightSide.colorClass;
+                            rightBank.onclick = () => togglePiketSelection(rightBank, finalRightName, 'непарна', km, pk);
+                        } else {
+                            rightBank.classList.add('inactive-bank');
+                            let ownerLabel = rightOwnerPd ? `(${rightOwnerPd})` : '';
+                            rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; font-weight: bold; margin-top:2px; color: #334155;">${rightSide.days} ${ownerLabel}</div>`;
+                        }
                     } else {
-                        rightBank.classList.add('inactive-bank');
-                        let ownerLabel = rightOwnerPd ? `(${rightOwnerPd})` : '';
-                        rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; font-weight: bold; margin-top:2px; color: #334155;">${rightSide.days} ${ownerLabel}</div>`;
+                        if (isRightMine) {
+                            const note = globalNotesData.find(n => parseInt(n.km) === km && parseInt(n.piket) === pk && isRightTrack(n.track_type));
+                            let icon = "➕";
+                            if (note) {
+                                let localPhotos = [];
+                                if (note.photo_url) {
+                                    try { localPhotos = JSON.parse(note.photo_url); if(!Array.isArray(localPhotos)) localPhotos = [note.photo_url]; } 
+                                    catch(e) { localPhotos = [note.photo_url]; }
+                                }
+                                const hasText = note.note_text && note.note_text.trim() !== "";
+                                const hasPhotos = localPhotos.length > 0;
+                                if (hasText && hasPhotos) icon = "📝📸";
+                                else if (hasText) icon = "📝";
+                                else if (hasPhotos) icon = "📸";
+                            }
+                            rightBank.innerHTML = `<div style="font-size:16px;">${icon}</div>`;
+                            rightBank.onclick = () => openNotesModal(finalRightName, 'непарна', km, pk, note);
+                        } else {
+                            rightBank.classList.add('inactive-bank');
+                            rightBank.innerHTML = `<div style="color:#94a3b8;">—</div>`;
+                        }
                     }
                     nodeRow.appendChild(rightBank);
 
-                    // ================= ПРАВЕ БОКОВЕ ПОЛЕ (СИГНАЛИ) =================
+                    // БОКОВЕ ПОЛЕ ПРАВЕ
                     const rightMargin = document.createElement('div');
                     rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isRightTrack(s.track_type));
-                    
                     if (rightSignal) {
-                        rightMargin.innerHTML = `<span class="signal-badge" 
-                            data-type="${rightSignal.signal_type || ''}" 
-                            onclick="handleSignalClick(this)" 
-                            ontouchstart="handleSignalClick(this)">${rightSignal.signal_name}</span>`;
+                        rightMargin.innerHTML = `<span class="signal-badge" data-type="${rightSignal.signal_type || ''}" onclick="handleSignalClick(this)" ontouchstart="handleSignalClick(this)">${rightSignal.signal_name}</span>`;
                     }
                     nodeRow.appendChild(rightMargin);
 
@@ -473,17 +519,171 @@
 
         function filterDiagramByKm() {
             const inputVal = document.getElementById('manual-km-input').value.trim();
-            if (!inputVal) {
-                buildMasterDiagram();
-                return;
-            }
+            if (!inputVal) { buildMasterDiagram(); return; }
             const allowed = inputVal.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
             buildMasterDiagram(allowed);
         }
 
+        // Відкриття картки нотатки
+        function openNotesModal(peregon, track, km, pk, note) {
+            activeNoteKm = km; activeNotePk = pk; activeNoteTrack = track; activeNotePeregon = peregon;
+            
+            document.getElementById('notes-modal-title').innerText = `📝 Нотатка: КМ ${km}, ПК ${pk} (${track.toUpperCase()} колія)`;
+            document.getElementById('note-textarea').value = note ? note.note_text || "" : "";
+            document.getElementById('note-file-input').value = "";
+            
+            // Парсимо масив фотографій (Пункт 2)
+            activeNotePhotos = [];
+            if (note && note.photo_url) {
+                try {
+                    activeNotePhotos = JSON.parse(note.photo_url);
+                    if (!Array.isArray(activeNotePhotos)) activeNotePhotos = [note.photo_url];
+                } catch(e) {
+                    activeNotePhotos = [note.photo_url]; // Конвертація одинарного старого запису
+                }
+            }
+            
+            renderModalPhotosPreview();
+            toggleNotesModal(true);
+        }
+
+        // Рендеринг мініатюр з можливістю поштучного видалення (Пункт 2)
+        function renderModalPhotosPreview() {
+            const previewZone = document.getElementById('note-image-preview-zone');
+            previewZone.innerHTML = "";
+            
+            if (activeNotePhotos.length === 0) {
+                previewZone.innerHTML = `<p style="font-size:12px; color:#64748b;">Фото відсутні</p>`;
+                return;
+            }
+            
+            activeNotePhotos.forEach((url, idx) => {
+                const holder = document.createElement('div');
+                holder.className = 'preview-image-container';
+                holder.innerHTML = `
+                    <img src="${url}">
+                    <button type="button" class="delete-img-btn" onclick="removeSinglePhoto(${idx})">×</button>
+                `;
+                previewZone.appendChild(holder);
+            });
+        }
+
+        // Поштучне видалення фотографії з масиву
+        function removeSinglePhoto(idx) {
+            if (confirm("Видалити цю фотографію з картки пікета?")) {
+                activeNotePhotos.splice(idx, 1);
+                renderModalPhotosPreview();
+            }
+        }
+
+        function toggleNotesModal(show) {
+            document.getElementById('piket-notes-modal').classList.toggle('show', show);
+        }
+
+        // Завантаження ОДНОГО чи КІЛЬКОХ нових фото та збереження всього масиву
+        async function executeSaveNote() {
+            const btn = document.getElementById('btn-save-note');
+            const textArea = document.getElementById('note-textarea');
+            const fileInput = document.getElementById('note-file-input');
+            
+            btn.disabled = true;
+            btn.innerText = "Зберігаю у хмару...";
+
+            try {
+                let newUploadedUrls = [];
+
+                // Якщо обрано нові файли — завантажуємо їх циклом у Storage
+                if (fileInput.files.length > 0) {
+                    for (let i = 0; i < fileInput.files.length; i++) {
+                        const file = fileInput.files[i];
+                        const fileExt = file.name.split('.').pop();
+                        const cleanPath = `${currentPD}_km${activeNoteKm}_pk${activeNotePk}_${activeNoteTrack}_${Date.now()}_${i}.${fileExt}`;
+                        
+                        logSys(`Вантажу файл ${i+1} із ${fileInput.files.length}...`);
+                        
+                        const { data: storageData, error: storageError } = await supabaseClient.storage
+                            .from('piket-photos')
+                            .upload(cleanPath, file);
+                            
+                        if (storageError) throw storageError;
+
+                        const { data: linkData } = supabaseClient.storage.from('piket-photos').getPublicUrl(cleanPath);
+                        newUploadedUrls.push(linkData.publicUrl);
+                    }
+                }
+
+                // Об'єднуємо залишені старі фото із щойно завантаженими
+                const totalPhotosList = [...activeNotePhotos, ...newUploadedUrls];
+
+                const notePayload = {
+                    pd: currentPD,
+                    km: activeNoteKm,
+                    piket: activeNotePk,
+                    track_type: activeNoteTrack,
+                    note_text: textArea.value.trim(),
+                    photo_url: totalPhotosList.length > 0 ? JSON.stringify(totalPhotosList) : null
+                };
+
+                const { error: dbError } = await supabaseClient.from('piket_notes').upsert(notePayload);
+                if (dbError) throw dbError;
+
+                logSys("Зміни зафіксовано!", "success");
+                toggleNotesModal(false);
+
+                // Перемальовуємо дані
+                const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+                const resNotes = await fetch(`${baseDbUrl}/rest/v1/piket_notes?pd=eq.${encodeURIComponent(currentPD)}`, { headers });
+                globalNotesData = await resNotes.json();
+                
+                filterDiagramByKm();
+            } catch(e) {
+                logSys("Помилка: " + e.message, "error");
+                alert("Не вдалося зберегти: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Зберегти зміни";
+            }
+        }
+
+        // ПОВНЕ ВИДАЛЕННЯ НОТАТКИ (Пункт 1)
+        async function executeDeleteNote() {
+            if (!confirm("Ви впевнені, що хочете ПОВНІСТЮ ВИДАЛИТИ цю нотатку та всі прикріплені фотографії?")) return;
+            
+            const btn = document.getElementById('btn-delete-note');
+            btn.disabled = true;
+            btn.innerText = "Видалення рядка...";
+
+            try {
+                const { error } = await supabaseClient
+                    .from('piket_notes')
+                    .delete()
+                    .eq('pd', currentPD)
+                    .eq('km', activeNoteKm)
+                    .eq('piket', activeNotePk)
+                    .eq('track_type', activeNoteTrack);
+
+                if (error) throw error;
+
+                logSys("Нотатку успішно видалено з хмари", "success");
+                toggleNotesModal(false);
+
+                // Оновлюємо локальний масив
+                const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+                const resNotes = await fetch(`${baseDbUrl}/rest/v1/piket_notes?pd=eq.${encodeURIComponent(currentPD)}`, { headers });
+                globalNotesData = await resNotes.json();
+                
+                filterDiagramByKm();
+            } catch(e) {
+                logSys("Помилка видалення: " + e.message, "error");
+                alert("Не вдалося видалити рядок: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "🗑️ Видалити нотатку";
+            }
+        }
+
         function togglePiketSelection(element, peregonName, trackType, km, piket) {
             const isSelected = element.classList.contains('status-clear-green') && !element.classList.contains(element.dataset.initialClass);
-            
             if (isSelected) {
                 element.className = `mowing-bank-zone ${element.dataset.initialClass}`;
                 element.querySelector('div').innerText = element.dataset.initialClass === 'status-warn-yellow' ? 'Увага' : 'Не обкошено';
@@ -491,49 +691,25 @@
             } else {
                 element.className = 'mowing-bank-zone status-clear-green';
                 element.querySelector('div').innerText = 'Обкошено';
-                selectedPiketsToSave.push({
-                    pd: currentPD,
-                    peregon: peregonName, 
-                    track_type: trackType,
-                    km: km,
-                    piket: piket,
-                    status: 'green'
-                });
+                selectedPiketsToSave.push({ pd: currentPD, peregon: peregonName, track_type: trackType, km: km, piket: piket, status: 'green' });
             }
-            logSys(`Оновлень до збереження: ${selectedPiketsToSave.length}`, "info");
         }
 
         async function saveMowingProgress() {
-            if (selectedPiketsToSave.length === 0) {
-                alert("Ви не вибрали жодного пікета на діаграмі!");
-                return;
-            }
-
+            if (selectedPiketsToSave.length === 0) { alert("Ви не вибрали жодного пікета!"); return; }
             const dateValue = document.getElementById('work-date-input').value;
-            const recordsToSend = selectedPiketsToSave.map(p => ({
-                ...p,
-                date: dateValue
-            }));
+            const recordsToSend = selectedPiketsToSave.map(p => ({ ...p, date: dateValue }));
 
-            logSys(`Збереження у хмару (${recordsToSend.length} записів)...`, "info");
-            
             try {
                 const { error } = await supabaseClient.from('mowing').upsert(recordsToSend);
                 if (error) throw error;
-
-                logSys("Синхронізація успішна!", "success");
                 alert("Роботу успішно зафіксовано!");
-                
                 selectedPiketsToSave = [];
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
                 globalMowingData = await resMowing.json();
-                
                 filterDiagramByKm();
-            } catch (e) {
-                logSys("Помилка збереження: " + e.message, "error");
-                alert("Помилка синхронізації: " + e.message);
-            }
+            } catch (e) { alert("Помилка: " + e.message); }
         }
 
         function toggleClearModal(show) {
@@ -541,61 +717,40 @@
             if (show) {
                 modal.classList.add('show');
                 document.getElementById('clear-all-pd-checkbox').checked = false;
-                const kmInput = document.getElementById('clear-km-input');
-                kmInput.value = "";
-                kmInput.disabled = false;
-            } else {
-                modal.classList.remove('show');
-            }
+                document.getElementById('clear-km-input').value = "";
+                document.getElementById('clear-km-input').disabled = false;
+            } else { modal.classList.remove('show'); }
         }
 
         function handleClearCheckboxChange() {
             const isChecked = document.getElementById('clear-all-pd-checkbox').checked;
-            const kmInput = document.getElementById('clear-km-input');
-            kmInput.disabled = isChecked;
-            if (isChecked) kmInput.value = "";
+            document.getElementById('clear-km-input').disabled = isChecked;
+            if (isChecked) document.getElementById('clear-km-input').value = "";
         }
 
         async function executeDataClear() {
             const isClearAllPd = document.getElementById('clear-all-pd-checkbox').checked;
             const kmValue = document.getElementById('clear-km-input').value.trim();
-            
             let url = `${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(currentPD)}`;
-            let confirmMessage = "";
 
-            if (isClearAllPd) {
-                confirmMessage = `Ви впевнені, що хочете ПОВНІСТЮ ОЧИСТИТИ ВСІ дані про обкошування для ${currentPD}?`;
-            } else {
-                if (!kmValue) return alert("Введіть номер кілометра або оберіть весь околоток!");
-                const kmNum = parseInt(kmValue);
-                if (isNaN(kmNum)) return alert("Помилка: номер кілометра має бути числом!");
-                url += `&km=eq.${kmNum}`;
-                confirmMessage = `Ви впевнені, що хочете видалити свої дані про обкошування на ${kmNum} км? (Дані сусідів не постраждають)`;
+            if (!isClearAllPd) {
+                if (!kmValue) return alert("Введіть номер кілометра!");
+                url += `&km=eq.${parseInt(kmValue)}`;
             }
 
-            if (!confirm(confirmMessage)) return;
-
+            if (!confirm("Підтвердити видалення даних про обкошування?")) return;
             toggleClearModal(false);
-            logSys("Видалення даних...", "info");
 
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
-
             try {
-                const response = await fetch(url, { method: 'DELETE', headers: headers });
+                const response = await fetch(url, { method: 'DELETE', headers });
                 if (response.ok) {
-                    logSys("Дані успішно видалено!", "success");
-                    alert("Ваші дані успішно очищено з хмари!");
-                    selectedPiketsToSave = [];
+                    alert("Дані успішно очищено!");
                     const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
                     globalMowingData = await resMowing.json();
                     filterDiagramByKm();
-                } else {
-                    throw new Error("Помилка сервера при операції DELETE");
                 }
-            } catch (e) {
-                logSys("Помилка очищення: " + e.message, "error");
-                alert("Не вдалося видалити дані: " + e.message);
-            }
+            } catch (e) { alert("Помилка: " + e.message); }
         }
     </script>
 </body>
