@@ -41,7 +41,7 @@
         .card-title { font-size: 18px; font-weight: 800; color: #115e59; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.8px; text-align: center; }
         .card-subtitle { color: #0f766e; font-size: 13px; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
-        /* ВИПРАВЛЕНО: Контрастні та виразні стилі для перемикача режимів робіт */
+        /* Контрастні та виразні стилі для перемикача режимів робіт */
         .mode-tabs { 
             display: flex; 
             background: #cbd5e1; 
@@ -126,6 +126,13 @@
         .modal-box { background: white; padding: 24px; border-radius: 16px; width: 90%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #fee2e2; overflow-y: auto; max-height: 90vh; }
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
+
+        /* ОНОВЛЕНО: Стилі картки нотаток — розгортання майже на весь екран */
+        #piket-notes-modal .modal-box {
+            max-width: 540px;  
+            height: 95vh;      
+            max-height: 95vh;
+        }
 
         /* Галерея мініатюр фотографій */
         .preview-images-holder { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; justify-content: center; }
@@ -228,7 +235,7 @@
             
             <div class="form-group">
                 <label>Текст нотатки / Зауваження:</label>
-                <textarea id="note-textarea" class="form-control" rows="4" placeholder="Введіть стан колії, зауваження чи складні місця..."></textarea>
+                <textarea id="note-textarea" class="form-control" style="height: 200px; resize: none; font-size: 15px; line-height: 1.4;"></textarea>
             </div>
 
             <div class="form-group">
@@ -488,7 +495,7 @@
                     } else {
                         if (isLeftMine) {
                             const note = globalNotesData.find(n => parseInt(n.km) === km && parseInt(n.piket) === pk && isLeftTrack(n.track_type));
-                            // ВИПРАВЛЕНО: Замінено похмурий знак плюс на нейтральний чистий аркуш паперу
+                            // Замінено знак плюс на нейтральний чистий аркуш паперу
                             let icon = "📄";
                             if (note) {
                                 let localPhotos = [];
@@ -532,7 +539,7 @@
                     } else {
                         if (isRightMine) {
                             const note = globalNotesData.find(n => parseInt(n.km) === km && parseInt(n.piket) === pk && isRightTrack(n.track_type));
-                            // ВИПРАВЛЕНО: Замінено похмурий знак плюс на нейтральний чистий аркуш паперу
+                            // Замінено знак плюс на нейтральний чистий аркуш паперу
                             let icon = "📄";
                             if (note) {
                                 let localPhotos = [];
