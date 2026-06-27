@@ -89,6 +89,12 @@
         .rail-line-visual::after { right: 1px; }
         .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
 
+        /* ВИПРАВЛЕНО: Посилена специфічність стилів для 100% забарвлення брівок */
+        .mowing-bank-zone.status-clear-green { background-color: #22c55e !important; color: white !important; }
+        .mowing-bank-zone.status-warn-yellow { background-color: #eab308 !important; color: #1f2937 !important; }
+        .mowing-bank-zone.status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
+        .mowing-bank-zone.status-unknown { background-color: #f1f5f9 !important; color: #64748b !important; border: 1px dashed #cbd5e1 !important; }
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-box { background: white; padding: 24px; border-radius: 16px; width: 90%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #fee2e2; overflow-y: auto; max-height: 90vh; }
@@ -570,7 +576,6 @@
             document.getElementById('piket-notes-modal').classList.toggle('show', show);
         }
 
-        // КРИТИЧНЕ ВИПРАВЛЕННЯ: Додано { onConflict: 'pd,km,piket,track_type' } для запобігання помилці дублювання унікального ключа
         async function executeSaveNote() {
             const btn = document.getElementById('btn-save-note');
             const textArea = document.getElementById('note-textarea');
@@ -615,7 +620,6 @@
                     photo_url: totalPhotosList.length > 0 ? JSON.stringify(totalPhotosList) : null
                 };
 
-                // ВИПРАВЛЕНО: Явно вказуємо колонки обмеження унікальності для коректного оновлення існуючих рядків
                 const { error: dbError } = await supabaseClient
                     .from('piket_notes')
                     .upsert(notePayload, { onConflict: 'pd,km,piket,track_type' });
@@ -670,7 +674,7 @@
                 alert("Не вдалося видалити рядок: " + e.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "🗑️ Видалити нотатку";
+                btn.innerText = "🗑️ Вилити нотатку";
             }
         }
 
