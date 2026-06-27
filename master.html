@@ -41,7 +41,7 @@
         .card-title { font-size: 18px; font-weight: 800; color: #115e59; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.8px; text-align: center; }
         .card-subtitle { color: #0f766e; font-size: 13px; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
-        /* Контрастні та виразні стилі для перемикача режимів робіт */
+        /* Виразні стилі для перемикача режимів робіт */
         .mode-tabs { 
             display: flex; 
             background: #cbd5e1; 
@@ -127,12 +127,55 @@
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
-        /* ОНОВЛЕНО: Стилі картки нотаток — розгортання майже на весь екран */
+        /* ОНОВЛЕНО: Стилі картки нотаток — правильні відступи на мобільних телефонах */
         #piket-notes-modal .modal-box {
             max-width: 540px;  
-            height: 95vh;      
-            max-height: 95vh;
+            height: auto;        
+            max-height: 85vh;    
+            position: relative;  
         }
+
+        /* Червоний хрестик для закриття всієї картки нотаток (зверху праворуч) */
+        .modal-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: transparent;
+            border: none;
+            font-size: 28px;
+            color: #94a3b8;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.15s;
+            z-index: 100;
+        }
+        .modal-close-btn:hover { color: #ef4444; }
+
+        /* Контейнер для поля вводу та червоного хрестика очищення нотатки */
+        .textarea-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .clear-textarea-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+        .clear-textarea-btn:active { transform: scale(0.9); }
 
         /* Галерея мініатюр фотографій */
         .preview-images-holder { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; justify-content: center; }
@@ -231,15 +274,20 @@
 
     <div id="piket-notes-modal" class="modal-overlay">
         <div class="modal-box">
-            <div class="card-title" id="notes-modal-title" style="font-size: 16px; text-align: left; margin-bottom: 14px;">📝 Картка пікета</div>
+            <button type="button" class="modal-close-btn" onclick="toggleNotesModal(false)">×</button>
+            
+            <div class="card-title" id="notes-modal-title" style="font-size: 16px; text-transform:none; text-align: left; margin-bottom: 14px; padding-right: 35px;">📝 Картка пікета</div>
             
             <div class="form-group">
                 <label>Текст нотатки / Зауваження:</label>
-                <textarea id="note-textarea" class="form-control" style="height: 200px; resize: none; font-size: 15px; line-height: 1.4;"></textarea>
+                <div class="textarea-wrapper">
+                    <textarea id="note-textarea" class="form-control" style="height: 200px; resize: none; font-size: 15px; line-height: 1.4; padding-right: 38px;"></textarea>
+                    <button type="button" class="clear-textarea-btn" onclick="clearNoteText()" title="Видалити текст нотатки">×</button>
+                </div>
             </div>
 
             <div class="form-group">
-                <label>Прикріпити фото (можна обрати кілька підряд):</label>
+                <label>Прикріпити photo (можна обрати кілька підряд):</label>
                 <label for="note-file-input" class="btn-submit" style="display: block; text-align: center; background: #e6f4ea; color: #115e59; border: 1px solid #a7f3d0; margin-top: 4px; padding: 10px; font-size: 14px; cursor: pointer; user-select: none;">
                     📸 Обрати фотографії
                 </label>
@@ -249,9 +297,7 @@
             </div>
 
             <button class="btn-submit" id="btn-save-note" onclick="executeSaveNote()">Зберегти зміни</button>
-            <button class="btn-submit" id="btn-delete-note" onclick="executeDeleteNote()" style="background: transparent; border: 2px solid #ef4444; color: #ef4444; margin-top: 8px; box-shadow: none;">🗑️ Видалити нотатку</button>
-            <button class="btn-submit" onclick="toggleNotesModal(false)" style="background: #94a3b8; margin-top: 8px;">Закрити</button>
-        </div>
+            </div>
     </div>
 
     <div id="photo-lightbox" class="lightbox-overlay" onclick="closeLightbox(event)">
@@ -495,7 +541,7 @@
                     } else {
                         if (isLeftMine) {
                             const note = globalNotesData.find(n => parseInt(n.km) === km && parseInt(n.piket) === pk && isLeftTrack(n.track_type));
-                            // Замінено знак плюс на нейтральний чистий аркуш паперу
+                            // ОНОВЛЕНО: Замінено знак плюс на чистий аркуш паперу
                             let icon = "📄";
                             if (note) {
                                 let localPhotos = [];
@@ -539,7 +585,7 @@
                     } else {
                         if (isRightMine) {
                             const note = globalNotesData.find(n => parseInt(n.km) === km && parseInt(n.piket) === pk && isRightTrack(n.track_type));
-                            // Замінено знак плюс на нейтральний чистий аркуш паперу
+                            // ОНОВЛЕНО: Замінено знак плюс на чистий аркуш паперу
                             let icon = "📄";
                             if (note) {
                                 let localPhotos = [];
@@ -671,6 +717,13 @@
         function closeLightbox(event) {
             if (!event || event.target.id === 'photo-lightbox' || event.target.classList.contains('lightbox-close')) {
                 document.getElementById('photo-lightbox').classList.remove('show');
+            }
+        }
+
+        // ОНОВЛЕНО: Функція очищення тексту нотатки через верхній хрестик текстового поля
+        function clearNoteText() {
+            if (confirm("Очистити весь текст цієї нотатки?")) {
+                document.getElementById('note-textarea').value = "";
             }
         }
 
