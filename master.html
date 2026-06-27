@@ -127,12 +127,15 @@
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
-        /* Стилі великої адаптивної картки нотаток з відступами на мобільних пристроях */
+        /* ОНОВЛЕНО: Стилі великої адаптивної картки нотаток з фіксованою висотою 80% екрану */
         #piket-notes-modal .modal-box {
             max-width: 540px;  
-            height: auto;        
-            max-height: 85vh;    
+            width: 90%;
+            height: 80vh;        /* Зафіксована висота */
+            max-height: 80vh;    
             position: relative;  
+            display: flex;
+            flex-direction: column; /* Вертикальний Flexbox для запобігання зміщенню кнопок */
         }
 
         /* Червоний хрестик для закриття всієї картки нотаток (зверху праворуч) */
@@ -160,6 +163,7 @@
             margin: 14px 0;
             gap: 4px;
             border: 1px solid #94a3b8;
+            flex-shrink: 0; /* Забороняємо табам зменшуватись у розмірах */
         }
         .modal-tab-btn {
             flex: 1;
@@ -182,8 +186,19 @@
             color: white;
             box-shadow: 0 2px 6px rgba(0, 139, 116, 0.2);
         }
+
+        /* ОНОВЛЕНО: Вміст вкладок займає весь вільний простір і має внутрішній скрол */
         .modal-tab-content {
             width: 100%;
+            flex: 1;            /* Автоматично розтягується */
+            overflow-y: auto;   /* Дозволяє внутрішній скрол, якщо елементів багато */
+            padding-right: 4px; /* Захисний відступ від повзунка скролу */
+        }
+
+        /* Притискаємо кнопку збереження чітко до нижнього краю фіксованої картки */
+        #piket-notes-modal .btn-submit {
+            margin-top: auto;   /* Виштовхує кнопку в самий низ */
+            flex-shrink: 0;     /* Забороняє кнопці деформуватись */
         }
 
         /* Контейнер для поля вводу та червоного хрестика очищення тексту */
@@ -350,7 +365,7 @@
                 </div>
             </div>
 
-            <button class="btn-submit" id="btn-save-note" onclick="executeSaveNote()" style="margin-top: 20px;">Зберегти зміни</button>
+            <button class="btn-submit" id="btn-save-note" onclick="executeSaveNote()">Зберегти зміни</button>
         </div>
     </div>
 
@@ -912,7 +927,7 @@
             try {
                 const { error = null } = await supabaseClient.from('mowing').upsert(recordsToSend);
                 if (error) throw error;
-                alert("Роботу успішно зафіксовано!");
+                alert("Роботу успешно зафіксовано!");
                 selectedPiketsToSave = [];
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
