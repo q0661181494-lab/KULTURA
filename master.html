@@ -227,7 +227,7 @@
         }
         .clear-textarea-btn:active { transform: scale(0.9); }
 
-        /* Стилі великої круглої кнопки мікрофона та аудіоплеєра */
+        /* Стилі великої круглої кнопки мікрофона */
         .audio-record-container {
             display: flex;
             flex-direction: column;
@@ -271,33 +271,44 @@
         .recording-status.active {
             color: #ef4444;
         }
-        .audio-preview-wrapper {
-            position: relative;
+
+        /* ОНОВЛЕНО: Галерея збереження кількох аудіоплеєрів підряд */
+        .preview-audios-holder {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 12px;
             width: 100%;
+            align-items: center;
+        }
+        .preview-audio-container {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 15px;
             background: #f8fafc;
-            padding: 12px;
+            padding: 10px 32px 10px 10px; 
             border-radius: 10px;
             border: 1px solid #e2e8f0;
-        }
-        .audio-preview-wrapper audio {
             width: 100%;
-            max-width: 280px;
+            max-width: 320px;
         }
-        .clear-audio-btn {
+        .preview-audio-container audio {
+            width: 100%;
+            height: 32px;
+        }
+        .delete-audio-btn {
             position: absolute;
-            top: -5px;
-            right: -5px;
+            top: 50%;
+            right: 6px;
+            transform: translateY(-50%);
             background: #ef4444;
             color: white;
             border: none;
             border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            font-size: 12px;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -438,15 +449,12 @@
 
             <div id="modal-content-audio" class="modal-tab-content hidden">
                 <div class="form-group">
-                    <label>Голосова нотатка пікета:</label>
+                    <label>Голосові нотатки пікета (можна записати кілька підряд):</label>
                     <div class="audio-record-container">
                         <button type="button" id="mic-record-btn" class="mic-btn" onclick="toggleAudioRecording()">🎙️</button>
                         <div id="recording-status-text" class="recording-status">Натисніть для початку запису</div>
                         
-                        <div id="audio-preview-zone" class="audio-preview-wrapper hidden">
-                            <audio id="audio-player" controls></audio>
-                            <button type="button" class="clear-audio-btn" onclick="clearAudioRecord()" title="Видалити аудіозапис">×</button>
-                        </div>
+                        <div id="note-audio-preview-zone" class="preview-audios-holder"></div>
                     </div>
                 </div>
             </div>
@@ -497,11 +505,11 @@
         let activeNotePhotos = []; 
         let currentLightboxIndex = 0;
 
-        // Змінні для запису та керування звуковим потоком мікрофона
+        // ОНОВЛЕНО: Масиви для роботи з кількома аудіофайлами підряд
         let mediaRecorder = null;
         let audioChunks = [];
-        let localAudioBlob = null;
-        let serverAudioUrl = null;
+        let activeNoteAudios = [];             // Сюди записуються лінки (і хмарні, і локальні blob:)
+        let localAudioBlobsToUpload = [];      // Черга бінарників { blob, localUrl } для надсилання в сховище
 
         document.getElementById('work-date-input').valueAsDate = new Date();
 
@@ -626,7 +634,7 @@
 
             const myConfigs = globalTracksData.filter(t => cleanPd(t.pd) === currentPD);
             if (myConfigs.length === 0) {
-                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріклених кілометрів.</p>`;
+                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>`;
                 return;
             }
 
@@ -719,9 +727,15 @@
                                     try { localPhotos = JSON.parse(note.photo_url); if(!Array.isArray(localPhotos)) localPhotos = [note.photo_url]; } 
                                     catch(e) { localPhotos = [note.photo_url]; }
                                 }
+                                // ОНОВЛЕНО: Читання кількох аудіозаписів для іконок головного екрану
+                                let localAudios = [];
+                                if (note.audio_url) {
+                                    try { localAudios = JSON.parse(note.audio_url); if(!Array.isArray(localAudios)) localAudios = [note.audio_url]; }
+                                    catch(e) { localAudios = [note.audio_url]; }
+                                }
                                 const hasText = note.note_text && note.note_text.trim() !== "";
                                 const hasPhotos = localPhotos.length > 0;
-                                const hasAudio = note.audio_url && note.audio_url.trim() !== "";
+                                const hasAudio = localAudios.length > 0;
                                 
                                 if (hasText && hasPhotos && hasAudio) icon = "📝📸🎙️";
                                 else if (hasText && hasPhotos) icon = "📝📸";
@@ -768,9 +782,14 @@
                                     try { localPhotos = JSON.parse(note.photo_url); if(!Array.isArray(localPhotos)) localPhotos = [note.photo_url]; } 
                                     catch(e) { localPhotos = [note.photo_url]; }
                                 }
+                                let localAudios = [];
+                                if (note.audio_url) {
+                                    try { localAudios = JSON.parse(note.audio_url); if(!Array.isArray(localAudios)) localAudios = [note.audio_url]; }
+                                    catch(e) { localAudios = [note.audio_url]; }
+                                }
                                 const hasText = note.note_text && note.note_text.trim() !== "";
                                 const hasPhotos = localPhotos.length > 0;
-                                const hasAudio = note.audio_url && note.audio_url.trim() !== "";
+                                const hasAudio = localAudios.length > 0;
                                 
                                 if (hasText && hasPhotos && hasAudio) icon = "📝📸🎙️";
                                 else if (hasText && hasPhotos) icon = "📝📸";
@@ -811,7 +830,7 @@
         }
 
         function openNotesModal(peregon, track, km, pk, note) {
-            switchModalTab('text'); // Автоматично скидаємо на першу вкладку «Текст»
+            switchModalTab('text'); 
             activeNoteKm = km; activeNotePk = pk; activeNoteTrack = track; activeNotePeregon = peregon;
             
             document.getElementById('notes-modal-title').innerText = `📝 Нотатка: КМ ${km}, ПК ${pk} (${track.toUpperCase()} колія)`;
@@ -830,28 +849,26 @@
             }
             renderModalPhotosPreview();
 
-            // Завантаження та ініціалізація збереженого аудіозапису
-            serverAudioUrl = note ? note.audio_url || null : null;
-            localAudioBlob = null;
+            // ОНОВЛЕНО: Читання раніше збереженого масиву аудіозаписів з Supabase
+            activeNoteAudios = [];
+            localAudioBlobsToUpload = []; // Скидаємо чергу нових записів
 
-            const audioPlayer = document.getElementById('audio-player');
-            const audioZone = document.getElementById('audio-preview-zone');
+            if (note && note.audio_url) {
+                try {
+                    activeNoteAudios = JSON.parse(note.audio_url);
+                    if (!Array.isArray(activeNoteAudios)) activeNoteAudios = [note.audio_url];
+                } catch(e) {
+                    activeNoteAudios = [note.audio_url]; // На випадок старих одинарних лінків
+                }
+            }
+
+            // Запускаємо перемальовку кнопок і плеєрів аудіо
             const micBtn = document.getElementById('mic-record-btn');
-            const statusText = document.getElementById('recording-status-text');
-
             micBtn.classList.remove('recording');
             micBtn.innerHTML = "🎙️";
-            statusText.classList.remove('active');
-
-            if (serverAudioUrl) {
-                audioPlayer.src = serverAudioUrl;
-                audioZone.classList.remove('hidden');
-                statusText.innerText = "Збережений запис завантажено з хмари";
-            } else {
-                audioPlayer.src = "";
-                audioZone.classList.add('hidden');
-                statusText.innerText = "Натисніть для початку запису";
-            }
+            document.getElementById('recording-status-text').classList.remove('active');
+            
+            renderModalAudiosPreview();
 
             toggleNotesModal(true);
         }
@@ -880,6 +897,44 @@
             if (confirm("Видалити цю фотографію з картки пікета?")) {
                 activeNotePhotos.splice(idx, 1);
                 renderModalPhotosPreview();
+            }
+        }
+
+        // ОНОВЛЕНО: Функція відмальовки списку всіх аудіозаписів пікета
+        function renderModalAudiosPreview() {
+            const previewZone = document.getElementById('note-audio-preview-zone');
+            previewZone.innerHTML = "";
+            const statusText = document.getElementById('recording-status-text');
+
+            if (activeNoteAudios.length === 0) {
+                previewZone.innerHTML = `<p style="font-size:12px; color:#64748b;">Аудіозаписи відсутні</p>`;
+                statusText.innerText = "Натисніть для початку запису";
+                return;
+            }
+
+            statusText.innerText = `Записів у картці: ${activeNoteAudios.length}. Можна записати ще.`;
+
+            activeNoteAudios.forEach((url, idx) => {
+                const holder = document.createElement('div');
+                holder.className = 'preview-audio-container';
+                holder.innerHTML = `
+                    <audio src="${url}" controls></audio>
+                    <button type="button" class="delete-audio-btn" onclick="removeSingleAudio(${idx})" title="Видалити аудіо">×</button>
+                `;
+                previewZone.appendChild(holder);
+            });
+        }
+
+        // ОНОВЛЕНО: Видалення конкретного треку з картки
+        function removeSingleAudio(idx) {
+            if (confirm("Видалити цей аудіозапис з картки пікета?")) {
+                const urlToRemove = activeNoteAudios[idx];
+                activeNoteAudios.splice(idx, 1);
+                
+                // Вилучаємо також із черги завантаження, якщо трек був щойно записаний локально
+                localAudioBlobsToUpload = localAudioBlobsToUpload.filter(item => item.localUrl !== urlToRemove);
+                
+                renderModalAudiosPreview();
             }
         }
 
@@ -931,7 +986,7 @@
             }
         }
 
-        // Логіка запису звуку (кнопка-перемикач Start / Stop)
+        // ОНОВЛЕНО: Функція запису аудіо з додаванням у динамічний масив (чергу)
         async function toggleAudioRecording() {
             const btn = document.getElementById('mic-record-btn');
             const statusText = document.getElementById('recording-status-text');
@@ -956,18 +1011,20 @@
                 };
 
                 mediaRecorder.onstop = () => {
-                    localAudioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/wav' });
-                    const audioUrl = URL.createObjectURL(localAudioBlob);
+                    const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/wav' });
+                    const localUrl = URL.createObjectURL(blob);
                     
-                    document.getElementById('audio-player').src = audioUrl;
-                    document.getElementById('audio-preview-zone').classList.remove('hidden');
+                    // Додаємо трек у загальний список відображення та реєструємо бінарник для Supabase
+                    activeNoteAudios.push(localUrl);
+                    localAudioBlobsToUpload.push({ blob: blob, localUrl: localUrl });
+                    
+                    renderModalAudiosPreview();
                     
                     btn.classList.remove('recording');
                     btn.innerHTML = "🎙️";
-                    statusText.innerText = "Запис готовий до синхронізації";
                     statusText.classList.remove('active');
                     
-                    stream.getTracks().forEach(track => track.stop()); // Відключаємо мікрофон на пристрої
+                    stream.getTracks().forEach(track => track.stop()); 
                 };
 
                 mediaRecorder.start();
@@ -983,16 +1040,6 @@
             }
         }
 
-        function clearAudioRecord() {
-            if (confirm("Видалити цей аудіозапис з картки пікета?")) {
-                localAudioBlob = null;
-                serverAudioUrl = null;
-                document.getElementById('audio-player').src = "";
-                document.getElementById('audio-preview-zone').classList.add('hidden');
-                document.getElementById('recording-status-text').innerText = "Натисніть для початку запису";
-            }
-        }
-
         async function executeSaveNote() {
             const btn = document.getElementById('btn-save-note');
             const textArea = document.getElementById('note-textarea');
@@ -1004,7 +1051,7 @@
             try {
                 let newUploadedUrls = [];
 
-                // 1. Завантаження нових фотографій
+                // 1. Завантаження нових фотографій у сховище
                 if (fileInput.files.length > 0) {
                     for (let i = 0; i < fileInput.files.length; i++) {
                         const file = fileInput.files[i];
@@ -1026,34 +1073,42 @@
                         newUploadedUrls.push(linkData.publicUrl);
                     }
                 }
-
                 const totalPhotosList = [...activeNotePhotos, ...newUploadedUrls];
 
-                // 2. Завантаження аудіофайлу (якщо є новий локальний запис)
-                let finalAudioUrl = serverAudioUrl;
-                if (localAudioBlob) {
-                    logSys("Вантажу аудіозапис у хмару...");
-                    const safePd = currentPD.replace('ПД', 'PD');
-                    const safeTrack = activeNoteTrack === 'парна' ? 'parna' : 'neparna';
-                    
-                    let ext = "webm";
-                    if (localAudioBlob.type.includes('mp4')) ext = "mp4";
-                    else if (localAudioBlob.type.includes('ogg')) ext = "ogg";
-                    else if (localAudioBlob.type.includes('wav')) ext = "wav";
-                    
-                    const audioPath = `${safePd}_km${activeNoteKm}_pk${activeNotePk}_${safeTrack}_${Date.now()}.${ext}`;
-                    
-                    const { data: audioStorageData, error: audioStorageError } = await supabaseClient.storage
-                        .from('piket-audios')
-                        .upload(audioPath, localAudioBlob);
+                // 2. ОНОВЛЕНО: Послідовне завантаження кількох записаних аудіофайлів з черги
+                let uploadedAudioUrls = [];
+                
+                // Відокремлюємо старі серверні посилання від тимчасових локальних (blob:)
+                let existingServerAudios = activeNoteAudios.filter(url => !url.startsWith('blob:'));
+
+                if (localAudioBlobsToUpload.length > 0) {
+                    for (let i = 0; i < localAudioBlobsToUpload.length; i++) {
+                        const audioObj = localAudioBlobsToUpload[i];
+                        const safePd = currentPD.replace('ПД', 'PD');
+                        const safeTrack = activeNoteTrack === 'парна' ? 'parna' : 'neparna';
                         
-                    if (audioStorageError) throw audioStorageError;
+                        let ext = "webm";
+                        if (audioObj.blob.type.includes('mp4')) ext = "mp4";
+                        else if (audioObj.blob.type.includes('ogg')) ext = "ogg";
+                        else if (audioObj.blob.type.includes('wav')) ext = "wav";
+                        
+                        const audioPath = `${safePd}_km${activeNoteKm}_pk${activeNotePk}_${safeTrack}_${Date.now()}_${i}.${ext}`;
+                        
+                        logSys(`Вантажу аудіо ${i+1} із ${localAudioBlobsToUpload.length}...`);
+                        
+                        const { data: audioStorageData, error: audioStorageError } = await supabaseClient.storage
+                            .from('piket-audios')
+                            .upload(audioPath, audioObj.blob);
+                            
+                        if (audioStorageError) throw audioStorageError;
 
-                    const { data: audioLinkData } = supabaseClient.storage.from('piket-audios').getPublicUrl(audioPath);
-                    finalAudioUrl = audioLinkData.publicUrl;
+                        const { data: audioLinkData } = supabaseClient.storage.from('piket-audios').getPublicUrl(audioPath);
+                        uploadedAudioUrls.push(audioLinkData.publicUrl);
+                    }
                 }
+                const totalAudiosList = [...existingServerAudios, ...uploadedAudioUrls];
 
-                // 3. Відправка Payload у таблицю
+                // 3. Відправка Payload у таблицю (обидва медіа-поля тепер є масивами)
                 const notePayload = {
                     pd: currentPD,
                     km: activeNoteKm,
@@ -1061,7 +1116,7 @@
                     track_type: activeNoteTrack,
                     note_text: textArea.value.trim(),
                     photo_url: totalPhotosList.length > 0 ? JSON.stringify(totalPhotosList) : null,
-                    audio_url: finalAudioUrl
+                    audio_url: totalAudiosList.length > 0 ? JSON.stringify(totalAudiosList) : null
                 };
 
                 const { error: dbError } = await supabaseClient
