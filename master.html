@@ -41,10 +41,37 @@
         .card-title { font-size: 18px; font-weight: 800; color: #115e59; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.8px; text-align: center; }
         .card-subtitle { color: #0f766e; font-size: 13px; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
-        /* Сегментований перемикач режимів */
-        .mode-tabs { display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; margin: 12px 0; gap: 4px; border: 1px solid #e2e8f0; }
-        .tab-btn { flex: 1; border: none; background: transparent; padding: 10px; font-weight: 700; font-size: 13px; color: #64748b; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .tab-btn.active { background: white; color: #115e59; box-shadow: 0 2px 6px rgba(11, 94, 89, 0.1); }
+        /* ВИПРАВЛЕНО: Контрастні та виразні стилі для перемикача режимів робіт */
+        .mode-tabs { 
+            display: flex; 
+            background: #cbd5e1; 
+            border-radius: 12px; 
+            padding: 4px; 
+            margin: 16px 0; 
+            gap: 6px; 
+            border: 1px solid #94a3b8; 
+        }
+        .tab-btn { 
+            flex: 1; 
+            border: none; 
+            background: transparent; 
+            padding: 12px; 
+            font-weight: 800; 
+            font-size: 14px; 
+            color: #475569; 
+            border-radius: 9px; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+        }
+        .tab-btn.active { 
+            background: var(--primary-color); 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(0, 139, 116, 0.3); 
+        }
 
         .form-group { margin-bottom: 14px; }
         .form-group label { display: block; font-weight: 700; font-size: 11px; margin-bottom: 4px; color: #115e59; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -89,7 +116,6 @@
         .rail-line-visual::after { right: 1px; }
         .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
 
-        /* Посилена специфічність стилів відображення забарвлення брівок */
         .mowing-bank-zone.status-clear-green { background-color: #22c55e !important; color: white !important; }
         .mowing-bank-zone.status-warn-yellow { background-color: #eab308 !important; color: #1f2937 !important; }
         .mowing-bank-zone.status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
@@ -154,7 +180,7 @@
 
         <div id="cabinet-card" class="screen hidden">
             <div class="card-title" id="cabinet-header-title">Вітаємо</div>
-            <div class="card-subtitle">Керування ділянкою околотка та ведення журналів робіт.</div>
+            <div class="card-subtitle">ОБЕРІТЬ, яку інформацію ви хочете внести</div>
             
             <div class="mode-tabs">
                 <button id="tab-mowing" class="tab-btn active" onclick="switchWorkMode('mowing')">🚜 Обкошування</button>
@@ -462,7 +488,8 @@
                     } else {
                         if (isLeftMine) {
                             const note = globalNotesData.find(n => parseInt(n.km) === km && parseInt(n.piket) === pk && isLeftTrack(n.track_type));
-                            let icon = "➕";
+                            // ВИПРАВЛЕНО: Замінено похмурий знак плюс на нейтральний чистий аркуш паперу
+                            let icon = "📄";
                             if (note) {
                                 let localPhotos = [];
                                 if (note.photo_url) {
@@ -505,7 +532,8 @@
                     } else {
                         if (isRightMine) {
                             const note = globalNotesData.find(n => parseInt(n.km) === km && parseInt(n.piket) === pk && isRightTrack(n.track_type));
-                            let icon = "➕";
+                            // ВИПРАВЛЕНО: Замінено похмурий знак плюс на нейтральний чистий аркуш паперу
+                            let icon = "📄";
                             if (note) {
                                 let localPhotos = [];
                                 if (note.photo_url) {
@@ -610,7 +638,6 @@
             }
         }
 
-        // Логіка галереї Lightbox
         function openLightbox(idx) {
             currentLightboxIndex = idx;
             updateLightboxContent();
@@ -761,7 +788,7 @@
             const recordsToSend = selectedPiketsToSave.map(p => ({ ...p, date: dateValue }));
 
             try {
-                const { error } = await supabaseClient.from('mowing').upsert(recordsToSend);
+                const { error = null } = await supabaseClient.from('mowing').upsert(recordsToSend);
                 if (error) throw error;
                 alert("Роботу успішно зафіксовано!");
                 selectedPiketsToSave = [];
