@@ -41,7 +41,7 @@
         .card-title { font-size: 18px; font-weight: 800; color: #115e59; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.8px; text-align: center; }
         .card-subtitle { color: #0f766e; font-size: 13px; margin-bottom: 16px; text-align: center; opacity: 0.8; }
         
-        /* Виразні стилі для перемикача режимів робіт */
+        /* Виразні стилі для головного перемикача режимів робіт */
         .mode-tabs { 
             display: flex; 
             background: #cbd5e1; 
@@ -127,7 +127,7 @@
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
-        /* ОНОВЛЕНО: Стилі картки нотаток — правильні відступи на мобільних телефонах */
+        /* Стилі великої адаптивної картки нотаток з відступами на мобільних пристроях */
         #piket-notes-modal .modal-box {
             max-width: 540px;  
             height: auto;        
@@ -151,7 +151,42 @@
         }
         .modal-close-btn:hover { color: #ef4444; }
 
-        /* Контейнер для поля вводу та червоного хрестика очищення нотатки */
+        /* Стилі сегментованого перемикача всередині картки нотаток */
+        .modal-tabs {
+            display: flex;
+            background: #cbd5e1;
+            border-radius: 10px;
+            padding: 3px;
+            margin: 14px 0;
+            gap: 4px;
+            border: 1px solid #94a3b8;
+        }
+        .modal-tab-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            color: #475569;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .modal-tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 139, 116, 0.2);
+        }
+        .modal-tab-content {
+            width: 100%;
+        }
+
+        /* Контейнер для поля вводу та червоного хрестика очищення тексту */
         .textarea-wrapper {
             position: relative;
             width: 100%;
@@ -276,28 +311,47 @@
         <div class="modal-box">
             <button type="button" class="modal-close-btn" onclick="toggleNotesModal(false)">×</button>
             
-            <div class="card-title" id="notes-modal-title" style="font-size: 16px; text-transform:none; text-align: left; margin-bottom: 14px; padding-right: 35px;">📝 Картка пікета</div>
+            <div class="card-title" id="notes-modal-title" style="font-size: 16px; text-transform:none; text-align: left; padding-right: 35px;">📝 Картка пікета</div>
             
-            <div class="form-group">
-                <label>Текст нотатки / Зауваження:</label>
-                <div class="textarea-wrapper">
-                    <textarea id="note-textarea" class="form-control" style="height: 200px; resize: none; font-size: 15px; line-height: 1.4; padding-right: 38px;"></textarea>
-                    <button type="button" class="clear-textarea-btn" onclick="clearNoteText()" title="Видалити текст нотатки">×</button>
+            <div class="modal-tabs">
+                <button id="modal-tab-text" class="modal-tab-btn active" onclick="switchModalTab('text')">📝 Текст</button>
+                <button id="modal-tab-photo" class="modal-tab-btn" onclick="switchModalTab('photo')">📸 Фото</button>
+                <button id="modal-tab-audio" class="modal-tab-btn" onclick="switchModalTab('audio')">🎙️ Аудіо</button>
+            </div>
+
+            <div id="modal-content-text" class="modal-tab-content">
+                <div class="form-group">
+                    <label>Текст нотатки / Зауваження:</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="note-textarea" class="form-control" style="height: 200px; resize: none; font-size: 15px; line-height: 1.4; padding-right: 38px;"></textarea>
+                        <button type="button" class="clear-textarea-btn" onclick="clearNoteText()" title="Видалити текст нотатки">×</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Прикріпити photo (можна обрати кілька підряд):</label>
-                <label for="note-file-input" class="btn-submit" style="display: block; text-align: center; background: #e6f4ea; color: #115e59; border: 1px solid #a7f3d0; margin-top: 4px; padding: 10px; font-size: 14px; cursor: pointer; user-select: none;">
-                    📸 Обрати фотографії
-                </label>
-                <input type="file" id="note-file-input" style="display: none;" accept="image/*" multiple onchange="handleFileSelectText(this)">
-                <span id="file-count-status" style="font-size: 12px; color: #64748b; display: block; margin-top: 6px; text-align: center; font-weight: 600;">Файли не обрано</span>
-                <div id="note-image-preview-zone" class="preview-images-holder"></div>
+            <div id="modal-content-photo" class="modal-tab-content hidden">
+                <div class="form-group">
+                    <label>Прикріпити фото (можна обрати кілька підряд):</label>
+                    <label for="note-file-input" class="btn-submit" style="display: block; text-align: center; background: #e6f4ea; color: #115e59; border: 1px solid #a7f3d0; margin-top: 4px; padding: 10px; font-size: 14px; cursor: pointer; user-select: none;">
+                        📸 Обрати фотографії
+                    </label>
+                    <input type="file" id="note-file-input" style="display: none;" accept="image/*" multiple onchange="handleFileSelectText(this)">
+                    <span id="file-count-status" style="font-size: 12px; color: #64748b; display: block; margin-top: 6px; text-align: center; font-weight: 600;">Файли не обрано</span>
+                    <div id="note-image-preview-zone" class="preview-images-holder"></div>
+                </div>
             </div>
 
-            <button class="btn-submit" id="btn-save-note" onclick="executeSaveNote()">Зберегти зміни</button>
+            <div id="modal-content-audio" class="modal-tab-content hidden">
+                <div class="form-group">
+                    <label>Голосова нотатка:</label>
+                    <div style="text-align: center; padding: 30px 10px; color: #64748b; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; font-size: 14px;">
+                        ⏳ Наступним кроком тут розгорнемо кнопку запису звуку
+                    </div>
+                </div>
             </div>
+
+            <button class="btn-submit" id="btn-save-note" onclick="executeSaveNote()" style="margin-top: 20px;">Зберегти зміни</button>
+        </div>
     </div>
 
     <div id="photo-lightbox" class="lightbox-overlay" onclick="closeLightbox(event)">
@@ -364,6 +418,16 @@
             document.getElementById('tab-notes').classList.toggle('active', mode === 'notes');
             document.getElementById('mowing-actions-bar').classList.toggle('hidden', mode === 'notes');
             filterDiagramByKm();
+        }
+
+        function switchModalTab(tabName) {
+            document.getElementById('modal-tab-text').classList.toggle('active', tabName === 'text');
+            document.getElementById('modal-tab-photo').classList.toggle('active', tabName === 'photo');
+            document.getElementById('modal-tab-audio').classList.toggle('active', tabName === 'audio');
+
+            document.getElementById('modal-content-text').classList.toggle('hidden', tabName !== 'text');
+            document.getElementById('modal-content-photo').classList.toggle('hidden', tabName !== 'photo');
+            document.getElementById('modal-content-audio').classList.toggle('hidden', tabName !== 'audio');
         }
 
         function handleSignalClick(element) {
@@ -541,7 +605,6 @@
                     } else {
                         if (isLeftMine) {
                             const note = globalNotesData.find(n => parseInt(n.km) === km && parseInt(n.piket) === pk && isLeftTrack(n.track_type));
-                            // ОНОВЛЕНО: Замінено знак плюс на чистий аркуш паперу
                             let icon = "📄";
                             if (note) {
                                 let localPhotos = [];
@@ -585,7 +648,6 @@
                     } else {
                         if (isRightMine) {
                             const note = globalNotesData.find(n => parseInt(n.km) === km && parseInt(n.piket) === pk && isRightTrack(n.track_type));
-                            // ОНОВЛЕНО: Замінено знак плюс на чистий аркуш паперу
                             let icon = "📄";
                             if (note) {
                                 let localPhotos = [];
@@ -630,6 +692,7 @@
         }
 
         function openNotesModal(peregon, track, km, pk, note) {
+            switchModalTab('text'); // Скидаємо картку на першу вкладку «Текст» при кожному відкритті
             activeNoteKm = km; activeNotePk = pk; activeNoteTrack = track; activeNotePeregon = peregon;
             
             document.getElementById('notes-modal-title').innerText = `📝 Нотатка: КМ ${km}, ПК ${pk} (${track.toUpperCase()} колія)`;
@@ -720,7 +783,6 @@
             }
         }
 
-        // ОНОВЛЕНО: Функція очищення тексту нотатки через верхній хрестик текстового поля
         function clearNoteText() {
             if (confirm("Очистити весь текст цієї нотатки?")) {
                 document.getElementById('note-textarea').value = "";
