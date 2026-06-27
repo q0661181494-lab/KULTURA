@@ -89,7 +89,7 @@
         .rail-line-visual::after { right: 1px; }
         .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
 
-        /* ВИПРАВЛЕНО: Посилена специфічність стилів для 100% забарвлення брівок */
+        /* Посилена специфічність стилів відображення забарвлення брівок */
         .mowing-bank-zone.status-clear-green { background-color: #22c55e !important; color: white !important; }
         .mowing-bank-zone.status-warn-yellow { background-color: #eab308 !important; color: #1f2937 !important; }
         .mowing-bank-zone.status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
@@ -106,6 +106,17 @@
         .preview-image-container { position: relative; display: inline-block; width: 80px; height: 80px; }
         .preview-image-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1; }
         .delete-img-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        /* Повноекранний режим Lightbox */
+        .lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.96); z-index: 200000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.22s ease; }
+        .lightbox-overlay.show { opacity: 1; pointer-events: auto; }
+        .lightbox-img { max-width: 95%; max-height: 82%; object-fit: contain; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .lightbox-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.12); color: white; border: none; width: 54px; height: 54px; border-radius: 50%; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; transition: background 0.2s; }
+        .lightbox-btn:hover { background: rgba(255,255,255,0.25); }
+        .lightbox-left { left: 14px; }
+        .lightbox-right { right: 14px; }
+        .lightbox-close { position: absolute; top: 16px; right: 16px; background: transparent; color: white; border: none; font-size: 38px; cursor: pointer; line-height: 1; }
+        .lightbox-counter { position: absolute; bottom: 20px; color: #cbd5e1; font-size: 14px; font-weight: 700; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 20px; }
 
         .debug-panel { flex-shrink: 0; width: 100%; max-width: 580px; position: fixed; bottom: -210px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; background-color: rgba(230, 244, 234, 0.98); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px 12px 0 0; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 20px rgba(11,94,89,0.15); box-sizing: border-box; transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
         .debug-panel.active { bottom: 0px; }
@@ -196,7 +207,11 @@
 
             <div class="form-group">
                 <label>Прикріпити фото (можна обрати кілька підряд):</label>
-                <input type="file" id="note-file-input" class="form-control" accept="image/*" multiple>
+                <label for="note-file-input" class="btn-submit" style="display: block; text-align: center; background: #e6f4ea; color: #115e59; border: 1px solid #a7f3d0; margin-top: 4px; padding: 10px; font-size: 14px; cursor: pointer; user-select: none;">
+                    📸 Обрати фотографії
+                </label>
+                <input type="file" id="note-file-input" style="display: none;" accept="image/*" multiple onchange="handleFileSelectText(this)">
+                <span id="file-count-status" style="font-size: 12px; color: #64748b; display: block; margin-top: 6px; text-align: center; font-weight: 600;">Файли не обрано</span>
                 <div id="note-image-preview-zone" class="preview-images-holder"></div>
             </div>
 
@@ -204,6 +219,14 @@
             <button class="btn-submit" id="btn-delete-note" onclick="executeDeleteNote()" style="background: transparent; border: 2px solid #ef4444; color: #ef4444; margin-top: 8px; box-shadow: none;">🗑️ Видалити нотатку</button>
             <button class="btn-submit" onclick="toggleNotesModal(false)" style="background: #94a3b8; margin-top: 8px;">Закрити</button>
         </div>
+    </div>
+
+    <div id="photo-lightbox" class="lightbox-overlay" onclick="closeLightbox(event)">
+        <button type="button" class="lightbox-close" onclick="closeLightbox(event)">×</button>
+        <button type="button" class="lightbox-btn lightbox-left" onclick="changeLightboxPhoto(-1, event)">‹</button>
+        <img id="lightbox-current-img" class="lightbox-img" src="" alt="Перегляд">
+        <button type="button" class="lightbox-btn lightbox-right" onclick="changeLightboxPhoto(1, event)">›</button>
+        <div id="lightbox-photo-counter" class="lightbox-counter">1 / 1</div>
     </div>
 
     <div id="signal-toast-notification" class="signal-toast" onclick="hideSignalToast()">
@@ -238,6 +261,7 @@
 
         let activeNoteKm = null, activeNotePk = null, activeNoteTrack = null, activeNotePeregon = null;
         let activeNotePhotos = []; 
+        let currentLightboxIndex = 0;
 
         document.getElementById('work-date-input').valueAsDate = new Date();
 
@@ -530,6 +554,7 @@
             document.getElementById('notes-modal-title').innerText = `📝 Нотатка: КМ ${km}, ПК ${pk} (${track.toUpperCase()} колія)`;
             document.getElementById('note-textarea').value = note ? note.note_text || "" : "";
             document.getElementById('note-file-input').value = "";
+            document.getElementById('file-count-status').innerText = "Файли не обрано";
             
             activeNotePhotos = [];
             if (note && note.photo_url) {
@@ -558,7 +583,7 @@
                 const holder = document.createElement('div');
                 holder.className = 'preview-image-container';
                 holder.innerHTML = `
-                    <img src="${url}">
+                    <img src="${url}" style="cursor: pointer;" onclick="openLightbox(${idx})">
                     <button type="button" class="delete-img-btn" onclick="removeSinglePhoto(${idx})">×</button>
                 `;
                 previewZone.appendChild(holder);
@@ -574,6 +599,45 @@
 
         function toggleNotesModal(show) {
             document.getElementById('piket-notes-modal').classList.toggle('show', show);
+        }
+
+        function handleFileSelectText(input) {
+            const status = document.getElementById('file-count-status');
+            if (input.files.length > 0) {
+                status.innerText = `Обрано нових фото: ${input.files.length}`;
+            } else {
+                status.innerText = "Файли не обрано";
+            }
+        }
+
+        // Логіка галереї Lightbox
+        function openLightbox(idx) {
+            currentLightboxIndex = idx;
+            updateLightboxContent();
+            document.getElementById('photo-lightbox').classList.add('show');
+        }
+
+        function updateLightboxContent() {
+            if (activeNotePhotos.length === 0) return;
+            if (currentLightboxIndex >= activeNotePhotos.length) currentLightboxIndex = activeNotePhotos.length - 1;
+            if (currentLightboxIndex < 0) currentLightboxIndex = 0;
+
+            document.getElementById('lightbox-current-img').src = activeNotePhotos[currentLightboxIndex];
+            document.getElementById('lightbox-photo-counter').innerText = `${currentLightboxIndex + 1} / ${activeNotePhotos.length}`;
+        }
+
+        function changeLightboxPhoto(direction, event) {
+            if (event) event.stopPropagation();
+            currentLightboxIndex += direction;
+            if (currentLightboxIndex >= activeNotePhotos.length) currentLightboxIndex = 0;
+            if (currentLightboxIndex < 0) currentLightboxIndex = activeNotePhotos.length - 1;
+            updateLightboxContent();
+        }
+
+        function closeLightbox(event) {
+            if (!event || event.target.id === 'photo-lightbox' || event.target.classList.contains('lightbox-close')) {
+                document.getElementById('photo-lightbox').classList.remove('show');
+            }
         }
 
         async function executeSaveNote() {
@@ -674,7 +738,7 @@
                 alert("Не вдалося видалити рядок: " + e.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "🗑️ Вилити нотатку";
+                btn.innerText = "🗑️ Видалити нотатку";
             }
         }
 
