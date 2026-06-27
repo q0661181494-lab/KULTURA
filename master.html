@@ -89,18 +89,13 @@
         .rail-line-visual::after { right: 1px; }
         .rail-line-visual span { display: block; width: 100%; height: 3px; background: #64748b; margin: 2px 0; }
 
-        .status-clear-green { background-color: #22c55e !important; color: white !important; }
-        .status-warn-yellow { background-color: #eab308 !important; color: #1f2937 !important; }
-        .status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
-        .status-unknown { background-color: #f1f5f9 !important; color: #64748b !important; border: 1px dashed #cbd5e1; }
-
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-box { background: white; padding: 24px; border-radius: 16px; width: 90%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #fee2e2; overflow-y: auto; max-height: 90vh; }
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
-        /* Галерея мініатюр */
+        /* Галерея мініатюр фотографій */
         .preview-images-holder { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; justify-content: center; }
         .preview-image-container { position: relative; display: inline-block; width: 80px; height: 80px; }
         .preview-image-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1; }
@@ -351,7 +346,7 @@
 
             const myConfigs = globalTracksData.filter(t => cleanPd(t.pd) === currentPD);
             if (myConfigs.length === 0) {
-                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріклених кілометрів.</p>`;
+                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>`;
                 return;
             }
 
@@ -575,7 +570,7 @@
             document.getElementById('piket-notes-modal').classList.toggle('show', show);
         }
 
-        // ВИПРАВЛЕНО: Генерація безпечних латинських назв файлів для Supabase Storage
+        // КРИТИЧНЕ ВИПРАВЛЕННЯ: Додано { onConflict: 'pd,km,piket,track_type' } для запобігання помилці дублювання унікального ключа
         async function executeSaveNote() {
             const btn = document.getElementById('btn-save-note');
             const textArea = document.getElementById('note-textarea');
@@ -592,7 +587,6 @@
                         const file = fileInput.files[i];
                         const fileExt = file.name.split('.').pop().toLowerCase();
                         
-                        // ПЕРЕКЛАД КИРИЛИЦІ В ЛАТИНСЬКИЙ ФОРМАТ ДЛЯ КЛЮЧА
                         const safePd = currentPD.replace('ПД', 'PD');
                         const safeTrack = activeNoteTrack === 'парна' ? 'parna' : 'neparna';
                         const cleanPath = `${safePd}_km${activeNoteKm}_pk${activeNotePk}_${safeTrack}_${Date.now()}_${i}.${fileExt}`;
@@ -621,7 +615,11 @@
                     photo_url: totalPhotosList.length > 0 ? JSON.stringify(totalPhotosList) : null
                 };
 
-                const { error: dbError } = await supabaseClient.from('piket_notes').upsert(notePayload);
+                // ВИПРАВЛЕНО: Явно вказуємо колонки обмеження унікальності для коректного оновлення існуючих рядків
+                const { error: dbError } = await supabaseClient
+                    .from('piket_notes')
+                    .upsert(notePayload, { onConflict: 'pd,km,piket,track_type' });
+
                 if (dbError) throw dbError;
 
                 logSys("Зміни зафіксовано!", "success");
