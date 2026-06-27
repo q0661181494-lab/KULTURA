@@ -100,7 +100,7 @@
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
-        /* Стилі для каруселі/галереї мініатюр всередині модалки */
+        /* Галерея мініатюр */
         .preview-images-holder { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; justify-content: center; }
         .preview-image-container { position: relative; display: inline-block; width: 80px; height: 80px; }
         .preview-image-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1; }
@@ -235,9 +235,8 @@
         let selectedPiketsToSave = []; 
         let toastTimeoutId = null;
 
-        // Змінні для збереження поточної картки нотатки
         let activeNoteKm = null, activeNotePk = null, activeNoteTrack = null, activeNotePeregon = null;
-        let activeNotePhotos = []; // Масив URL фотографій для поточного відкритого пікета
+        let activeNotePhotos = []; 
 
         document.getElementById('work-date-input').valueAsDate = new Date();
 
@@ -352,7 +351,7 @@
 
             const myConfigs = globalTracksData.filter(t => cleanPd(t.pd) === currentPD);
             if (myConfigs.length === 0) {
-                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>`;
+                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріклених кілометрів.</p>`;
                 return;
             }
 
@@ -524,7 +523,6 @@
             buildMasterDiagram(allowed);
         }
 
-        // Відкриття картки нотатки
         function openNotesModal(peregon, track, km, pk, note) {
             activeNoteKm = km; activeNotePk = pk; activeNoteTrack = track; activeNotePeregon = peregon;
             
@@ -532,14 +530,13 @@
             document.getElementById('note-textarea').value = note ? note.note_text || "" : "";
             document.getElementById('note-file-input').value = "";
             
-            // Парсимо масив фотографій (Пункт 2)
             activeNotePhotos = [];
             if (note && note.photo_url) {
                 try {
                     activeNotePhotos = JSON.parse(note.photo_url);
                     if (!Array.isArray(activeNotePhotos)) activeNotePhotos = [note.photo_url];
                 } catch(e) {
-                    activeNotePhotos = [note.photo_url]; // Конвертація одинарного старого запису
+                    activeNotePhotos = [note.photo_url]; 
                 }
             }
             
@@ -547,7 +544,6 @@
             toggleNotesModal(true);
         }
 
-        // Рендеринг мініатюр з можливістю поштучного видалення (Пункт 2)
         function renderModalPhotosPreview() {
             const previewZone = document.getElementById('note-image-preview-zone');
             previewZone.innerHTML = "";
@@ -568,7 +564,6 @@
             });
         }
 
-        // Поштучне видалення фотографії з масиву
         function removeSinglePhoto(idx) {
             if (confirm("Видалити цю фотографію з картки пікета?")) {
                 activeNotePhotos.splice(idx, 1);
@@ -580,7 +575,7 @@
             document.getElementById('piket-notes-modal').classList.toggle('show', show);
         }
 
-        // Завантаження ОДНОГО чи КІЛЬКОХ нових фото та збереження всього масиву
+        // ВИПРАВЛЕНО: Генерація безпечних латинських назв файлів для Supabase Storage
         async function executeSaveNote() {
             const btn = document.getElementById('btn-save-note');
             const textArea = document.getElementById('note-textarea');
@@ -592,12 +587,15 @@
             try {
                 let newUploadedUrls = [];
 
-                // Якщо обрано нові файли — завантажуємо їх циклом у Storage
                 if (fileInput.files.length > 0) {
                     for (let i = 0; i < fileInput.files.length; i++) {
                         const file = fileInput.files[i];
-                        const fileExt = file.name.split('.').pop();
-                        const cleanPath = `${currentPD}_km${activeNoteKm}_pk${activeNotePk}_${activeNoteTrack}_${Date.now()}_${i}.${fileExt}`;
+                        const fileExt = file.name.split('.').pop().toLowerCase();
+                        
+                        // ПЕРЕКЛАД КИРИЛИЦІ В ЛАТИНСЬКИЙ ФОРМАТ ДЛЯ КЛЮЧА
+                        const safePd = currentPD.replace('ПД', 'PD');
+                        const safeTrack = activeNoteTrack === 'парна' ? 'parna' : 'neparna';
+                        const cleanPath = `${safePd}_km${activeNoteKm}_pk${activeNotePk}_${safeTrack}_${Date.now()}_${i}.${fileExt}`;
                         
                         logSys(`Вантажу файл ${i+1} із ${fileInput.files.length}...`);
                         
@@ -612,7 +610,6 @@
                     }
                 }
 
-                // Об'єднуємо залишені старі фото із щойно завантаженими
                 const totalPhotosList = [...activeNotePhotos, ...newUploadedUrls];
 
                 const notePayload = {
@@ -630,7 +627,6 @@
                 logSys("Зміни зафіксовано!", "success");
                 toggleNotesModal(false);
 
-                // Перемальовуємо дані
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resNotes = await fetch(`${baseDbUrl}/rest/v1/piket_notes?pd=eq.${encodeURIComponent(currentPD)}`, { headers });
                 globalNotesData = await resNotes.json();
@@ -645,7 +641,6 @@
             }
         }
 
-        // ПОВНЕ ВИДАЛЕННЯ НОТАТКИ (Пункт 1)
         async function executeDeleteNote() {
             if (!confirm("Ви впевнені, що хочете ПОВНІСТЮ ВИДАЛИТИ цю нотатку та всі прикріплені фотографії?")) return;
             
@@ -667,7 +662,6 @@
                 logSys("Нотатку успішно видалено з хмари", "success");
                 toggleNotesModal(false);
 
-                // Оновлюємо локальний масив
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resNotes = await fetch(`${baseDbUrl}/rest/v1/piket_notes?pd=eq.${encodeURIComponent(currentPD)}`, { headers });
                 globalNotesData = await resNotes.json();
