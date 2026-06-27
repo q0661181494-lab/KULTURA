@@ -127,15 +127,15 @@
         .checkbox-container { display: flex; align-items: center; gap: 10px; background: #fff5f5; padding: 12px; border-radius: 10px; border: 1px dashed #fca5a5; margin-bottom: 16px; cursor: pointer; user-select: none; color: #991b1b; font-weight: 600; font-size: 14px; }
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
-        /* ОНОВЛЕНО: Стилі великої адаптивної картки нотаток з фіксованою висотою 80% екрану */
+        /* Стилі великої адаптивної картки нотаток з фіксованою висотою 80% екрану */
         #piket-notes-modal .modal-box {
             max-width: 540px;  
             width: 90%;
-            height: 80vh;        /* Зафіксована висота */
+            height: 80vh;        
             max-height: 80vh;    
             position: relative;  
             display: flex;
-            flex-direction: column; /* Вертикальний Flexbox для запобігання зміщенню кнопок */
+            flex-direction: column; 
         }
 
         /* Червоний хрестик для закриття всієї картки нотаток (зверху праворуч) */
@@ -163,7 +163,7 @@
             margin: 14px 0;
             gap: 4px;
             border: 1px solid #94a3b8;
-            flex-shrink: 0; /* Забороняємо табам зменшуватись у розмірах */
+            flex-shrink: 0; 
         }
         .modal-tab-btn {
             flex: 1;
@@ -187,18 +187,18 @@
             box-shadow: 0 2px 6px rgba(0, 139, 116, 0.2);
         }
 
-        /* ОНОВЛЕНО: Вміст вкладок займає весь вільний простір і має внутрішній скрол */
+        /* Вміст вкладок займає весь вільний простір і має внутрішній скрол */
         .modal-tab-content {
             width: 100%;
-            flex: 1;            /* Автоматично розтягується */
-            overflow-y: auto;   /* Дозволяє внутрішній скрол, якщо елементів багато */
-            padding-right: 4px; /* Захисний відступ від повзунка скролу */
+            flex: 1;            
+            overflow-y: auto;   
+            padding-right: 4px; 
         }
 
         /* Притискаємо кнопку збереження чітко до нижнього краю фіксованої картки */
         #piket-notes-modal .btn-submit {
-            margin-top: auto;   /* Виштовхує кнопку в самий низ */
-            flex-shrink: 0;     /* Забороняє кнопці деформуватись */
+            margin-top: auto;   
+            flex-shrink: 0;     
         }
 
         /* Контейнер для поля вводу та червоного хрестика очищення тексту */
@@ -226,6 +226,86 @@
             z-index: 10;
         }
         .clear-textarea-btn:active { transform: scale(0.9); }
+
+        /* Стилі великої круглої кнопки мікрофона та аудіоплеєра */
+        .audio-record-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+            gap: 15px;
+        }
+        .mic-btn {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: none;
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mic-btn.recording {
+            background: #ef4444;
+            color: white;
+            animation: mic-pulse 1.5s infinite;
+        }
+        @keyframes mic-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .recording-status {
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748b;
+            text-align: center;
+        }
+        .recording-status.active {
+            color: #ef4444;
+        }
+        .audio-preview-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        .audio-preview-wrapper audio {
+            width: 100%;
+            max-width: 280px;
+        }
+        .clear-audio-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
 
         /* Галерея мініатюр фотографій */
         .preview-images-holder { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; justify-content: center; }
@@ -358,9 +438,15 @@
 
             <div id="modal-content-audio" class="modal-tab-content hidden">
                 <div class="form-group">
-                    <label>Голосова нотатка:</label>
-                    <div style="text-align: center; padding: 30px 10px; color: #64748b; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; font-size: 14px;">
-                        ⏳ Наступним кроком тут розгорнемо кнопку запису звуку
+                    <label>Голосова нотатка пікета:</label>
+                    <div class="audio-record-container">
+                        <button type="button" id="mic-record-btn" class="mic-btn" onclick="toggleAudioRecording()">🎙️</button>
+                        <div id="recording-status-text" class="recording-status">Натисніть для початку запису</div>
+                        
+                        <div id="audio-preview-zone" class="audio-preview-wrapper hidden">
+                            <audio id="audio-player" controls></audio>
+                            <button type="button" class="clear-audio-btn" onclick="clearAudioRecord()" title="Видалити аудіозапис">×</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -410,6 +496,12 @@
         let activeNoteKm = null, activeNotePk = null, activeNoteTrack = null, activeNotePeregon = null;
         let activeNotePhotos = []; 
         let currentLightboxIndex = 0;
+
+        // Змінні для запису та керування звуковим потоком мікрофона
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let localAudioBlob = null;
+        let serverAudioUrl = null;
 
         document.getElementById('work-date-input').valueAsDate = new Date();
 
@@ -534,7 +626,7 @@
 
             const myConfigs = globalTracksData.filter(t => cleanPd(t.pd) === currentPD);
             if (myConfigs.length === 0) {
-                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>`;
+                container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріклених кілометрів.</p>`;
                 return;
             }
 
@@ -629,9 +721,15 @@
                                 }
                                 const hasText = note.note_text && note.note_text.trim() !== "";
                                 const hasPhotos = localPhotos.length > 0;
-                                if (hasText && hasPhotos) icon = "📝📸";
+                                const hasAudio = note.audio_url && note.audio_url.trim() !== "";
+                                
+                                if (hasText && hasPhotos && hasAudio) icon = "📝📸🎙️";
+                                else if (hasText && hasPhotos) icon = "📝📸";
+                                else if (hasText && hasAudio) icon = "📝🎙️";
+                                else if (hasPhotos && hasAudio) icon = "📸🎙️";
                                 else if (hasText) icon = "📝";
                                 else if (hasPhotos) icon = "📸";
+                                else if (hasAudio) icon = "🎙️";
                             }
                             leftBank.innerHTML = `<div style="font-size:16px;">${icon}</div>`;
                             leftBank.onclick = () => openNotesModal(finalLeftName, 'парна', km, pk, note);
@@ -672,9 +770,15 @@
                                 }
                                 const hasText = note.note_text && note.note_text.trim() !== "";
                                 const hasPhotos = localPhotos.length > 0;
-                                if (hasText && hasPhotos) icon = "📝📸";
+                                const hasAudio = note.audio_url && note.audio_url.trim() !== "";
+                                
+                                if (hasText && hasPhotos && hasAudio) icon = "📝📸🎙️";
+                                else if (hasText && hasPhotos) icon = "📝📸";
+                                else if (hasText && hasAudio) icon = "📝🎙️";
+                                else if (hasPhotos && hasAudio) icon = "📸🎙️";
                                 else if (hasText) icon = "📝";
                                 else if (hasPhotos) icon = "📸";
+                                else if (hasAudio) icon = "🎙️";
                             }
                             rightBank.innerHTML = `<div style="font-size:16px;">${icon}</div>`;
                             rightBank.onclick = () => openNotesModal(finalRightName, 'непарна', km, pk, note);
@@ -707,7 +811,7 @@
         }
 
         function openNotesModal(peregon, track, km, pk, note) {
-            switchModalTab('text'); // Скидаємо картку на першу вкладку «Текст» при кожному відкритті
+            switchModalTab('text'); // Автоматично скидаємо на першу вкладку «Текст»
             activeNoteKm = km; activeNotePk = pk; activeNoteTrack = track; activeNotePeregon = peregon;
             
             document.getElementById('notes-modal-title').innerText = `📝 Нотатка: КМ ${km}, ПК ${pk} (${track.toUpperCase()} колія)`;
@@ -724,8 +828,31 @@
                     activeNotePhotos = [note.photo_url]; 
                 }
             }
-            
             renderModalPhotosPreview();
+
+            // Завантаження та ініціалізація збереженого аудіозапису
+            serverAudioUrl = note ? note.audio_url || null : null;
+            localAudioBlob = null;
+
+            const audioPlayer = document.getElementById('audio-player');
+            const audioZone = document.getElementById('audio-preview-zone');
+            const micBtn = document.getElementById('mic-record-btn');
+            const statusText = document.getElementById('recording-status-text');
+
+            micBtn.classList.remove('recording');
+            micBtn.innerHTML = "🎙️";
+            statusText.classList.remove('active');
+
+            if (serverAudioUrl) {
+                audioPlayer.src = serverAudioUrl;
+                audioZone.classList.remove('hidden');
+                statusText.innerText = "Збережений запис завантажено з хмари";
+            } else {
+                audioPlayer.src = "";
+                audioZone.classList.add('hidden');
+                statusText.innerText = "Натисніть для початку запису";
+            }
+
             toggleNotesModal(true);
         }
 
@@ -804,6 +931,68 @@
             }
         }
 
+        // Логіка запису звуку (кнопка-перемикач Start / Stop)
+        async function toggleAudioRecording() {
+            const btn = document.getElementById('mic-record-btn');
+            const statusText = document.getElementById('recording-status-text');
+
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioChunks = [];
+                
+                let options = { mimeType: 'audio/webm' };
+                if (!MediaRecorder.isTypeSupported('audio/webm')) options = { mimeType: 'audio/mp4' };
+                if (!MediaRecorder.isTypeSupported('audio/mp4')) options = {}; 
+
+                mediaRecorder = new MediaRecorder(stream, options);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    localAudioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(localAudioBlob);
+                    
+                    document.getElementById('audio-player').src = audioUrl;
+                    document.getElementById('audio-preview-zone').classList.remove('hidden');
+                    
+                    btn.classList.remove('recording');
+                    btn.innerHTML = "🎙️";
+                    statusText.innerText = "Запис готовий до синхронізації";
+                    statusText.classList.remove('active');
+                    
+                    stream.getTracks().forEach(track => track.stop()); // Відключаємо мікрофон на пристрої
+                };
+
+                mediaRecorder.start();
+                btn.classList.add('recording');
+                btn.innerHTML = "🛑";
+                statusText.innerText = "⏺️ Запис іде... Натисніть знову для зупинки";
+                statusText.classList.add('active');
+
+            } catch (err) {
+                console.error(err);
+                alert("Помилка доступу до мікрофона: " + err.message);
+                statusText.innerText = "Помилка мікрофона";
+            }
+        }
+
+        function clearAudioRecord() {
+            if (confirm("Видалити цей аудіозапис з картки пікета?")) {
+                localAudioBlob = null;
+                serverAudioUrl = null;
+                document.getElementById('audio-player').src = "";
+                document.getElementById('audio-preview-zone').classList.add('hidden');
+                document.getElementById('recording-status-text').innerText = "Натисніть для початку запису";
+            }
+        }
+
         async function executeSaveNote() {
             const btn = document.getElementById('btn-save-note');
             const textArea = document.getElementById('note-textarea');
@@ -815,6 +1004,7 @@
             try {
                 let newUploadedUrls = [];
 
+                // 1. Завантаження нових фотографій
                 if (fileInput.files.length > 0) {
                     for (let i = 0; i < fileInput.files.length; i++) {
                         const file = fileInput.files[i];
@@ -839,13 +1029,39 @@
 
                 const totalPhotosList = [...activeNotePhotos, ...newUploadedUrls];
 
+                // 2. Завантаження аудіофайлу (якщо є новий локальний запис)
+                let finalAudioUrl = serverAudioUrl;
+                if (localAudioBlob) {
+                    logSys("Вантажу аудіозапис у хмару...");
+                    const safePd = currentPD.replace('ПД', 'PD');
+                    const safeTrack = activeNoteTrack === 'парна' ? 'parna' : 'neparna';
+                    
+                    let ext = "webm";
+                    if (localAudioBlob.type.includes('mp4')) ext = "mp4";
+                    else if (localAudioBlob.type.includes('ogg')) ext = "ogg";
+                    else if (localAudioBlob.type.includes('wav')) ext = "wav";
+                    
+                    const audioPath = `${safePd}_km${activeNoteKm}_pk${activeNotePk}_${safeTrack}_${Date.now()}.${ext}`;
+                    
+                    const { data: audioStorageData, error: audioStorageError } = await supabaseClient.storage
+                        .from('piket-audios')
+                        .upload(audioPath, localAudioBlob);
+                        
+                    if (audioStorageError) throw audioStorageError;
+
+                    const { data: audioLinkData } = supabaseClient.storage.from('piket-audios').getPublicUrl(audioPath);
+                    finalAudioUrl = audioLinkData.publicUrl;
+                }
+
+                // 3. Відправка Payload у таблицю
                 const notePayload = {
                     pd: currentPD,
                     km: activeNoteKm,
                     piket: activeNotePk,
                     track_type: activeNoteTrack,
                     note_text: textArea.value.trim(),
-                    photo_url: totalPhotosList.length > 0 ? JSON.stringify(totalPhotosList) : null
+                    photo_url: totalPhotosList.length > 0 ? JSON.stringify(totalPhotosList) : null,
+                    audio_url: finalAudioUrl
                 };
 
                 const { error: dbError } = await supabaseClient
@@ -872,11 +1088,10 @@
         }
 
         async function executeDeleteNote() {
-            if (!confirm("Ви впевнені, що хочете ПОВНІСТЮ ВИДАЛИТИ цю нотатку та всі прикріплені фотографії?")) return;
+            if (!confirm("Ви впевнені, що хочете ПОВНІСТЮ ВИДАЛИТИ дані з цього пікета?")) return;
             
-            const btn = document.getElementById('btn-delete-note');
+            const btn = document.getElementById('btn-save-note');
             btn.disabled = true;
-            btn.innerText = "Видалення рядка...";
 
             try {
                 const { error } = await supabaseClient
@@ -889,7 +1104,7 @@
 
                 if (error) throw error;
 
-                logSys("Нотатку успішно видалено з хмари", "success");
+                logSys("Дані успішно видалено з хмари", "success");
                 toggleNotesModal(false);
 
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
@@ -902,7 +1117,6 @@
                 alert("Не вдалося видалити рядок: " + e.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "🗑️ Видалити нотатку";
             }
         }
 
@@ -927,7 +1141,7 @@
             try {
                 const { error = null } = await supabaseClient.from('mowing').upsert(recordsToSend);
                 if (error) throw error;
-                alert("Роботу успешно зафіксовано!");
+                alert("Роботу успішно зафіксовано!");
                 selectedPiketsToSave = [];
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
