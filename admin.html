@@ -95,6 +95,9 @@
         .debug-panel { margin-top: 8px; padding: 12px; background-color: #e6f4ea; border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(11,94,89,0.02); width: 100%; box-sizing: border-box; }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 90px; overflow-y: auto; text-align: left; }
+
+        /* ОНОВЛЕНО: Клас прихованого маскування цифрових полів пароля */
+        .secure-numeric-input { -webkit-text-security: disc !important; text-security: disc !important; }
     </style>
 </head>
 <body>
@@ -111,7 +114,7 @@
             <p>Для входу в панель адміністрування введіть пароль захисту</p>
             <div class="auth-box">
                 <label class="track-label">Пароль адміністратора:</label>
-                <input type="password" id="admin-password-input" class="input-field" onkeydown="if(event.key==='Enter') verifyAdminPassword()">
+                <input type="tel" id="admin-password-input" class="input-field secure-numeric-input" onkeydown="if(event.key==='Enter') verifyAdminPassword()" style="text-align: center; font-size: 18px; font-weight: 600; letter-spacing: 2px;" autocomplete="off">
                 <button class="btn-submit" onclick="verifyAdminPassword()">Підтвердити вхід</button>
             </div>
         </div>
@@ -156,7 +159,7 @@
                     </div>
                 </div>
      
-                <label class="track-label">4. Визначте лінійні межі:</label>
+                <label class="track-label">4. Визначте лінійні MEЖІ:</label>
                 <div class="km-section">
                     <div class="km-pk-row">
                         <div class="km-col">
@@ -240,6 +243,14 @@
             </div>
 
             <button class="btn-danger" onclick="clearSelectedPdTracks()">Очистити вибрані дані</button>
+
+            <hr class="section-divider">
+            <h2>🔑 Зміна пароля адміністратора</h2>
+            <p>Встановіть новий цифровий пароль для входу в цю панель керування</p>
+            <div class="form-group" style="margin-bottom: 14px; max-width: 280px; margin-left: auto; margin-right: auto;">
+                <input type="tel" id="new-admin-password" class="input-field secure-numeric-input" style="height: 50px; text-align: center; font-size: 18px; font-weight: 600; letter-spacing: 2px;" autocomplete="off">
+            </div>
+            <button class="btn-submit" onclick="executeChangeAdminPassword()">Оновити пароль адміна</button>
         </div>
 
         <div class="debug-panel">
@@ -476,16 +487,101 @@
             if(drop) drop.classList.toggle('show');
         }
 
-        function verifyAdminPassword() {
-            const enteredPass = document.getElementById('admin-password-input').value;
-            if (enteredPass === "1234") {
-                logSys("Авторизація адміністратора успішна", "success");
-                document.getElementById('screen-auth').style.display = 'none';
-                document.getElementById('screen-admin').style.display = 'block';
-                loadPdsForCleaning();
-            } else {
-                alert("Невірний пароль адміністратора!");
-                logSys("Спроба несанкціонованого входу", "error");
+        // ОНОВЛЕНО: Функція авторизації тепер спочатку перевіряє динамічний пароль адміна у хмарі Supabase
+        async function verifyAdminPassword() {
+            const enteredPass = document.getElementById('admin-password-input').value.trim();
+            if (!enteredPass) {
+                alert("Будь ласка, введіть пароль!");
+                return;
+            }
+            
+            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+            logSys("Перевірка доступу адміністратора...");
+
+            try {
+                const res = await fetch(`${baseDbUrl}/rest/v1/app_passwords?role=eq.admin`, { headers });
+                const pwData = await res.json();
+                
+                let isAuthorized = false;
+                if (pwData && pwData.length > 0) {
+                    if (pwData[0].password === enteredPass) isAuthorized = true;
+                } else {
+                    // Якщо таблиця порожня або немає рядка 'admin', залишаємо дефолтний 1234
+                    if (enteredPass === "1234") isAuthorized = true;
+                }
+                
+                if (isAuthorized) {
+                    logSys("Авторизація адміністратора успішна", "success");
+                    document.getElementById('screen-auth').style.display = 'none';
+                    document.getElementById('screen-admin').style.display = 'block';
+                    loadPdsForCleaning();
+                } else {
+                    alert("Невірний пароль адміністратора!");
+                    logSys("Спроба несанкціонованого входу", "error");
+                }
+            } catch (e) {
+                // Автономний бекап-режим на випадок збоїв мережі
+                if (enteredPass === "1234") {
+                    logSys("Вхід за резервною схемою", "success");
+                    document.getElementById('screen-auth').style.display = 'none';
+                    document.getElementById('screen-admin').style.display = 'block';
+                    loadPdsForCleaning();
+                } else {
+                    alert("Помилка авторизації: " + e.message);
+                }
+            }
+        }
+
+        // ОНОВЛЕНО: Нова функція оновлення/запису пароля адміна через чистий fetch REST API
+        async function executeChangeAdminPassword() {
+            const passwordInput = document.getElementById('new-admin-password');
+            const newAdminPw = passwordInput.value.trim();
+            
+            if (!newAdminPw) {
+                alert("Будь ласка, введіть новий пароль для адміністратора!");
+                return;
+            }
+            
+            if (!confirm("Ви впевнені, що хочете змінити пароль адміністратора сайту?")) return;
+            
+            const headers = { 
+                'apikey': fullKey, 
+                'authorization': 'Bearer ' + fullKey,
+                'Content-Type': 'application/json'
+            };
+            
+            try {
+                logSys("Запис конфігурації безпеки адміна...");
+                const checkRes = await fetch(`${baseDbUrl}/rest/v1/app_passwords?role=eq.admin`, { headers });
+                const checkData = await checkRes.json();
+                
+                let res;
+                if (checkData && checkData.length > 0) {
+                    // Якщо роль admin вже є — оновлюємо (PATCH)
+                    res = await fetch(`${baseDbUrl}/rest/v1/app_passwords?role=eq.admin`, {
+                        method: 'PATCH',
+                        headers,
+                        body: JSON.stringify({ password: newAdminPw })
+                    });
+                } else {
+                    // Якщо немає — створюємо новий рядок (POST)
+                    res = await fetch(`${baseDbUrl}/rest/v1/app_passwords`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({ role: 'admin', password: newAdminPw })
+                    });
+                }
+                
+                if (res.ok) {
+                    alert("Пароль адміністратора успішно змінено у хмарі!");
+                    passwordInput.value = "";
+                    logSys("Пароль головного адміністратора змінено", "success");
+                } else {
+                    alert("Не вдалося оновити пароль.");
+                    logSys("Помилка операції оновлення пароля", "error");
+                }
+            } catch (e) {
+                alert("Помилка підключення: " + e.message);
             }
         }
 
@@ -612,7 +708,6 @@
             }
         }
 
-        // Завантажуємо ПД з обох таблиць для повного покриття
         async function loadPdsForCleaning() {
             const optionsContainer = document.getElementById('dropdown-options');
             optionsContainer.innerHTML = "<div style='color:gray;padding:8px;font-size:12px;'>Завантаження...</div>";
@@ -681,11 +776,9 @@
                 lbl.innerText = selectedPds.map(x => String(x).startsWith("ПД-") ? x : `ПД-${x}`).join(', ');
             }
             
-            // Завантажуємо індивідуальні об'єкти для вибраних ПД
             loadItemsForCleaning();
         }
 
-        // НОВА ФУНКЦІЯ: завантаження конкретних записів для видалення
         async function loadItemsForCleaning() {
             const box = document.getElementById('cleaning-records-box');
             const list = document.getElementById('cleaning-records-list');
@@ -718,7 +811,6 @@
                     return;
                 }
                 
-                // Рендеримо дільниці / станції
                 lines.forEach(item => {
                     const div = document.createElement('div');
                     div.style = "display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:8px; border:1px solid #e2e8f0; font-size:13px;";
@@ -737,7 +829,6 @@
                     list.appendChild(div);
                 });
                 
-                // Рендеримо світлофори
                 signals.forEach(item => {
                     const div = document.createElement('div');
                     div.style = "display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:8px; border:1px solid #e2e8f0; font-size:13px;";
@@ -760,7 +851,6 @@
             }
         }
 
-        // НОВА ФУНКЦІЯ: точкове видалення обраних чекбоксами елементів
         async function clearSelectedPdTracks() {
             const checkedInputs = document.querySelectorAll('.clean-item-chk:checked');
             if (checkedInputs.length === 0) {
@@ -784,7 +874,6 @@
             let totalDeleted = 0;
             
             try {
-                // Видаляємо з lines_config
                 if (groups.lines_config.length > 0) {
                     const queryIds = groups.lines_config.join(',');
                     logSys(`Видалення ${groups.lines_config.length} записів з lines_config...`);
@@ -792,7 +881,6 @@
                     if (res.ok) totalDeleted += groups.lines_config.length;
                 }
                 
-                // Видаляємо з signals
                 if (groups.signals.length > 0) {
                     const queryIds = groups.signals.join(',');
                     logSys(`Видалення ${groups.signals.length} світлофорів з signals...`);
@@ -803,7 +891,6 @@
                 logSys(`Успішно видалено ${totalDeleted} записів!`, 'success');
                 alert(`Успішно видалено ${totalDeleted} записів із бази даних!`);
                 
-                // Повне оновлення списків
                 await loadPdsForCleaning(); 
             } catch(e) {
                 logSys("Помилка при видаленні: " + e.message, 'error');
