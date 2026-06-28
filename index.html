@@ -257,7 +257,7 @@
             flex-shrink: 0;
         }
  
-        /* ОНОВЛЕНО: Новий компактний стиль для об'єктів інфраструктури "Інше" (Переїзд тощо) */
+        /* Новий компактний стиль для об'єктів інфраструктури "Інше" (Крива, Переїзд тощо) */
         .infra-badge {
             display: inline-flex;
             align-items: center;
@@ -374,7 +374,7 @@
         .signal-toast-accent { background: #22c55e; color: #1e293b; font-weight: 900; padding: 3px 8px; border-radius: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
         .signal-toast-text { font-weight: 500; line-height: 1.3; }
  
-        /* ОНОВЛЕНО: Стилі блоку інформаційного підпису розробника */
+        /* Блок інформаційного підпису розробника */
         .app-footer {
             width: 100%;
             padding: 16px 12px 4px 12px;
@@ -717,10 +717,20 @@
                     const leftMargin = document.createElement('div');
                     leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
                     
-                    const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isLeftTrack(s.track_type));
+                    // МОДЕРНІЗОВАНО: Пошук лівих сигналів з урахуванням лінійних меж (початку та кінця)
+                    let leftSignal = signalsData.find(s => isLeftTrack(s.track_type) && parseInt(s.km) === km && parseInt(s.piket) === pk);
+                    if (!leftSignal) {
+                        leftSignal = signalsData.find(s => {
+                            if (!isLeftTrack(s.track_type) || s.signal_type !== 'інше') return false;
+                            const sVal = parseInt(s.km) * 100 + parseInt(s.piket);
+                            const eVal = parseInt(s.end_km || s.km) * 100 + parseInt(s.end_pk || s.piket);
+                            const curVal = km * 100 + pk;
+                            return curVal >= sVal && curVal <= eVal;
+                        });
+                    }
+
                     if (leftSignal) {
                         const signalNote = leftSignal.signal_type || leftSignal.signal || 'Примітка відсутня';
-                        // ОНОВЛЕНО: Динамічне розділення класів для Світлофора (signal-badge) та Іншого (infra-badge)
                         const isOtherObj = leftSignal.signal_type === 'інше';
                         leftMargin.innerHTML = `
                             <span class="${isOtherObj ? 'infra-badge' : 'signal-badge'}" 
@@ -777,10 +787,20 @@
                     const rightMargin = document.createElement('div');
                     rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
                     
-                    const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isRightTrack(s.track_type));
+                    // МОДЕРНІЗОВАНО: Пошук правих сигналів з урахуванням лінійних меж (початку та кінця)
+                    let rightSignal = signalsData.find(s => isRightTrack(s.track_type) && parseInt(s.km) === km && parseInt(s.piket) === pk);
+                    if (!rightSignal) {
+                        rightSignal = signalsData.find(s => {
+                            if (!isRightTrack(s.track_type) || s.signal_type !== 'інше') return false;
+                            const sVal = parseInt(s.km) * 100 + parseInt(s.piket);
+                            const eVal = parseInt(s.end_km || s.km) * 100 + parseInt(s.end_pk || s.piket);
+                            const curVal = km * 100 + pk;
+                            return curVal >= sVal && curVal <= eVal;
+                        });
+                    }
+
                     if (rightSignal) {
                         const signalNote = rightSignal.signal_type || rightSignal.signal || 'Примітка відсутня';
-                        // ОНОВЛЕНО: Динамічне розділення класів для Світлофора (signal-badge) та Іншого (infra-badge)
                         const isOtherObj = rightSignal.signal_type === 'інше';
                         rightMargin.innerHTML = `
                             <span class="${isOtherObj ? 'infra-badge' : 'signal-badge'}" 
