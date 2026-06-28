@@ -79,8 +79,25 @@
         .form-control:focus { border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2); }
         .secure-numeric-input { -webkit-text-security: disc !important; text-security: disc !important; }
         
-        .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: background 0.2s; }
+        /* ЗМІНЕНО: Додано flex-налаштування для гарного вирівнювання іконки завантаження по центру */
+        .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-submit:hover { background: var(--primary-hover); }
+        .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        /* ДОДАНО: Стилі крутилки-анімації завантаження */
+        .btn-loader {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: btnSpinner 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes btnSpinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
         /* Стиль фіксації кнопки збереження на дисплеї */
         .sticky-save-btn {
@@ -226,14 +243,14 @@
             <div class="form-group" style="display: flex; gap: 10px; justify-content: center; align-items: center; max-width: 340px; margin: 0 auto 14px auto;">
                 <div style="display: flex; align-items: center; gap: 4px; flex: 1;">
                     <span style="font-size: 18px; font-weight: 900; color: #115e59; user-select: none;">ПД-</span>
-                    <input type="tel" id="login-pd-input" class="form-control" style="text-align: center; font-size: 18px; font-weight: 900; color: #115e59; height: 50px;" oninput="if(this.value.length > 2) this.value = this.value.slice(0, 2)">
+                    <input type="tel" id="login-pd-input" class="form-control" style="text-align: center; font-size: 18px; font-weight: 900; color: #115e59; height: 50px;" oninput="if(this.value.length > 2) this.value = this.value.slice(0, 2); if(this.value.length === 2) document.getElementById('login-password-input').focus();" autofocus>
                 </div>
                 <div style="flex: 1.3;">
                     <input type="tel" id="login-password-input" class="form-control secure-numeric-input" style="height: 50px; text-align: center; font-size: 18px; font-weight: 600; letter-spacing: 2px;" autocomplete="off">
                 </div>
             </div>
             
-            <button class="btn-submit" onclick="executeLogin()">Увійти в кабінет</button>
+            <button id="login-submit-btn" class="btn-submit" onclick="executeLogin()">Увійти в кабінет</button>
         </div>
  
         <div id="cabinet-card" class="screen hidden">
@@ -318,7 +335,7 @@
  
             <div id="modal-content-photo" class="modal-tab-content hidden">
                 <div class="form-group">
-                    <label>Прикріпити фото (можна обрати кілька підряд):</label>
+                    <label>Прикріпити photo (можна обрати кілька підряд):</label>
                     <label for="note-file-input" class="btn-submit" style="display: block; text-align: center; background: #e6f4ea; color: #115e59; border: 1px solid #a7f3d0; margin-top: 4px; padding: 10px; font-size: 14px; cursor: pointer; user-select: none;">
                         📸 Обрати фотографії
                     </label>
@@ -386,7 +403,6 @@
         let activeNotePhotos = []; 
         let currentLightboxIndex = 0;
  
-        // ОНОВЛЕНО: Масиви для роботи з кількома аудіофайлами підряд
         let mediaRecorder = null;
         let audioChunks = [];
         let activeNoteAudios = [];             
@@ -452,10 +468,11 @@
             } catch (e) { logSys("Помилка підключення: " + e.message, "error"); }
         });
  
-        // ПАРАМЕТРИ ВХОДУ: Нова функція авторизації (Околоток цифрами + Пароль з бази) через безпечні для хрому текстові маски
+        // ОНОВЛЕНО: Додано індикатор завантаження на кнопку (крутилка CSS + блокування) на період тривалих асинхронних fetch-запитів до бази даних Supabase
         async function executeLogin() {
             const pdInput = document.getElementById('login-pd-input');
             const passInput = document.getElementById('login-password-input');
+            const loginBtn = document.getElementById('login-submit-btn');
             
             let pdNum = pdInput.value.trim();
             const password = passInput.value.trim();
@@ -465,14 +482,16 @@
                 return;
             }
 
-            // Додаємо лідируючий нуль для однозначних номерів околотків
             if (pdNum.length === 1) pdNum = "0" + pdNum;
             const roleName = `ПД-${pdNum}`;
+            
+            // Вмикаємо лоадер та блокуємо повторні кліки
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<div class="btn-loader"></div> Перевірка доступу...';
             
             logSys(`Перевірка автентифікації для ${roleName}...`);
 
             try {
-                // Перевіряємо наявність індивідуального пароля у таблиці бази
                 const { data: pwData, error: pwError } = await supabaseClient
                     .from('app_passwords')
                     .select('*')
@@ -491,7 +510,6 @@
                         return;
                     }
                 } else {
-                    // Якщо міняли запис, діє автоматичне правило подвоєння номера ПД
                     const defaultPassword = pdNum + pdNum;
                     if (password === defaultPassword) {
                         isAuthorized = true;
@@ -532,10 +550,13 @@
             } catch (e) { 
                 logSys("Помилка завантаження даних: " + e.message, "error"); 
                 alert("Помилка підключення: " + e.message);
+            } finally {
+                // Завжди повертаємо кнопку в робочий стан при будь-якому результаті
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'Увійти в кабінет';
             }
         }
 
-        // ПАРАМЕТРИ ВХОДУ: Функції керування видимістю та надсилання оновленого пароля ПД
         function togglePasswordChangeBlock() {
             const block = document.getElementById('password-change-block');
             block.classList.toggle('hidden');
@@ -652,7 +673,6 @@
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
  
-                    // БОКОВЕ ПОЛЕ ЛІВЕ
                     const leftMargin = document.createElement('div');
                     leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isLeftTrack(s.track_type));
@@ -661,7 +681,6 @@
                     }
                     nodeRow.appendChild(leftMargin);
  
-                    // ================= БРІВКА ПАРНА (ЛІВА) =================
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
                      
@@ -685,7 +704,6 @@
                                     try { localPhotos = JSON.parse(note.photo_url); if(!Array.isArray(localPhotos)) localPhotos = [note.photo_url]; } 
                                     catch(e) { localPhotos = [note.photo_url]; }
                                 }
-                                // ОНОВЛЕНО: Читання кількох аудіозаписів для іконок головного екрану
                                 let localAudios = [];
                                 if (note.audio_url) {
                                     try { localAudios = JSON.parse(note.audio_url); if(!Array.isArray(localAudios)) localAudios = [note.audio_url]; }
@@ -716,7 +734,6 @@
                     const centerPiket = document.createElement('div'); centerPiket.className = 'piket-center-core'; centerPiket.innerText = pk; nodeRow.appendChild(centerPiket);
                     nodeRow.appendChild(document.createElement('div')).className = 'rail-line-visual';
  
-                    // ================= БРІВКА НЕПАРНА (ПРАВА) =================
                     const rightBank = document.createElement('div');
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
                      
@@ -766,7 +783,6 @@
                     }
                     nodeRow.appendChild(rightBank);
  
-                    // БОКОВЕ ПОЛЕ ПРАВЕ
                     const rightMargin = document.createElement('div');
                     rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isRightTrack(s.track_type));
@@ -805,9 +821,8 @@
             }
             renderModalPhotosPreview();
  
-            // ОНОВЛЕНО: Читання раніше збереженого масиву аудіозаписів з Supabase
             activeNoteAudios = [];
-            localAudioBlobsToUpload = []; // Скидаємо чергу нових записів
+            localAudioBlobsToUpload = []; 
  
             if (note && note.audio_url) {
                 try {
@@ -816,7 +831,6 @@
                 } catch(e) { activeNoteAudios = [note.audio_url]; }
             }
  
-            // Запускаємо перемальовку кнопок і плеєрів аудіо
             const micBtn = document.getElementById('mic-record-btn');
             micBtn.classList.remove('recording');
             micBtn.innerHTML = "🎙️";
@@ -854,7 +868,6 @@
             }
         }
  
-        // ОНОВЛЕНО: Функція відмальовки списку всіх аудіозаписів пікета
         function renderModalAudiosPreview() {
             const previewZone = document.getElementById('note-audio-preview-zone');
             previewZone.innerHTML = "";
@@ -879,13 +892,11 @@
             });
         }
  
-        // ОНОВЛЕНО: Видалення конкретного треку з картки
         function removeSingleAudio(idx) {
             if (confirm("Видалити цей аудіозапис з картки пікета?")) {
                 const urlToRemove = activeNoteAudios[idx];
                 activeNoteAudios.splice(idx, 1);
                  
-                // Вилучаємо також із черги завантаження, якщо трек був щойно записаний локально
                 localAudioBlobsToUpload = localAudioBlobsToUpload.filter(item => item.localUrl !== urlToRemove);
                  
                 renderModalAudiosPreview();
@@ -940,7 +951,6 @@
             }
         }
  
-        // ОНОВЛЕНО: Функція запису аудіо з додаванням у динамічний масив (чергу)
         async function toggleAudioRecording() {
             const btn = document.getElementById('mic-record-btn');
             const statusText = document.getElementById('recording-status-text');
@@ -968,7 +978,6 @@
                     const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/wav' });
                     const localUrl = URL.createObjectURL(blob);
                      
-                    // Додаємо трек у загальний список відображення та реєструємо бінарник для Supabase
                     activeNoteAudios.push(localUrl);
                     localAudioBlobsToUpload.push({ blob: blob, localUrl: localUrl });
                      
@@ -1005,7 +1014,6 @@
             try {
                 let newUploadedUrls = [];
  
-                // 1. Завантаження нових фотографій у сховище
                 if (fileInput.files.length > 0) {
                     for (let i = 0; i < fileInput.files.length; i++) {
                         const file = fileInput.files[i];
@@ -1029,10 +1037,7 @@
                 }
                 const totalPhotosList = [...activeNotePhotos, ...newUploadedUrls];
  
-                // 2. ОНОВЛЕНО: Послідовне завантаження кількох записаних аудіофайлів з черги
                 let uploadedAudioUrls = [];
-                 
-                // Відокремлюємо старі серверні посилання від тимчасових локальних (blob:)
                 let existingServerAudios = activeNoteAudios.filter(url => !url.startsWith('blob:'));
  
                 if (localAudioBlobsToUpload.length > 0) {
@@ -1062,7 +1067,6 @@
                 }
                 const totalAudiosList = [...existingServerAudios, ...uploadedAudioUrls];
  
-                // 3. Відправка Payload у таблицю (обидва медіа-поля тепер є масивами)
                 const notePayload = {
                     pd: currentPD,
                     km: activeNoteKm,
