@@ -257,6 +257,25 @@
             flex-shrink: 0;
         }
  
+        /* ОНОВЛЕНО: Новий компактний стиль для об'єктів інфраструктури "Інше" (Переїзд тощо) */
+        .infra-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #cbd5e1;       /* Світло-сірий колір */
+            color: #334155;            /* Темно-сірий колір шрифту для читабельності */
+            padding: 2px 5px;          /* Зменшені внутрішні поля */
+            border-radius: 4px;        /* Квадратна форма із закругленими кутами */
+            font-size: 10px;           /* Зменшений розмір шрифту */
+            font-weight: 800;
+            border: 1px solid #94a3b8;
+            min-width: 36px;           /* Зменшена мінімальна ширина */
+            max-width: 42px;           /* Гарантує, що синя межа станції залишиться видимою */
+            box-sizing: border-box;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+
         /* Зони обкошування */
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; }
         .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
@@ -370,6 +389,7 @@
             letter-spacing: 0.5px;
         }
 
+        @media (max-width: 600px) { .debug-panel { width: calc(100% - 20px); } }
         @keyframes blink-cursor { 0%, 100% { opacity: 0; } 50% { opacity: 0.8; } }
         @keyframes pulse-border { 0%, 100% { box-shadow: 0 0 0 rgba(13, 148, 136, 0); } 50% { box-shadow: 0 0 14px rgba(13, 148, 136, 0.15); border-color: #0d9488; } }
     </style>
@@ -481,7 +501,7 @@
         }
  
         async function reloadDataFromCloud() {
-            logSys("Завантаження даних із Supabase...");
+            logSys("Завантаження дані із Supabase...");
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
                 const resTracks = await fetch(`${baseDbUrl}/rest/v1/lines_config?select=*`, { headers });
@@ -493,7 +513,7 @@
                 const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals?select=*`, { headers });
                 signalsData = await resSignals.json();
  
-                logSys(`Синхронізовано з хмарою. Ліній: ${tracksData.length}, Світлофорів: ${signalsData.length}`, 'success');
+                logSys(`Синхронізовано з хмарою. Ліній: ${tracksData.length}, Об'єктів: ${signalsData.length}`, 'success');
             } catch (e) {
                 logSys("Помилка завантаження: " + e.message, 'error');
             }
@@ -693,15 +713,17 @@
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
  
-                    // БОКОВЕ ПОЛЕ ЛІВЕ + СТАНЦІЙНА СИНЯ ДУЖКА (жодних інших кольорових заливок рядка)
+                    // БОКОВЕ ПОЛЕ ЛІВЕ + СТАНЦІЙНА СИНЯ ДУЖКА
                     const leftMargin = document.createElement('div');
                     leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
                     
                     const leftSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isLeftTrack(s.track_type));
                     if (leftSignal) {
                         const signalNote = leftSignal.signal_type || leftSignal.signal || 'Примітка відсутня';
+                        // ОНОВЛЕНО: Динамічне розділення класів для Світлофора (signal-badge) та Іншого (infra-badge)
+                        const isOtherObj = leftSignal.signal_type === 'інше';
                         leftMargin.innerHTML = `
-                            <span class="signal-badge" 
+                            <span class="${isOtherObj ? 'infra-badge' : 'signal-badge'}" 
                                   style="cursor: pointer;" 
                                   data-name="${leftSignal.signal_name}" 
                                   data-type="${signalNote}" 
@@ -711,7 +733,7 @@
                     }
                     nodeRow.appendChild(leftMargin);
  
-                    // БРІВКА ПАРНА (Яскравість залежно від приналежності до ПД)
+                    // БРІВКА ПАРНА
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
                     if (!isLeftMine) {
@@ -728,7 +750,7 @@
                     leftTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(leftTrackVisual);
  
-                    // ЦЕНТРАЛЬНЕ ЯДРО ПІКЕТА (Абсолютно чисте, без зелені чи сторонньої заливки)
+                    // ЦЕНТРАЛЬНЕ ЯДРО ПІКЕТА
                     const centerPiket = document.createElement('div');
                     centerPiket.className = 'piket-center-core';
                     centerPiket.innerText = pk;
@@ -739,7 +761,7 @@
                     rightTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(rightTrackVisual);
  
-                    // БРІВКА НЕПАРНА (Яскравість залежно від приналежності до ПД)
+                    // БРІВКА НЕПАРНА
                     const rightBank = document.createElement('div');
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
                     if (!isRightMine) {
@@ -751,15 +773,17 @@
                     }
                     nodeRow.appendChild(rightBank);
                     
-                    // БОКОВЕ ПОЛЕ ПРАВЕ + СТАНЦІЙНА СИНЯ ДУЖКА (жодних інших кольорових заливок рядка)
+                    // БОКОВЕ ПОЛЕ ПРАВЕ + СТАНЦІЙНА СИНЯ ДУЖКА
                     const rightMargin = document.createElement('div');
                     rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
                     
                     const rightSignal = signalsData.find(s => parseInt(s.km) === km && parseInt(s.piket) === pk && isRightTrack(s.track_type));
                     if (rightSignal) {
                         const signalNote = rightSignal.signal_type || rightSignal.signal || 'Примітка відсутня';
+                        // ОНОВЛЕНО: Динамічне розділення класів для Світлофора (signal-badge) та Іншого (infra-badge)
+                        const isOtherObj = rightSignal.signal_type === 'інше';
                         rightMargin.innerHTML = `
-                            <span class="signal-badge" 
+                            <span class="${isOtherObj ? 'infra-badge' : 'signal-badge'}" 
                                   style="cursor: pointer;" 
                                   data-name="${rightSignal.signal_name}" 
                                   data-type="${signalNote}" 
