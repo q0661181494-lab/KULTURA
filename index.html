@@ -277,7 +277,7 @@
         .status-overgrown-red { background-color: #ef4444 !important; color: white !important; }
         .status-unknown { background-color: #f1f5f9 !important; color: #64748b !important; border: 1px dashed #cbd5e1 !important; }
         
-        /* ПЕРЕНЕСЕНО: Прихований монітор системи з викликом знизу ліворуч */
+        /* Прихований монітор системи з викликом знизу ліворуч */
         .debug-panel {
             flex-shrink: 0;
             width: 100%;
@@ -304,7 +304,7 @@
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 60px; overflow-y: auto; text-align: left; }
         
-        /* Напівпрозора кнопка виклику монітора */
+        /* Напівпроза кнопка виклику монітора */
         .debug-toggle-btn {
             position: fixed;
             bottom: 4px;
@@ -396,8 +396,10 @@
         </div>
     </div>
  
+    <!-- Напівпрозора кнопка виклику панелі монітора -->
     <button class="debug-toggle-btn" onclick="toggleDebugPanel()">🛠️</button>
 
+    <!-- Панель монітора системи з master -->
     <div class="debug-panel" id="system-debug-panel">
         <div class="debug-title" style="display: flex; justify-content: space-between; align-items: center;">
             <span>🖥️ Монітор системи</span>
@@ -421,7 +423,6 @@
         let currentMode = 'pd';
         let toastTimeout;
  
-        // Оновлено: Препенд для плавного моніторингу консолі як у master
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
             if(!con) return;
@@ -481,7 +482,6 @@
             }
         }
  
-        // Допоміжні функції парсингу та нормалізації з master
         function cleanPd(pdStr) { return pdStr ? pdStr.trim().toUpperCase() : ""; }
 
         function sanitizeString(str) {
@@ -565,7 +565,6 @@
             drawDoubleTrackDiagram();
         }
  
-        // Оновлено: Порядок відображення робіт за правилом 30 та 45 днів
         function getPiketAnalysis(ownerPd, peregonName, trackType, km, pk) {
             if (!ownerPd) return { colorClass: 'status-unknown', label: 'Немає даних', days: '' };
             const record = mowingData.find(m => cleanPd(m.pd) === cleanPd(ownerPd) && parseInt(m.km) === km && parseInt(m.piket) === pk && (trackType === 'парна' ? isLeftTrack(m.track_type) : isRightTrack(m.track_type)));
@@ -580,7 +579,6 @@
             return { colorClass: 'status-clear-green', label: 'Обкошено', days: `${diffDays} дн.` };
         }
  
-        // Оновлено: Повний перенос алгоритму побудови діаграми, сигналів, суміжних ПД та синіх станцій з master
         function drawDoubleTrackDiagram() {
             const pdNum = document.getElementById('filter-pd-input').value.trim();
             const container = document.getElementById('diagram-render-zone');
@@ -639,7 +637,6 @@
                 container.appendChild(headersRow);
  
                 for (let pk = 1; pk <= 10; pk++) {
-                    // Збір усіх конфігурацій для поточного пікета для виявлення станцій та суміжних ліній
                     let configsForPk = tracksData.filter(s => {
                         let sKm = parseInt(s.start_km), eKm = parseInt(s.end_km);
                         let sPk = parseInt(s.start_pk), ePk = parseInt(s.end_pk);
@@ -679,7 +676,7 @@
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
  
-                    // БОКОВЕ ПОЛЕ ЛІВЕ + СТАНЦІЙНА СИНЯ ДУЖКА
+                    // БОКОВЕ ПОЛЕ ЛІВЕ + СТАНЦІЙНА СИНЯ ДУЖКА (жодних інших кольорових заливок рядка)
                     const leftMargin = document.createElement('div');
                     leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
                     
@@ -697,7 +694,7 @@
                     }
                     nodeRow.appendChild(leftMargin);
  
-                    // БРІВКА ПАРНА (З урахуванням логіки яскравості за ПД)
+                    // БРІВКА ПАРНА (Яскравість залежно від приналежності до ПД)
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
                     if (!isLeftMine) {
@@ -714,15 +711,10 @@
                     leftTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(leftTrackVisual);
  
-                    // ЦЕНТРАЛЬНЕ ЯДРО ПІКЕТА (Підсвічується зеленим для станцій як у master)
+                    // ЦЕНТРАЛЬНЕ ЯДРО ПІКЕТА (Абсолютно чисте, без зелені чи сторонньої заливки)
                     const centerPiket = document.createElement('div');
                     centerPiket.className = 'piket-center-core';
                     centerPiket.innerText = pk;
-                    if (isLeftStation || isRightStation) {
-                        centerPiket.style.background = '#0d9488';
-                        centerPiket.style.color = 'white';
-                        centerPiket.style.borderColor = '#0f766e';
-                    }
                     nodeRow.appendChild(centerPiket);
  
                     const rightTrackVisual = document.createElement('div');
@@ -730,7 +722,7 @@
                     rightTrackVisual.innerHTML = '<span></span><span></span><span></span><span></span>';
                     nodeRow.appendChild(rightTrackVisual);
  
-                    // БРІВКА НЕПАРНА (З урахуванням логіки яскравості за ПД)
+                    // БРІВКА НЕПАРНА (Яскравість залежно від приналежності до ПД)
                     const rightBank = document.createElement('div');
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
                     if (!isRightMine) {
@@ -742,7 +734,7 @@
                     }
                     nodeRow.appendChild(rightBank);
                     
-                    // БОКОВЕ ПОЛЕ ПРАВЕ + СТАНЦІЙНА СИНЯ ДУЖКА
+                    // БОКОВЕ ПОЛЕ ПРАВЕ + СТАНЦІЙНА СИНЯ ДУЖКА (жодних інших кольорових заливок рядка)
                     const rightMargin = document.createElement('div');
                     rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
                     
