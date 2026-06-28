@@ -73,7 +73,7 @@
 
         /* Модальне вікно */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 94, 89, 0.5); z-index: 100; justify-content: center; align-items: center; padding: 12px; box-sizing: border-box; }
-        .modal-window { background: white; width: 100%; max-width: 440px; height: 85vh; border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: hidden; border: 1px solid #d1fae5; }
+        .modal-window { background: white; width: 100%; max-width: 440px; height: 85vh; border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: hidden; border: 1px solid #d1fae5; position: relative; }
         .modal-header { background: #115e59; color: white; padding: 14px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .modal-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; font-weight: bold; }
         .modal-filter-bar { padding: 10px 14px; background: #f0fdf4; border-bottom: 1px solid #c2e7d9; display: flex; align-items: center; gap: 10px; justify-content: space-between; }
@@ -91,12 +91,16 @@
         .btn-card-delete { background: #fee2e2; color: #dc2626; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; margin-left: 8px; }
         .btn-card-delete:hover { background: #fca5a5; }
 
-        /* Монітор системи */
-        .debug-panel { margin-top: 8px; padding: 12px; background-color: #e6f4ea; border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px; font-size: 11px; font-family: monospace; box-shadow: 0 2px 4px rgba(11,94,89,0.02); width: 100%; box-sizing: border-box; }
+        /* Оптимізований монітор системи — виїзна фіксована панель знизу */
+        .debug-panel { flex-shrink: 0; width: 100%; max-width: 480px; position: fixed; bottom: -210px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; background-color: rgba(230, 244, 234, 0.98); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px 12px 0 0; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 20px rgba(11,94,89,0.15); box-sizing: border-box; transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .debug-panel.active { bottom: 0px; }
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 90px; overflow-y: auto; text-align: left; }
+        
+        /* Кнопка виклику монітора в лівому нижньому кутку екрана (як у Кабінеті ПД) */
+        .debug-toggle-btn { position: fixed; bottom: 4px; left: 4px; width: 26px; height: 26px; background: rgba(148, 163, 184, 0.12); color: #475569; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; user-select: none; transition: background 0.2s, opacity 0.2s; opacity: 0.6; }
+        .debug-toggle-btn:hover { background: rgba(148, 163, 184, 0.35); opacity: 1; }
 
-        /* ОНОВЛЕНО: Клас прихованого маскування цифрових полів пароля */
         .secure-numeric-input { -webkit-text-security: disc !important; text-security: disc !important; }
     </style>
 </head>
@@ -128,7 +132,7 @@
             
             <div class="admin-tabs">
                 <button id="mode-btn-lines" class="admin-tab-btn active" onclick="switchAdminMode('lines')">🗺️ Дільниці / Станції</button>
-                <button id="mode-btn-signals" class="admin-tab-btn" onclick="switchAdminMode('signals')">🚦 Світлофори</button>
+                <button id="mode-btn-signals" class="admin-tab-btn" onclick="switchAdminMode('signals')">🚦 Світлофори/інше</button>
             </div>
 
             <label class="track-label">1. Введіть околоток:</label>
@@ -188,10 +192,14 @@
             </div>
 
             <div id="form-signals-block" style="display: none;">
-                <label class="track-label">2. Літера світлофора:</label>
-                <input type="text" id="sig-name" class="input-field">
+                <label class="track-label">2. Виберіть тип та назву об'єкта:</label>
+                <div class="type-toggle-group">
+                    <button id="sig-type-btn-signal" class="type-toggle-btn active" onclick="setSignalObjectType('signal')">Світлофор</button>
+                    <button id="sig-type-btn-other" class="type-toggle-btn" onclick="setSignalObjectType('other')">Інше</button>
+                </div>
+                <input type="text" id="sig-name" class="input-field" placeholder="Введіть назву або літеру об'єкта">
 
-                <label class="track-label">3. Колія світлофора:</label>
+                <label class="track-label">3. Оберіть колію:</label>
                 <div class="track-checkbox-group">
                     <label class="track-checkbox-item">
                         <input type="checkbox" id="sig-chk-neparna" checked>
@@ -203,22 +211,32 @@
                     </label>
                 </div>
 
-                <label class="track-label">4. Координати встановлення:</label>
+                <label class="track-label">4. Визначте лінійні межі:</label>
                 <div class="km-section">
                     <div class="km-pk-row">
                         <div class="km-col">
-                            <span class="sub-heading">Встановлений на КМ</span>
-                            <input type="number" id="sig-km" class="input-field" style="margin-bottom:0;">
+                            <span class="sub-heading">Початок (КМ)</span>
+                            <input type="number" id="sig-start-km" class="input-field" style="margin-bottom:0;">
                         </div>
                         <div class="pk-col">
-                            <span class="sub-heading">Встановлений на ПК</span>
-                            <input type="number" id="sig-pk" class="input-field" style="margin-bottom:0;" min="1" max="10">
+                            <span class="sub-heading">Початок (ПК)</span>
+                            <input type="number" id="sig-start-pk" class="input-field" style="margin-bottom:0;" min="1" max="10">
                         </div>
                     </div>
                 </div>
 
-                <label class="track-label">5. Примітки (Тип сигналу):</label>
-                <input type="text" id="sig-type" class="input-field">
+                <div class="km-section">
+                    <div class="km-pk-row">
+                        <div class="km-col">
+                            <span class="sub-heading">Кінець (КМ)</span>
+                            <input type="number" id="sig-end-km" class="input-field" style="margin-bottom:0;">
+                        </div>
+                        <div class="pk-col">
+                            <span class="sub-heading">Кінець (ПК)</span>
+                            <input type="number" id="sig-end-pk" class="input-field" style="margin-bottom:0;" min="1" max="10">
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <button class="btn-submit" onclick="saveDataToCloud()">Зберегти в базу даних</button>
@@ -252,11 +270,16 @@
             </div>
             <button class="btn-submit" onclick="executeChangeAdminPassword()">Оновити пароль адміна</button>
         </div>
+    </div>
 
-        <div class="debug-panel">
-            <div class="debug-title">🖥️ Монітор системи</div>
-            <div id="debug-console" class="debug-scroll"></div>
+    <button class="debug-toggle-btn" onclick="toggleDebugPanel()">🛠️</button>
+
+    <div class="debug-panel" id="system-debug-panel">
+        <div class="debug-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>🖥️ Монітор системи</span>
+            <span onclick="toggleDebugPanel()" style="cursor:pointer; padding: 0 4px; font-weight: bold; color: #dc2626;">[Сховати]</span>
         </div>
+        <div id="debug-console" class="debug-scroll"></div>
     </div>
 
     <div class="modal-overlay" id="db-modal">
@@ -270,7 +293,7 @@
                     <span style="font-size:11px; font-weight:bold; color:#115e59; display:block;">Таблиця:</span>
                     <select id="modal-table-select" onchange="loadTableDataFromModal()" class="input-field" style="margin-bottom:0; padding:2px; font-size:12px; height:28px; width:150px;">
                         <option value="lines_config">🗺️ Дільниці (lines_config)</option>
-                        <option value="signals">🚦 Світлофори (signals)</option>
+                        <option value="signals">🚦 Світлофори/інше (signals)</option>
                     </select>
                 </div>
                 <div>
@@ -291,6 +314,8 @@
         let currentAdminMode = 'lines'; 
         let selectedPds = [];
         let currentObjectType = 'peregon'; 
+        let currentSignalObjectType = 'signal'; 
+        const graphiteColor = '#475569'; // Статичний колір за замовчуванням для вкладки "Інше"
 
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
@@ -303,9 +328,19 @@
             con.scrollTop = con.scrollHeight;
         }
 
+        function toggleDebugPanel() {
+            document.getElementById('system-debug-panel').classList.toggle('active');
+        }
+
+        function setSignalObjectType(type) {
+            currentSignalObjectType = type;
+            document.getElementById('sig-type-btn-signal').classList.toggle('active', type === 'signal');
+            document.getElementById('sig-type-btn-other').classList.toggle('active', type === 'other');
+            logSys(type === 'other' ? "Обрано тип об'єкта: Інше (фіксований графітовий колір)." : "Обрано тип об'єкта: Світлофор.");
+        }
+
         function clearFormInputs() {
             document.getElementById('admin-pd-num').value = "";
-            
             document.getElementById('admin-peregon').value = "";
             document.getElementById('admin-start-km').value = "";
             document.getElementById('admin-start-pk').value = "";
@@ -315,13 +350,15 @@
             document.getElementById('chk-parna').checked = true;
             
             document.getElementById('sig-name').value = "";
-            document.getElementById('sig-km').value = "";
-            document.getElementById('sig-pk').value = "";
-            document.getElementById('sig-type').value = "";
+            document.getElementById('sig-start-km').value = "";
+            document.getElementById('sig-start-pk').value = "";
+            document.getElementById('sig-end-km').value = "";
+            document.getElementById('sig-end-pk').value = "";
             document.getElementById('sig-chk-neparna').checked = true;
             document.getElementById('sig-chk-parna').checked = false;
+            setSignalObjectType('signal');
 
-            logSys("Всі поля форми очищено.");
+            logSys("Всі поля форми конфігурації очищено.");
         }
 
         function switchAdminMode(mode) {
@@ -331,7 +368,7 @@
             
             document.getElementById('mode-btn-lines').classList.toggle('active', mode === 'lines');
             document.getElementById('mode-btn-signals').classList.toggle('active', mode === 'signals');
-            logSys(`Перемкнуто режим на: ${mode === 'lines' ? 'Дільниці' : 'Світлофори'}`);
+            logSys(`Перемкнуто режим на: ${mode === 'lines' ? 'Дільниці' : 'Світлофори/інше'}`);
         }
 
         async function saveDataToCloud() {
@@ -371,11 +408,10 @@
                 }
 
                 const typeUkr = currentObjectType === 'station' ? 'станція' : 'перегін';
-                logSys(`Ініціалізація збереження дільниці для ${pdNum}. Обрано колій: ${trackTypes.length}`);
+                logSys(`Збереження дільниці для ${pdNum}. Обрано колій: ${trackTypes.length}`);
 
                 try {
                     let successCount = 0;
-                    
                     for (const singleTrack of trackTypes) {
                         const payload = {
                             pd: pdNum,
@@ -388,7 +424,6 @@
                             end_pk: endPk
                         };
 
-                        logSys(`Надсилання запису для колії: ${singleTrack}...`);
                         const res = await fetch(`${baseDbUrl}/rest/v1/lines_config`, {
                             method: 'POST',
                             headers,
@@ -399,11 +434,11 @@
 
                     if (successCount === trackTypes.length) {
                         logSys(`Усі записи дільниці (${successCount}) успішно додано!`, "success");
-                        alert("Дані дільниці успешно збережено!");
+                        alert("Дані дільниці успішно збережено!");
                         clearFormInputs(); 
                         loadPdsForCleaning();
                     } else {
-                        logSys(`Помилка: збережено лише ${successCount} з ${trackTypes.length} записів.`, "error");
+                        logSys(`Помилка: збережено лише ${successCount} записів.`, "error");
                     }
                 } catch (e) {
                     logSys(`Помилка мережі: ${e.message}`, "error");
@@ -411,12 +446,13 @@
 
             } else if (currentAdminMode === 'signals') {
                 const sigName = document.getElementById('sig-name').value.trim();
-                const km = parseInt(document.getElementById('sig-km').value);
-                const piket = parseInt(document.getElementById('sig-pk').value);
-                const sigType = document.getElementById('sig-type').value.trim();
+                const startKm = parseInt(document.getElementById('sig-start-km').value);
+                const startPk = parseInt(document.getElementById('sig-start-pk').value);
+                const endKm = parseInt(document.getElementById('sig-end-km').value);
+                const endPk = parseInt(document.getElementById('sig-end-pk').value);
 
-                if (!sigName || isNaN(km) || isNaN(piket)) {
-                    alert("Заповніть обов'язкові поля світлофора (Літера, КМ та ПК)!");
+                if (!sigName || isNaN(startKm) || isNaN(startPk)) {
+                    alert("Заповніть обов'язкові початкові координати об'єкта!");
                     return;
                 }
 
@@ -424,26 +460,28 @@
                 if (document.getElementById('sig-chk-neparna').checked) trackTypes.push("непарна");
                 if (document.getElementById('sig-chk-parna').checked) trackTypes.push("парна");
                 if (trackTypes.length === 0) {
-                    alert("Оберіть колію для світлофора!");
+                    alert("Оберіть колію для об'єкта!");
                     return;
                 }
 
-                logSys(`Ініціалізація збереження світлофора ${sigName} для ${pdNum}. Обрано колій: ${trackTypes.length}`);
+                logSys(`Збереження об'єкта ${sigName} для ${pdNum}. Тип: ${currentSignalObjectType}`);
 
                 try {
                     let successCount = 0;
-
                     for (const singleTrack of trackTypes) {
                         const payload = {
                             pd: pdNum,
                             signal_name: sigName,
                             track_type: singleTrack, 
-                            km: km,
-                            piket: piket,
-                            signal_type: sigType || 'не вказано'
+                            km: startKm,
+                            piket: startPk,
+                            end_km: isNaN(endKm) ? startKm : endKm,
+                            end_pk: isNaN(endPk) ? startPk : endPk,
+                            signal_type: currentSignalObjectType === 'other' ? 'інше' : 'світлофор',
+                            // Автоматично пишемо фіксований графітовий колір для "інше" або null для світлофора
+                            color_hex: currentSignalObjectType === 'other' ? graphiteColor : null
                         };
 
-                        logSys(`Надсилання світлофора для колії: ${singleTrack}...`);
                         const res = await fetch(`${baseDbUrl}/rest/v1/signals`, {
                             method: 'POST',
                             headers,
@@ -453,13 +491,13 @@
                     }
 
                     if (successCount === trackTypes.length) {
-                        logSys(`Усі записи світлофора (${successCount}) успішно додано!`, "success");
-                        alert("Світлофор успішно збережено в базу!");
+                        logSys(`Успішно додано об'єктів: ${successCount}!`, "success");
+                        alert("Об'єкт успішно збережено в базу!");
                         clearFormInputs(); 
                         loadPdsForCleaning();
                     } else {
-                        logSys(`Помилка: збережено лише ${successCount} з ${trackTypes.length} світлофорів.`, "error");
-                        alert("Часткова помилка збереження. Перевір монітор системи.");
+                        logSys(`Помилка при збереженні записів.`, "error");
+                        alert("Помилка збереження. Перевірте монітор.");
                     }
                 } catch (e) {
                     logSys(`Помилка мережі: ${e.message}`, "error");
@@ -471,12 +509,7 @@
             currentObjectType = type;
             document.getElementById('type-btn-peregon').classList.toggle('active', type === 'peregon');
             document.getElementById('type-btn-station').classList.toggle('active', type === 'station');
-            
-            if (type === 'station') {
-                logSys("Обрано об'єкт: Станція.");
-            } else {
-                logSys("Обрано об'єкт: Перегін.");
-            }
+            logSys(type === 'station' ? "Обрано об'єкт: Станція." : "Обрано об'єкт: Перегін.");
         }
 
         function toggleDropdown(id) {
@@ -487,7 +520,6 @@
             if(drop) drop.classList.toggle('show');
         }
 
-        // ОНОВЛЕНО: Функція авторизації тепер спочатку перевіряє динамічний пароль адміна у хмарі Supabase
         async function verifyAdminPassword() {
             const enteredPass = document.getElementById('admin-password-input').value.trim();
             if (!enteredPass) {
@@ -506,7 +538,6 @@
                 if (pwData && pwData.length > 0) {
                     if (pwData[0].password === enteredPass) isAuthorized = true;
                 } else {
-                    // Якщо таблиця порожня або немає рядка 'admin', залишаємо дефолтний 1234
                     if (enteredPass === "1234") isAuthorized = true;
                 }
                 
@@ -520,7 +551,6 @@
                     logSys("Спроба несанкціонованого входу", "error");
                 }
             } catch (e) {
-                // Автономний бекап-режим на випадок збоїв мережі
                 if (enteredPass === "1234") {
                     logSys("Вхід за резервною схемою", "success");
                     document.getElementById('screen-auth').style.display = 'none';
@@ -532,7 +562,6 @@
             }
         }
 
-        // ОНОВЛЕНО: Нова функція оновлення/запису пароля адміна через чистий fetch REST API
         async function executeChangeAdminPassword() {
             const passwordInput = document.getElementById('new-admin-password');
             const newAdminPw = passwordInput.value.trim();
@@ -557,14 +586,12 @@
                 
                 let res;
                 if (checkData && checkData.length > 0) {
-                    // Якщо роль admin вже є — оновлюємо (PATCH)
                     res = await fetch(`${baseDbUrl}/rest/v1/app_passwords?role=eq.admin`, {
                         method: 'PATCH',
                         headers,
                         body: JSON.stringify({ password: newAdminPw })
                     });
                 } else {
-                    // Якщо немає — створюємо новий рядок (POST)
                     res = await fetch(`${baseDbUrl}/rest/v1/app_passwords`, {
                         method: 'POST',
                         headers,
@@ -578,7 +605,7 @@
                     logSys("Пароль головного адміністратора змінено", "success");
                 } else {
                     alert("Не вдалося оновити пароль.");
-                    logSys("Помилка операції оновлення пароля", "error");
+                    logSys("Помилка оновлення пароля", "error");
                 }
             } catch (e) {
                 alert("Помилка підключення: " + e.message);
@@ -663,12 +690,12 @@
                         <div class="db-card-content">
                             <div class="db-card-top">
                                 <span class="badge-pd">${displayPd}</span>
-                                <span class="badge-signal">${item.signal_type || 'не вказано'}</span>
+                                <span class="badge-signal" style="background:${item.color_hex || '#475569'};">${item.signal_type || 'світлофор'}</span>
                                 <span class="badge-type" style="background:#0f766e;">${item.track_type}</span>
                             </div>
-                            <div class="db-card-name">🚦 Світлофор ${item.signal_name}</div>
+                            <div class="db-card-name">${item.signal_type === 'інше' ? '📦' : '🚦'} ${item.signal_name}</div>
                             <div class="db-card-limits">
-                                Координата: <b>${item.km} КМ</b>, ПК-<b>${item.piket}</b>
+                                Межі: <b>${item.km} КМ</b> (ПК-${item.piket}) → <b>${item.end_km || item.km} КМ</b> (ПК-${item.end_pk || item.piket})
                             </div>
                         </div>
                         <button class="btn-card-delete" onclick="deleteSingleItem('signals', ${item.id})">Видалити</button>
@@ -697,7 +724,7 @@
             try {
                 const res = await fetch(`${baseDbUrl}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers });
                 if(res.ok) {
-                    logSys(`Запис ID ${id} успішно видалено з таблиці ${table}`, 'info');
+                    logSys(`Запис ID ${id} видалено з таблиці ${table}`, 'info');
                     loadTableDataFromModal();
                     loadPdsForCleaning();
                 } else {
@@ -775,7 +802,6 @@
             } else {
                 lbl.innerText = selectedPds.map(x => String(x).startsWith("ПД-") ? x : `ПД-${x}`).join(', ');
             }
-            
             loadItemsForCleaning();
         }
 
@@ -805,7 +831,6 @@
                 const signals = await resSignals.json();
                 
                 list.innerHTML = "";
-                
                 if (lines.length === 0 && signals.length === 0) {
                     list.innerHTML = "<div style='color:gray;padding:8px;font-size:12px;text-align:center;'>Немає записів для вибраних ПД</div>";
                     return;
@@ -814,7 +839,6 @@
                 lines.forEach(item => {
                     const div = document.createElement('div');
                     div.style = "display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:8px; border:1px solid #e2e8f0; font-size:13px;";
-                    
                     const cleanDisplay = String(item.pd).startsWith("ПД-") ? item.pd : `ПД-${item.pd}`;
                     const typeBadgeColor = item.type === 'станція' ? '#6366f1' : '#0d9488';
                     
@@ -832,15 +856,15 @@
                 signals.forEach(item => {
                     const div = document.createElement('div');
                     div.style = "display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:8px; border:1px solid #e2e8f0; font-size:13px;";
-                    
                     const cleanDisplay = String(item.pd).startsWith("ПД-") ? item.pd : `ПД-${item.pd}`;
+                    const badgeColor = item.signal_type === 'інше' ? (item.color_hex || '#475569') : '#f59e0b';
                     
                     div.innerHTML = `
                         <input type="checkbox" class="clean-item-chk" data-table="signals" data-id="${item.id}" style="width:18px; height:18px; accent-color:#ef4444; margin:0; cursor:pointer;">
                         <div style="flex:1; color:#115e59; text-align:left;">
                             <span style="font-weight:bold; font-size:10px; background:#e6f4ea; padding:2px 5px; border-radius:4px; margin-right:4px; color:#115e59;">${cleanDisplay}</span>
-                            <span style="font-weight:bold; font-size:10px; background:#f59e0b; color:white; padding:2px 5px; border-radius:4px; margin-right:4px; text-transform:uppercase;">Сигнал</span>
-                            <b>🚦 Світлофор ${item.signal_name}</b> (${item.track_type} колія, ${item.km} км)
+                            <span style="font-weight:bold; font-size:10px; background:${badgeColor}; color:white; padding:2px 5px; border-radius:4px; margin-right:4px; text-transform:uppercase;">${item.signal_type || 'сигнал'}</span>
+                            <b>${item.signal_type === 'інше' ? '📦' : '🚦'} ${item.signal_name}</b> (${item.track_type} колія, ${item.km} км)
                         </div>
                     `;
                     list.appendChild(div);
@@ -863,7 +887,6 @@
             }
             
             const groups = { lines_config: [], signals: [] };
-            
             checkedInputs.forEach(input => {
                 const table = input.getAttribute('data-table');
                 const id = input.getAttribute('data-id');
@@ -883,14 +906,13 @@
                 
                 if (groups.signals.length > 0) {
                     const queryIds = groups.signals.join(',');
-                    logSys(`Видалення ${groups.signals.length} світлофорів з signals...`);
+                    logSys(`Видалення ${groups.signals.length} об'єктів з signals...`);
                     const res = await fetch(`${baseDbUrl}/rest/v1/signals?id=in.(${queryIds})`, { method: 'DELETE', headers });
                     if (res.ok) totalDeleted += groups.signals.length;
                 }
                 
                 logSys(`Успішно видалено ${totalDeleted} записів!`, 'success');
                 alert(`Успішно видалено ${totalDeleted} записів із бази даних!`);
-                
                 await loadPdsForCleaning(); 
             } catch(e) {
                 logSys("Помилка при видаленні: " + e.message, 'error');
