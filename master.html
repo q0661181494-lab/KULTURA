@@ -128,195 +128,41 @@
         .checkbox-container input { width: 18px; height: 18px; accent-color: #dc2626; cursor: pointer; }
 
         /* Стилі великої адаптивної картки нотаток з фіксованою висотою 80% екрану */
-        #piket-notes-modal .modal-box {
-            max-width: 540px;  
-            width: 90%;
-            height: 80vh;        
-            max-height: 80vh;    
-            position: relative;  
-            display: flex;
-            flex-direction: column; 
-        }
+        #piket-notes-modal .modal-box { max-width: 540px; width: 90%; height: 80vh; max-height: 80vh; position: relative; display: flex; flex-direction: column; }
 
         /* Червоний хрестик для закриття всієї картки нотаток (зверху праворуч) */
-        .modal-close-btn {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            background: transparent;
-            border: none;
-            font-size: 28px;
-            color: #94a3b8;
-            cursor: pointer;
-            line-height: 1;
-            transition: color 0.15s;
-            z-index: 100;
-        }
+        .modal-close-btn { position: absolute; top: 14px; right: 14px; background: transparent; border: none; font-size: 28px; color: #94a3b8; cursor: pointer; line-height: 1; z-index: 100; }
         .modal-close-btn:hover { color: #ef4444; }
 
         /* Стилі сегментованого перемикача всередині картки нотаток */
-        .modal-tabs {
-            display: flex;
-            background: #cbd5e1;
-            border-radius: 10px;
-            padding: 3px;
-            margin: 14px 0;
-            gap: 4px;
-            border: 1px solid #94a3b8;
-            flex-shrink: 0; 
-        }
-        .modal-tab-btn {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 8px;
-            font-weight: 800;
-            font-size: 13px;
-            color: #475569;
-            border-radius: 7px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-        .modal-tab-btn.active {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 2px 6px rgba(0, 139, 116, 0.2);
-        }
+        .modal-tabs { display: flex; background: #cbd5e1; border-radius: 10px; padding: 3px; margin: 14px 0; gap: 4px; border: 1px solid #94a3b8; flex-shrink: 0; }
+        .modal-tab-btn { flex: 1; border: none; background: transparent; padding: 8px; font-weight: 800; font-size: 13px; color: #475569; border-radius: 7px; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .modal-tab-btn.active { background: var(--primary-color); color: white; box-shadow: 0 2px 6px rgba(0, 139, 116, 0.2); }
 
         /* Вміст вкладок займає весь вільний простір і має внутрішній скрол */
-        .modal-tab-content {
-            width: 100%;
-            flex: 1;            
-            overflow-y: auto;   
-            padding-right: 4px; 
-        }
+        .modal-tab-content { width: 100%; flex: 1; overflow-y: auto; padding-right: 4px; }
 
         /* Притискаємо кнопку збереження чітко до нижнього краю фіксованої картки */
-        #piket-notes-modal .btn-submit {
-            margin-top: auto;   
-            flex-shrink: 0;     
-        }
+        #piket-notes-modal .btn-submit { margin-top: auto; flex-shrink: 0; }
 
         /* Контейнер для поля вводу та червоного хрестика очищення тексту */
-        .textarea-wrapper {
-            position: relative;
-            width: 100%;
-        }
-        .clear-textarea-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-            z-index: 10;
-        }
+        .textarea-wrapper { position: relative; width: 100%; }
+        .clear-textarea-btn { position: absolute; top: 8px; right: 8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.15); z-index: 10; }
         .clear-textarea-btn:active { transform: scale(0.9); }
 
         /* Стилі великої круглої кнопки мікрофона */
-        .audio-record-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px 0;
-            gap: 15px;
-        }
-        .mic-btn {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            border: none;
-            background: #e2e8f0;
-            color: #475569;
-            font-size: 36px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            -webkit-tap-highlight-color: transparent;
-        }
-        .mic-btn.recording {
-            background: #ef4444;
-            color: white;
-            animation: mic-pulse 1.5s infinite;
-        }
-        @keyframes mic-pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-        .recording-status {
-            font-size: 13px;
-            font-weight: 700;
-            color: #64748b;
-            text-align: center;
-        }
-        .recording-status.active {
-            color: #ef4444;
-        }
+        .audio-record-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0; gap: 15px; }
+        .mic-btn { width: 90px; height: 90px; border-radius: 50%; border: none; background: #e2e8f0; color: #475569; font-size: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.1); -webkit-tap-highlight-color: transparent; }
+        .mic-btn.recording { background: #ef4444; color: white; animation: mic-pulse 1.5s infinite; }
+        @keyframes mic-pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        .recording-status { font-size: 13px; font-weight: 700; color: #64748b; text-align: center; }
+        .recording-status.active { color: #ef4444; }
 
         /* ОНОВЛЕНО: Галерея збереження кількох аудіоплеєрів підряд */
-        .preview-audios-holder {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 12px;
-            width: 100%;
-            align-items: center;
-        }
-        .preview-audio-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8fafc;
-            padding: 10px 32px 10px 10px; 
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
-            width: 100%;
-            max-width: 320px;
-        }
-        .preview-audio-container audio {
-            width: 100%;
-            height: 32px;
-        }
-        .delete-audio-btn {
-            position: absolute;
-            top: 50%;
-            right: 6px;
-            transform: translateY(-50%);
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 11px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-            z-index: 10;
-        }
+        .preview-audios-holder { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; width: 100%; align-items: center; }
+        .preview-audio-container { position: relative; display: flex; align-items: center; justify-content: center; background: #f8fafc; padding: 10px 32px 10px 10px; border-radius: 10px; border: 1px solid #e2e8f0; width: 100%; max-width: 320px; }
+        .preview-audio-container audio { width: 100%; height: 32px; }
+        .delete-audio-btn { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); background: #ef4444; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.15); z-index: 10; }
 
         /* Галерея мініатюр фотографій */
         .preview-images-holder { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; justify-content: center; }
@@ -352,42 +198,63 @@
     </style>
 </head>
 <body>
-
+ 
     <div class="main-content">
         <div class="nav-menu">
             <a href="index.html" class="nav-link">📊 Графіки</a>
             <button class="nav-link active">🚪 Кабінет ПД</button>
             <a href="admin.html" class="admin-menu-btn">⚙️</a>
         </div>
-
+ 
         <div id="login-card" class="screen welcome-focus">
             <div class="card-title">Вхід для ПД</div>
-            <div class="card-subtitle">Введіть пароль вашого околотка для переходу до графіка.</div>
-            <div class="form-group">
-                <input type="tel" id="password-input" class="form-control secure-numeric-input" style="text-align:center; font-size:20px; letter-spacing:4px;" maxlength="4" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
+            <div class="card-subtitle">Вкажіть номер вашого околотку та індивідуальний пароль доступу.</div>
+            
+            <div class="form-group" style="display: flex; gap: 10px; justify-content: center; align-items: center; max-width: 340px; margin: 0 auto 14px auto;">
+                <div style="display: flex; align-items: center; background: white; border: 1px solid #a7f3d0; border-radius: 10px; padding: 0 10px; height: 50px; flex: 1;">
+                    <span style="font-size: 16px; font-weight: 800; color: #115e59; margin-right: 2px; user-select: none;">ПД-</span>
+                    <input type="number" id="login-pd-input" class="form-control" style="border: none; padding: 0; font-size: 18px; font-weight: 900; color: #115e59; width: 100%; outline: none;" placeholder="01" oninput="if(this.value.length > 2) this.value = this.value.slice(0, 2)">
+                </div>
+                <input type="password" id="login-password-input" class="form-control secure-numeric-input" style="height: 50px; flex: 1.3; text-align: center; font-size: 18px; font-weight: 600; letter-spacing: 2px;" placeholder="Пароль" autocomplete="off" inputmode="numeric">
             </div>
+            
             <button class="btn-submit" onclick="executeLogin()">Увійти в кабінет</button>
         </div>
-
+ 
         <div id="cabinet-card" class="screen hidden">
-            <div class="card-title" id="cabinet-header-title">Вітаємо</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #e6f4ea; padding: 10px 14px; border-radius: 12px; border: 1px solid #a7f3d0;">
+                <div class="card-title" id="cabinet-header-title" style="margin-bottom: 0; font-size: 15px; text-align: left; letter-spacing: 0.5px;">Вітаємо</div>
+                <button type="button" onclick="togglePasswordChangeBlock()" style="background: white; border: 1px solid #cbd5e1; color: #115e59; font-size: 11px; font-weight: bold; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; white-space: nowrap;">🔑 Змінити пароль</button>
+            </div>
+
+            <div id="password-change-block" class="hidden" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 16px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                <div class="form-group" style="margin-bottom: 8px;">
+                    <label style="color:#475569; font-size:11px; font-weight:800;">Введіть новий пароль вашого околотку:</label>
+                    <input type="password" id="new-pd-password" class="form-control secure-numeric-input" style="margin-top:4px; height: 38px; text-align: center; letter-spacing: 2px;" placeholder="Новий секретний код">
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn-submit" onclick="executeChangeOwnPassword()" style="margin-top:0; padding:8px; font-size:13px; background:#0d9488; flex:1;">Оновити пароль</button>
+                    <button type="button" class="btn-submit" onclick="togglePasswordChangeBlock()" style="margin-top:0; padding:8px; font-size:13px; background:#94a3b8; flex:0.5;">Скасувати</button>
+                </div>
+            </div>
+
             <div class="card-subtitle">ОБЕРІТЬ, яку інформацію ви хочете внести</div>
             
             <div class="mode-tabs">
                 <button id="tab-mowing" class="tab-btn active" onclick="switchWorkMode('mowing')">🚜 Обкошування</button>
                 <button id="tab-notes" class="tab-btn" onclick="switchWorkMode('notes')">📝 Нотатки/фото</button>
             </div>
-
+ 
             <div class="form-group">
                 <label>Дата виконання робіт:</label>
                 <input type="date" id="work-date-input" class="form-control">
             </div>
-
+ 
             <div class="form-group">
                 <label>Фільтр КМ (ручний ввід через кому / порожньо - весь околоток):</label>
                 <input type="text" id="manual-km-input" class="form-control" placeholder="Наприклад: 69, 70" oninput="filterDiagramByKm()">
             </div>
-
+ 
             <div id="diagram-render-zone" class="railway-canvas"></div>
             
             <div id="mowing-actions-bar">
@@ -396,7 +263,7 @@
             </div>
         </div>
     </div>
-
+ 
     <div id="clear-data-modal" class="modal-overlay">
         <div class="modal-box">
             <div class="card-title" style="color: #dc2626; font-size: 16px; margin-bottom: 12px;">🗑️ Видалення даних</div>
@@ -412,7 +279,7 @@
             <button class="btn-submit" onclick="toggleClearModal(false)" style="background: #94a3b8; margin-top: 8px;">Скасувати</button>
         </div>
     </div>
-
+ 
     <div id="piket-notes-modal" class="modal-overlay">
         <div class="modal-box">
             <button type="button" class="modal-close-btn" onclick="toggleNotesModal(false)">×</button>
@@ -424,7 +291,7 @@
                 <button id="modal-tab-photo" class="modal-tab-btn" onclick="switchModalTab('photo')">📸 Фото</button>
                 <button id="modal-tab-audio" class="modal-tab-btn" onclick="switchModalTab('audio')">🎙️ Аудіо</button>
             </div>
-
+ 
             <div id="modal-content-text" class="modal-tab-content">
                 <div class="form-group">
                     <label>Текст нотатки / Зауваження:</label>
@@ -434,10 +301,10 @@
                     </div>
                 </div>
             </div>
-
+ 
             <div id="modal-content-photo" class="modal-tab-content hidden">
                 <div class="form-group">
-                    <label>Прикріпити фото (можна обрати кілька підряд):</label>
+                    <label>Прикріпити photo (можна обрати кілька підряд):</label>
                     <label for="note-file-input" class="btn-submit" style="display: block; text-align: center; background: #e6f4ea; color: #115e59; border: 1px solid #a7f3d0; margin-top: 4px; padding: 10px; font-size: 14px; cursor: pointer; user-select: none;">
                         📸 Обрати фотографії
                     </label>
@@ -446,7 +313,7 @@
                     <div id="note-image-preview-zone" class="preview-images-holder"></div>
                 </div>
             </div>
-
+ 
             <div id="modal-content-audio" class="modal-tab-content hidden">
                 <div class="form-group">
                     <label>Голосові нотатки пікета (можна записати кілька підряд):</label>
@@ -458,11 +325,11 @@
                     </div>
                 </div>
             </div>
-
+ 
             <button class="btn-submit" id="btn-save-note" onclick="executeSaveNote()">Зберегти зміни</button>
         </div>
     </div>
-
+ 
     <div id="photo-lightbox" class="lightbox-overlay" onclick="closeLightbox(event)">
         <button type="button" class="lightbox-close" onclick="closeLightbox(event)">×</button>
         <button type="button" class="lightbox-btn lightbox-left" onclick="changeLightboxPhoto(-1, event)">‹</button>
@@ -470,14 +337,14 @@
         <button type="button" class="lightbox-btn lightbox-right" onclick="changeLightboxPhoto(1, event)">›</button>
         <div id="lightbox-photo-counter" class="lightbox-counter">1 / 1</div>
     </div>
-
+ 
     <div id="signal-toast-notification" class="signal-toast" onclick="hideSignalToast()">
         <div class="signal-toast-accent"></div>
         <span id="signal-toast-text">Текст примітки</span>
     </div>
-
+ 
     <button class="debug-toggle-btn" onclick="toggleDebugPanel()">🛠️</button>
-
+ 
     <div class="debug-panel" id="system-debug-panel">
         <div class="debug-title" style="display: flex; justify-content: space-between; align-items: center;">
             <span>🖥️ Монітор системи</span>
@@ -485,12 +352,12 @@
         </div>
         <div id="debug-console" class="debug-scroll"></div>
     </div>
-
+ 
     <script>
         const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
         const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
         let supabaseClient;
-
+ 
         let globalTracksData = []; 
         let globalMowingData = [];
         let globalNotesData = []; 
@@ -500,19 +367,19 @@
         let currentMode = "mowing"; 
         let selectedPiketsToSave = []; 
         let toastTimeoutId = null;
-
+ 
         let activeNoteKm = null, activeNotePk = null, activeNoteTrack = null, activeNotePeregon = null;
         let activeNotePhotos = []; 
         let currentLightboxIndex = 0;
-
+ 
         // ОНОВЛЕНО: Масиви для роботи з кількома аудіофайлами підряд
         let mediaRecorder = null;
         let audioChunks = [];
-        let activeNoteAudios = [];             // Сюди записуються лінки (і хмарні, і локальні blob:)
-        let localAudioBlobsToUpload = [];      // Черга бінарників { blob, localUrl } для надсилання в сховище
-
+        let activeNoteAudios = [];             
+        let localAudioBlobsToUpload = [];      
+ 
         document.getElementById('work-date-input').valueAsDate = new Date();
-
+ 
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
             if(!con) return;
@@ -522,11 +389,11 @@
             div.innerText = "[" + new Date().toLocaleTimeString() + "]: " + text;
             con.prepend(div);
         }
-
+ 
         function toggleDebugPanel() {
             document.getElementById('system-debug-panel').classList.toggle('active');
         }
-
+ 
         function switchWorkMode(mode) {
             currentMode = mode;
             document.getElementById('tab-mowing').classList.toggle('active', mode === 'mowing');
@@ -534,17 +401,17 @@
             document.getElementById('mowing-actions-bar').classList.toggle('hidden', mode === 'notes');
             filterDiagramByKm();
         }
-
+ 
         function switchModalTab(tabName) {
             document.getElementById('modal-tab-text').classList.toggle('active', tabName === 'text');
             document.getElementById('modal-tab-photo').classList.toggle('active', tabName === 'photo');
             document.getElementById('modal-tab-audio').classList.toggle('active', tabName === 'audio');
-
+ 
             document.getElementById('modal-content-text').classList.toggle('hidden', tabName !== 'text');
             document.getElementById('modal-content-photo').classList.toggle('hidden', tabName !== 'photo');
             document.getElementById('modal-content-audio').classList.toggle('hidden', tabName !== 'audio');
         }
-
+ 
         function handleSignalClick(element) {
             const typeText = element.getAttribute('data-type');
             const toast = document.getElementById('signal-toast-notification');
@@ -560,53 +427,130 @@
             if (toastTimeoutId) clearTimeout(toastTimeoutId);
             toastTimeoutId = setTimeout(() => { toast.classList.remove('show'); }, 5000);
         }
-
+ 
         function hideSignalToast() {
             document.getElementById('signal-toast-notification').classList.remove('show');
         }
-
+ 
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 supabaseClient = window.supabase.createClient(baseDbUrl, fullKey);
             } catch (e) { logSys("Помилка підключення: " + e.message, "error"); }
         });
-
+ 
+        // ПАРАМЕТРИ ВХОДУ: Абсолютно нова функція авторизації (Околоток цифрами + Пароль з бази)
         async function executeLogin() {
-            const passInput = document.getElementById('password-input');
-            const pass = passInput.value.trim();
-            if (!/^\d{4}$/.test(pass) || pass.slice(0, 2) !== pass.slice(2, 4)) {
-                logSys("Помилка: Невірний формат паролю!", "error");
+            const pdInput = document.getElementById('login-pd-input');
+            const passInput = document.getElementById('login-password-input');
+            
+            let pdNum = pdInput.value.trim();
+            const password = passInput.value.trim();
+            
+            if (!pdNum || !password) {
+                alert("Будь ласка, введіть номер околотку та пароль!");
                 return;
             }
 
-            currentPD = `ПД-${pass.slice(0, 2)}`;
-            passInput.value = ""; 
+            // Додаємо лідируючий нуль для однозначних номерів
+            if (pdNum.length === 1) pdNum = "0" + pdNum;
+            const roleName = `ПД-${pdNum}`;
             
-            document.getElementById('cabinet-header-title').innerText = `Вітаю, ${currentPD}`;
+            logSys(`Перевірка автентифікації для ${roleName}...`);
 
-            const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
-                const resTracks = await fetch(`${baseDbUrl}/rest/v1/lines_config`, { headers });
-                globalTracksData = await resTracks.json();
-
-                const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
-                globalMowingData = await resMowing.json();
-
-                const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals`, { headers });
-                signalsData = await resSignals.json();
-
-                const resNotes = await fetch(`${baseDbUrl}/rest/v1/piket_notes?pd=eq.${encodeURIComponent(currentPD)}`, { headers });
-                globalNotesData = await resNotes.json();
-
-                document.getElementById('login-card').classList.add('hidden');
-                document.getElementById('cabinet-card').classList.remove('hidden');
+                // Перевіряємо наявність зміненого пароля у хмарі
+                const { data: pwData, error: pwError } = await supabaseClient
+                    .from('app_passwords')
+                    .select('*')
+                    .eq('role', roleName);
+                    
+                if (pwError) throw pwError;
                 
-                buildMasterDiagram();
-            } catch (e) { logSys("Помилка завантаження даних: " + e.message, "error"); }
+                let isAuthorized = false;
+                
+                if (pwData && pwData.length > 0) {
+                    if (pwData[0].password === password) {
+                        isAuthorized = true;
+                    } else {
+                        alert("Невірний пароль для цього околотку!");
+                        logSys(`Помилка входу для ${roleName}: невірний пароль`, "error");
+                        return;
+                    }
+                } else {
+                    // Якщо запису ще немає, розраховуємо стандартний пароль (повторення номера два рази)
+                    const defaultPassword = pdNum + pdNum;
+                    if (password === defaultPassword) {
+                        isAuthorized = true;
+                        logSys(`Вхід за дефолтним ключем для лінії ${roleName}`, "info");
+                    } else {
+                        alert("Невірний пароль! За замовчуванням пароль — це подвійний номер вашого ПД (наприклад, 0101).");
+                        logSys(`Відхилено спробу входу для ${roleName}`, "error");
+                        return;
+                    }
+                }
+
+                if (isAuthorized) {
+                    currentPD = roleName;
+                    pdInput.value = ""; 
+                    passInput.value = "";
+                    
+                    document.getElementById('cabinet-header-title').innerText = `Вітаю, ${currentPD}`;
+                    const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+                    
+                    const resTracks = await fetch(`${baseDbUrl}/rest/v1/lines_config`, { headers });
+                    globalTracksData = await resTracks.json();
+ 
+                    const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
+                    globalMowingData = await resMowing.json();
+ 
+                    const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals`, { headers });
+                    signalsData = await resSignals.json();
+ 
+                    const resNotes = await fetch(`${baseDbUrl}/rest/v1/piket_notes?pd=eq.${encodeURIComponent(currentPD)}`, { headers });
+                    globalNotesData = await resNotes.json();
+ 
+                    document.getElementById('login-card').classList.add('hidden');
+                    document.getElementById('cabinet-card').classList.remove('hidden');
+                    
+                    buildMasterDiagram();
+                    logSys(`Успішно авторизовано під токеном ${currentPD}`, "success");
+                }
+            } catch (e) { 
+                logSys("Помилка завантаження даних: " + e.message, "error"); 
+                alert("Помилка підключення: " + e.message);
+            }
         }
 
-        function cleanPd(pdStr) { return pdStr ? pdStr.trim().toUpperCase() : ""; }
+        // ПАРАМЕТРИ ВХОДУ: Функції керування видимістю та надсилання оновленого пароля ПД
+        function togglePasswordChangeBlock() {
+            const block = document.getElementById('password-change-block');
+            block.classList.toggle('hidden');
+            document.getElementById('new-pd-password').value = "";
+        }
 
+        async function executeChangeOwnPassword() {
+            const newPw = document.getElementById('new-pd-password').value.trim();
+            if (!newPw) { return alert("Будь ласка, введіть новий пароль!"); }
+            
+            logSys(`Запис нового пароля для ${currentPD}...`);
+            try {
+                const { error } = await supabaseClient
+                    .from('app_passwords')
+                    .upsert({ role: currentPD, password: newPw }, { onConflict: 'role' });
+                    
+                if (error) throw error;
+                
+                alert("Пароль вашого околотку успішно оновлено!");
+                logSys("Конфігурацію пароля змінено користувачем", "success");
+                togglePasswordChangeBlock();
+            } catch (e) {
+                logSys("Помилка оновлення пароля: " + e.message, "error");
+                alert("Не вдалося зберегти: " + e.message);
+            }
+        }
+ 
+        function cleanPd(pdStr) { return pdStr ? pdStr.trim().toUpperCase() : ""; }
+ 
         function sanitizeString(str) {
             if (!str) return '';
             let s = str.toLowerCase().replace(/\s+/g, '');
@@ -616,7 +560,7 @@
         
         function isLeftTrack(str) { return sanitizeString(str).includes('парна') && !sanitizeString(str).includes('непарна'); }
         function isRightTrack(str) { return sanitizeString(str).includes('непарна'); }
-
+ 
         function getPiketAnalysis(targetTrackType, km, pk, ownerPd) {
             if (!ownerPd) return { colorClass: 'status-unknown', label: 'Немає даних', days: '' };
             const record = globalMowingData.find(m => cleanPd(m.pd) === cleanPd(ownerPd) && parseInt(m.km) === km && parseInt(m.piket) === pk && (targetTrackType === 'парна' ? isLeftTrack(m.track_type) : isRightTrack(m.track_type)));
@@ -627,33 +571,33 @@
             if (diffDays >= 30) return { colorClass: 'status-warn-yellow', label: 'Увага', days: `${diffDays} дн.` };
             return { colorClass: 'status-clear-green', label: 'Обкошено', days: `${diffDays} дн.` };
         }
-
+ 
         function buildMasterDiagram(allowedKm = null) {
             const container = document.getElementById('diagram-render-zone');
             container.innerHTML = "";
-
+ 
             const myConfigs = globalTracksData.filter(t => cleanPd(t.pd) === currentPD);
             if (myConfigs.length === 0) {
                 container.innerHTML = `<p style='color:red; text-align:center;'>Для ${currentPD} не знайдено закріплених кілометрів.</p>`;
                 return;
             }
-
+ 
             let minKm = Math.min(...myConfigs.map(s => parseInt(s.start_km)));
             let maxKm = Math.max(...myConfigs.map(s => parseInt(s.end_km)));
-
+ 
             for (let km = minKm; km <= maxKm; km++) {
                 if (allowedKm && !allowedKm.includes(km)) continue;
-
+ 
                 const kmSign = document.createElement('div');
                 kmSign.className = 'km-signboard';
                 kmSign.innerText = `Кілометр ${km}`;
                 container.appendChild(kmSign);
-
+ 
                 const headersRow = document.createElement('div');
                 headersRow.className = 'track-headers-row';
                 headersRow.innerHTML = `<div class="header-margin-space"></div><div class="header-left-track">ПАРНА</div><div class="header-center-space"></div><div class="header-right-track">НЕПАРНА</div><div class="header-margin-space"></div>`;
                 container.appendChild(headersRow);
-
+ 
                 for (let pk = 1; pk <= 10; pk++) {
                     let configsForPk = globalTracksData.filter(s => {
                         let sKm = parseInt(s.start_km), eKm = parseInt(s.end_km);
@@ -664,36 +608,36 @@
                         if (km === eKm && pk > ePk) return false;
                         return true;
                     });
-
+ 
                     let leftConfigs = configsForPk.filter(s => sanitizeString(s.type) !== 'станція' && isLeftTrack(s.track_type));
                     let rightConfigs = configsForPk.filter(s => sanitizeString(s.type) !== 'станція' && isRightTrack(s.track_type));
                     let leftStationConfigs = configsForPk.filter(s => sanitizeString(s.type) === 'станція' && (isLeftTrack(s.track_type) || !s.track_type || s.track_type.trim() === ''));
                     let rightStationConfigs = configsForPk.filter(s => sanitizeString(s.type) === 'станція' && (isRightTrack(s.track_type) || !s.track_type || s.track_type.trim() === ''));
-
+ 
                     let leftConfig = leftConfigs.find(s => cleanPd(s.pd) === currentPD) || leftConfigs[0];
                     let rightConfig = rightConfigs.find(s => cleanPd(s.pd) === currentPD) || rightConfigs[0];
                     let leftStationConfig = leftStationConfigs.find(s => cleanPd(s.pd) === currentPD) || leftStationConfigs[0];
                     let rightStationConfig = rightStationConfigs.find(s => cleanPd(s.pd) === currentPD) || rightStationConfigs[0];
-
+ 
                     let finalLeftConfig = leftStationConfig || leftConfig;
                     let finalRightConfig = rightStationConfig || rightConfig;
-
+ 
                     let finalLeftName = finalLeftConfig ? finalLeftConfig.name : "Невідомо";
                     let finalRightName = finalRightConfig ? finalRightConfig.name : "Невідомо";
                     let leftOwnerPd = finalLeftConfig ? finalLeftConfig.pd : null;
                     let rightOwnerPd = finalRightConfig ? finalRightConfig.pd : null;
-
+ 
                     let isLeftMine = cleanPd(leftOwnerPd) === currentPD;
                     let isRightMine = cleanPd(rightOwnerPd) === currentPD;
                     let isLeftStation = !!leftStationConfig;
                     let isRightStation = !!rightStationConfig;
-
+ 
                     const leftSide = getPiketAnalysis('парна', km, pk, leftOwnerPd);
                     const rightSide = getPiketAnalysis('непарна', km, pk, rightOwnerPd);
-
+ 
                     const nodeRow = document.createElement('div');
                     nodeRow.className = 'piket-rail-node';
-
+ 
                     // БОКОВЕ ПОЛЕ ЛІВЕ
                     const leftMargin = document.createElement('div');
                     leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
@@ -702,11 +646,11 @@
                         leftMargin.innerHTML = `<span class="signal-badge" data-type="${leftSignal.signal_type || ''}" onclick="handleSignalClick(this)" ontouchstart="handleSignalClick(this)">${leftSignal.signal_name}</span>`;
                     }
                     nodeRow.appendChild(leftMargin);
-
+ 
                     // ================= БРІВКА ПАРНА (ЛІВА) =================
                     const leftBank = document.createElement('div');
                     leftBank.className = `mowing-bank-zone ${leftSide.colorClass}`;
-                    
+                     
                     if (currentMode === "mowing") {
                         if (isLeftMine) {
                             leftBank.innerHTML = `<div>${leftSide.label}</div><div style="font-size:9px; opacity:0.85;">${leftSide.days}</div>`;
@@ -736,7 +680,7 @@
                                 const hasText = note.note_text && note.note_text.trim() !== "";
                                 const hasPhotos = localPhotos.length > 0;
                                 const hasAudio = localAudios.length > 0;
-                                
+                                 
                                 if (hasText && hasPhotos && hasAudio) icon = "📝📸🎙️";
                                 else if (hasText && hasPhotos) icon = "📝📸";
                                 else if (hasText && hasAudio) icon = "📝🎙️";
@@ -753,15 +697,15 @@
                         }
                     }
                     nodeRow.appendChild(leftBank);
-
+ 
                     nodeRow.appendChild(document.createElement('div')).className = 'rail-line-visual';
                     const centerPiket = document.createElement('div'); centerPiket.className = 'piket-center-core'; centerPiket.innerText = pk; nodeRow.appendChild(centerPiket);
                     nodeRow.appendChild(document.createElement('div')).className = 'rail-line-visual';
-
+ 
                     // ================= БРІВКА НЕПАРНА (ПРАВА) =================
                     const rightBank = document.createElement('div');
                     rightBank.className = `mowing-bank-zone ${rightSide.colorClass}`;
-                    
+                     
                     if (currentMode === "mowing") {
                         if (isRightMine) {
                             rightBank.innerHTML = `<div>${rightSide.label}</div><div style="font-size:9px; opacity:0.85;">${rightSide.days}</div>`;
@@ -790,7 +734,7 @@
                                 const hasText = note.note_text && note.note_text.trim() !== "";
                                 const hasPhotos = localPhotos.length > 0;
                                 const hasAudio = localAudios.length > 0;
-                                
+                                 
                                 if (hasText && hasPhotos && hasAudio) icon = "📝📸🎙️";
                                 else if (hasText && hasPhotos) icon = "📝📸";
                                 else if (hasText && hasAudio) icon = "📝🎙️";
@@ -807,7 +751,7 @@
                         }
                     }
                     nodeRow.appendChild(rightBank);
-
+ 
                     // БОКОВЕ ПОЛЕ ПРАВЕ
                     const rightMargin = document.createElement('div');
                     rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
@@ -816,132 +760,128 @@
                         rightMargin.innerHTML = `<span class="signal-badge" data-type="${rightSignal.signal_type || ''}" onclick="handleSignalClick(this)" ontouchstart="handleSignalClick(this)">${rightSignal.signal_name}</span>`;
                     }
                     nodeRow.appendChild(rightMargin);
-
+ 
                     container.appendChild(nodeRow);
                 }
             }
         }
-
+ 
         function filterDiagramByKm() {
             const inputVal = document.getElementById('manual-km-input').value.trim();
             if (!inputVal) { buildMasterDiagram(); return; }
             const allowed = inputVal.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
             buildMasterDiagram(allowed);
         }
-
+ 
         function openNotesModal(peregon, track, km, pk, note) {
             switchModalTab('text'); 
             activeNoteKm = km; activeNotePk = pk; activeNoteTrack = track; activeNotePeregon = peregon;
-            
+             
             document.getElementById('notes-modal-title').innerText = `📝 Нотатка: КМ ${km}, ПК ${pk} (${track.toUpperCase()} колія)`;
             document.getElementById('note-textarea').value = note ? note.note_text || "" : "";
             document.getElementById('note-file-input').value = "";
             document.getElementById('file-count-status').innerText = "Файли не обрано";
-            
+             
             activeNotePhotos = [];
             if (note && note.photo_url) {
                 try {
                     activeNotePhotos = JSON.parse(note.photo_url);
                     if (!Array.isArray(activeNotePhotos)) activeNotePhotos = [note.photo_url];
-                } catch(e) {
-                    activeNotePhotos = [note.photo_url]; 
-                }
+                } catch(e) { activeNotePhotos = [note.photo_url]; }
             }
             renderModalPhotosPreview();
-
+ 
             // ОНОВЛЕНО: Читання раніше збереженого масиву аудіозаписів з Supabase
             activeNoteAudios = [];
             localAudioBlobsToUpload = []; // Скидаємо чергу нових записів
-
+ 
             if (note && note.audio_url) {
                 try {
                     activeNoteAudios = JSON.parse(note.audio_url);
                     if (!Array.isArray(activeNoteAudios)) activeNoteAudios = [note.audio_url];
-                } catch(e) {
-                    activeNoteAudios = [note.audio_url]; // На випадок старих одинарних лінків
-                }
+                } catch(e) { activeNoteAudios = [note.audio_url]; }
             }
-
+ 
             // Запускаємо перемальовку кнопок і плеєрів аудіо
             const micBtn = document.getElementById('mic-record-btn');
             micBtn.classList.remove('recording');
             micBtn.innerHTML = "🎙️";
             document.getElementById('recording-status-text').classList.remove('active');
-            
+             
             renderModalAudiosPreview();
-
+ 
             toggleNotesModal(true);
         }
-
+ 
         function renderModalPhotosPreview() {
             const previewZone = document.getElementById('note-image-preview-zone');
             previewZone.innerHTML = "";
-            
+             
             if (activeNotePhotos.length === 0) {
                 previewZone.innerHTML = `<p style="font-size:12px; color:#64748b;">Фото відсутні</p>`;
                 return;
             }
-            
+             
             activeNotePhotos.forEach((url, idx) => {
                 const holder = document.createElement('div');
                 holder.className = 'preview-image-container';
                 holder.innerHTML = `
                     <img src="${url}" style="cursor: pointer;" onclick="openLightbox(${idx})">
                     <button type="button" class="delete-img-btn" onclick="removeSinglePhoto(${idx})">×</button>
-                `;
+                 `;
                 previewZone.appendChild(holder);
             });
         }
-
+ 
         function removeSinglePhoto(idx) {
             if (confirm("Видалити цю фотографію з картки пікета?")) {
                 activeNotePhotos.splice(idx, 1);
                 renderModalPhotosPreview();
             }
         }
-
+ 
         // ОНОВЛЕНО: Функція відмальовки списку всіх аудіозаписів пікета
         function renderModalAudiosPreview() {
             const previewZone = document.getElementById('note-audio-preview-zone');
             previewZone.innerHTML = "";
             const statusText = document.getElementById('recording-status-text');
-
+ 
             if (activeNoteAudios.length === 0) {
                 previewZone.innerHTML = `<p style="font-size:12px; color:#64748b;">Аудіозаписи відсутні</p>`;
                 statusText.innerText = "Натисніть для початку запису";
                 return;
             }
-
+ 
             statusText.innerText = `Записів у картці: ${activeNoteAudios.length}. Можна записати ще.`;
-
+ 
             activeNoteAudios.forEach((url, idx) => {
                 const holder = document.createElement('div');
                 holder.className = 'preview-audio-container';
                 holder.innerHTML = `
                     <audio src="${url}" controls></audio>
                     <button type="button" class="delete-audio-btn" onclick="removeSingleAudio(${idx})" title="Видалити аудіо">×</button>
-                `;
+                 `;
                 previewZone.appendChild(holder);
             });
         }
-
+ 
         // ОНОВЛЕНО: Видалення конкретного треку з картки
         function removeSingleAudio(idx) {
             if (confirm("Видалити цей аудіозапис з картки пікета?")) {
                 const urlToRemove = activeNoteAudios[idx];
                 activeNoteAudios.splice(idx, 1);
-                
+                 
                 // Вилучаємо також із черги завантаження, якщо трек був щойно записаний локально
                 localAudioBlobsToUpload = localAudioBlobsToUpload.filter(item => item.localUrl !== urlToRemove);
-                
+                 
                 renderModalAudiosPreview();
             }
         }
-
+ 
         function toggleNotesModal(show) {
             document.getElementById('piket-notes-modal').classList.toggle('show', show);
         }
-
+ 
         function handleFileSelectText(input) {
             const status = document.getElementById('file-count-status');
             if (input.files.length > 0) {
@@ -950,22 +890,22 @@
                 status.innerText = "Файли не обрано";
             }
         }
-
+ 
         function openLightbox(idx) {
             currentLightboxIndex = idx;
             updateLightboxContent();
             document.getElementById('photo-lightbox').classList.add('show');
         }
-
+ 
         function updateLightboxContent() {
             if (activeNotePhotos.length === 0) return;
             if (currentLightboxIndex >= activeNotePhotos.length) currentLightboxIndex = activeNotePhotos.length - 1;
             if (currentLightboxIndex < 0) currentLightboxIndex = 0;
-
+ 
             document.getElementById('lightbox-current-img').src = activeNotePhotos[currentLightboxIndex];
             document.getElementById('lightbox-photo-counter').innerText = `${currentLightboxIndex + 1} / ${activeNotePhotos.length}`;
         }
-
+ 
         function changeLightboxPhoto(direction, event) {
             if (event) event.stopPropagation();
             currentLightboxIndex += direction;
@@ -973,84 +913,84 @@
             if (currentLightboxIndex < 0) currentLightboxIndex = activeNotePhotos.length - 1;
             updateLightboxContent();
         }
-
+ 
         function closeLightbox(event) {
             if (!event || event.target.id === 'photo-lightbox' || event.target.classList.contains('lightbox-close')) {
                 document.getElementById('photo-lightbox').classList.remove('show');
             }
         }
-
+ 
         function clearNoteText() {
             if (confirm("Очистити весь текст цієї нотатки?")) {
                 document.getElementById('note-textarea').value = "";
             }
         }
-
+ 
         // ОНОВЛЕНО: Функція запису аудіо з додаванням у динамічний масив (чергу)
         async function toggleAudioRecording() {
             const btn = document.getElementById('mic-record-btn');
             const statusText = document.getElementById('recording-status-text');
-
+ 
             if (mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
                 return;
             }
-
+ 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 audioChunks = [];
-                
+                 
                 let options = { mimeType: 'audio/webm' };
                 if (!MediaRecorder.isTypeSupported('audio/webm')) options = { mimeType: 'audio/mp4' };
                 if (!MediaRecorder.isTypeSupported('audio/mp4')) options = {}; 
-
+ 
                 mediaRecorder = new MediaRecorder(stream, options);
-                
+                 
                 mediaRecorder.ondataavailable = (event) => {
                     if (event.data.size > 0) audioChunks.push(event.data);
                 };
-
+ 
                 mediaRecorder.onstop = () => {
                     const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/wav' });
                     const localUrl = URL.createObjectURL(blob);
-                    
+                     
                     // Додаємо трек у загальний список відображення та реєструємо бінарник для Supabase
                     activeNoteAudios.push(localUrl);
                     localAudioBlobsToUpload.push({ blob: blob, localUrl: localUrl });
-                    
+                     
                     renderModalAudiosPreview();
-                    
+                     
                     btn.classList.remove('recording');
                     btn.innerHTML = "🎙️";
                     statusText.classList.remove('active');
-                    
+                     
                     stream.getTracks().forEach(track => track.stop()); 
                 };
-
+ 
                 mediaRecorder.start();
                 btn.classList.add('recording');
                 btn.innerHTML = "🛑";
                 statusText.innerText = "⏺️ Запис іде... Натисніть знову для зупинки";
                 statusText.classList.add('active');
-
+ 
             } catch (err) {
                 console.error(err);
                 alert("Помилка доступу до мікрофона: " + err.message);
                 statusText.innerText = "Помилка мікрофона";
             }
         }
-
+ 
         async function executeSaveNote() {
             const btn = document.getElementById('btn-save-note');
             const textArea = document.getElementById('note-textarea');
             const fileInput = document.getElementById('note-file-input');
-            
+             
             btn.disabled = true;
             btn.innerText = "Зберігаю у хмару...";
-
+ 
             try {
                 let newUploadedUrls = [];
-
+ 
                 // 1. Завантаження нових фотографій у сховище
                 if (fileInput.files.length > 0) {
                     for (let i = 0; i < fileInput.files.length; i++) {
@@ -1068,19 +1008,19 @@
                             .upload(cleanPath, file);
                             
                         if (storageError) throw storageError;
-
+ 
                         const { data: linkData } = supabaseClient.storage.from('piket-photos').getPublicUrl(cleanPath);
                         newUploadedUrls.push(linkData.publicUrl);
                     }
                 }
                 const totalPhotosList = [...activeNotePhotos, ...newUploadedUrls];
-
+ 
                 // 2. ОНОВЛЕНО: Послідовне завантаження кількох записаних аудіофайлів з черги
                 let uploadedAudioUrls = [];
-                
+                 
                 // Відокремлюємо старі серверні посилання від тимчасових локальних (blob:)
                 let existingServerAudios = activeNoteAudios.filter(url => !url.startsWith('blob:'));
-
+ 
                 if (localAudioBlobsToUpload.length > 0) {
                     for (let i = 0; i < localAudioBlobsToUpload.length; i++) {
                         const audioObj = localAudioBlobsToUpload[i];
@@ -1101,13 +1041,13 @@
                             .upload(audioPath, audioObj.blob);
                             
                         if (audioStorageError) throw audioStorageError;
-
+ 
                         const { data: audioLinkData } = supabaseClient.storage.from('piket-audios').getPublicUrl(audioPath);
                         uploadedAudioUrls.push(audioLinkData.publicUrl);
                     }
                 }
                 const totalAudiosList = [...existingServerAudios, ...uploadedAudioUrls];
-
+ 
                 // 3. Відправка Payload у таблицю (обидва медіа-поля тепер є масивами)
                 const notePayload = {
                     pd: currentPD,
@@ -1118,20 +1058,20 @@
                     photo_url: totalPhotosList.length > 0 ? JSON.stringify(totalPhotosList) : null,
                     audio_url: totalAudiosList.length > 0 ? JSON.stringify(totalAudiosList) : null
                 };
-
+ 
                 const { error: dbError } = await supabaseClient
                     .from('piket_notes')
                     .upsert(notePayload, { onConflict: 'pd,km,piket,track_type' });
-
+ 
                 if (dbError) throw dbError;
-
+ 
                 logSys("Зміни зафіксовано!", "success");
                 toggleNotesModal(false);
-
+ 
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resNotes = await fetch(`${baseDbUrl}/rest/v1/piket_notes?pd=eq.${encodeURIComponent(currentPD)}`, { headers });
                 globalNotesData = await resNotes.json();
-                
+                 
                 filterDiagramByKm();
             } catch(e) {
                 logSys("Помилка: " + e.message, "error");
@@ -1141,13 +1081,13 @@
                 btn.innerText = "Зберегти зміни";
             }
         }
-
+ 
         async function executeDeleteNote() {
             if (!confirm("Ви впевнені, що хочете ПОВНІСТЮ ВИДАЛИТИ дані з цього пікета?")) return;
             
             const btn = document.getElementById('btn-save-note');
             btn.disabled = true;
-
+ 
             try {
                 const { error } = await supabaseClient
                     .from('piket_notes')
@@ -1156,16 +1096,16 @@
                     .eq('km', activeNoteKm)
                     .eq('piket', activeNotePk)
                     .eq('track_type', activeNoteTrack);
-
+ 
                 if (error) throw error;
-
+ 
                 logSys("Дані успішно видалено з хмари", "success");
                 toggleNotesModal(false);
-
+ 
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resNotes = await fetch(`${baseDbUrl}/rest/v1/piket_notes?pd=eq.${encodeURIComponent(currentPD)}`, { headers });
                 globalNotesData = await resNotes.json();
-                
+                 
                 filterDiagramByKm();
             } catch(e) {
                 logSys("Помилка видалення: " + e.message, "error");
@@ -1174,7 +1114,7 @@
                 btn.disabled = false;
             }
         }
-
+ 
         function togglePiketSelection(element, peregonName, trackType, km, piket) {
             const isSelected = element.classList.contains('status-clear-green') && !element.classList.contains(element.dataset.initialClass);
             if (isSelected) {
@@ -1187,12 +1127,12 @@
                 selectedPiketsToSave.push({ pd: currentPD, peregon: peregonName, track_type: trackType, km: km, piket: piket, status: 'green' });
             }
         }
-
+ 
         async function saveMowingProgress() {
             if (selectedPiketsToSave.length === 0) { alert("Ви не вибрали жодного пікета!"); return; }
             const dateValue = document.getElementById('work-date-input').value;
             const recordsToSend = selectedPiketsToSave.map(p => ({ ...p, date: dateValue }));
-
+ 
             try {
                 const { error = null } = await supabaseClient.from('mowing').upsert(recordsToSend);
                 if (error) throw error;
@@ -1204,7 +1144,7 @@
                 filterDiagramByKm();
             } catch (e) { alert("Помилка: " + e.message); }
         }
-
+ 
         function toggleClearModal(show) {
             const modal = document.getElementById('clear-data-modal');
             if (show) {
@@ -1214,26 +1154,26 @@
                 document.getElementById('clear-km-input').disabled = false;
             } else { modal.classList.remove('show'); }
         }
-
+ 
         function handleClearCheckboxChange() {
             const isChecked = document.getElementById('clear-all-pd-checkbox').checked;
             document.getElementById('clear-km-input').disabled = isChecked;
             if (isChecked) document.getElementById('clear-km-input').value = "";
         }
-
+ 
         async function executeDataClear() {
             const isClearAllPd = document.getElementById('clear-all-pd-checkbox').checked;
             const kmValue = document.getElementById('clear-km-input').value.trim();
             let url = `${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(currentPD)}`;
-
+ 
             if (!isClearAllPd) {
                 if (!kmValue) return alert("Введіть номер кілометра!");
                 url += `&km=eq.${parseInt(kmValue)}`;
             }
-
+ 
             if (!confirm("Підтвердити видалення даних про обкошування?")) return;
             toggleClearModal(false);
-
+ 
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
             try {
                 const response = await fetch(url, { method: 'DELETE', headers });
