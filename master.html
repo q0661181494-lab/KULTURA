@@ -82,6 +82,19 @@
         .btn-submit { width: 100%; background: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: background 0.2s; }
         .btn-submit:hover { background: var(--primary-hover); }
 
+        /* Стиль фіксації кнопки збереження на дисплеї */
+        .sticky-save-btn {
+            position: fixed !important;
+            bottom: 16px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: calc(100% - 24px) !important;
+            max-width: 580px !important;
+            z-index: 9999 !important;
+            box-shadow: 0 8px 25px rgba(0, 139, 116, 0.4) !important;
+            margin-top: 0 !important;
+        }
+
         .railway-canvas { display: flex; flex-direction: column; width: 100%; margin-top: 12px; }
         .km-signboard { background: #e6f4ea; border: 2px solid #115e59; border-radius: 8px; padding: 8px; margin: 18px 0 8px 0; text-align: center; font-weight: 900; font-size: 14px; color: #115e59; letter-spacing: 1px; text-transform: uppercase; }
         
@@ -224,22 +237,7 @@
         </div>
  
         <div id="cabinet-card" class="screen hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #e6f4ea; padding: 10px 14px; border-radius: 12px; border: 1px solid #a7f3d0;">
-                <div class="card-title" id="cabinet-header-title" style="margin-bottom: 0; font-size: 15px; text-align: left; letter-spacing: 0.5px;">Вітаємо</div>
-                <button type="button" onclick="togglePasswordChangeBlock()" style="background: white; border: 1px solid #cbd5e1; color: #115e59; font-size: 11px; font-weight: bold; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; white-space: nowrap;">🔑 Змінити пароль</button>
-            </div>
-
-            <div id="password-change-block" class="hidden" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 16px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-                <div class="form-group" style="margin-bottom: 8px;">
-                    <label style="color:#475569; font-size:11px; font-weight:800;">Введіть новий пароль вашого околотку:</label>
-                    <input type="tel" id="new-pd-password" class="form-control secure-numeric-input" style="margin-top:4px; height: 38px; text-align: center; letter-spacing: 2px;">
-                </div>
-                <div style="display:flex; gap:8px;">
-                    <button type="button" class="btn-submit" onclick="executeChangeOwnPassword()" style="margin-top:0; padding:8px; font-size:13px; background:#0d9488; flex:1;">Оновити пароль</button>
-                    <button type="button" class="btn-submit" onclick="togglePasswordChangeBlock()" style="margin-top:0; padding:8px; font-size:13px; background:#94a3b8; flex:0.5;">Скасувати</button>
-                </div>
-            </div>
-
+            <div class="card-title" id="cabinet-header-title">Вітаємо</div>
             <div class="card-subtitle">ОБЕРІТЬ, яку інформацію ви хочете внести</div>
             
             <div class="mode-tabs">
@@ -260,8 +258,22 @@
             <div id="diagram-render-zone" class="railway-canvas"></div>
             
             <div id="mowing-actions-bar">
-                <button class="btn-submit" onclick="saveMowingProgress()">Синхронізувати з хмарою</button>
+                <button class="btn-submit sticky-save-btn" onclick="saveMowingProgress()">Зберегти зміни</button>
+                
                 <button class="btn-submit" onclick="toggleClearModal(true)" style="background: transparent; border: 2px solid #ef4444; color: #ef4444; margin-top: 12px; box-shadow: none;">🗑️ Очистити інформацію</button>
+                
+                <button type="button" onclick="togglePasswordChangeBlock()" style="width: 100%; background: white; border: 1px solid #cbd5e1; color: #115e59; font-size: 14px; font-weight: bold; padding: 14px; border-radius: 10px; cursor: pointer; transition: background 0.15s; margin-top: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">🔑 Змінити пароль околотку</button>
+
+                <div id="password-change-block" class="hidden" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-top: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="color:#475569; font-size:11px; font-weight:800;">Введіть новий пароль вашого околотку:</label>
+                        <input type="tel" id="new-pd-password" class="form-control secure-numeric-input" style="margin-top:4px; height: 38px; text-align: center; letter-spacing: 2px;">
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" class="btn-submit" onclick="executeChangeOwnPassword()" style="margin-top:0; padding:8px; font-size:13px; background:#0d9488; flex:1;">Оновити пароль</button>
+                        <button type="button" class="btn-submit" onclick="togglePasswordChangeBlock()" style="margin-top:0; padding:8px; font-size:13px; background:#94a3b8; flex:0.5;">Скасувати</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
