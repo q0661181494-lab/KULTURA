@@ -381,6 +381,18 @@
         <div id="lightbox-photo-counter" class="lightbox-counter">1 / 1</div>
     </div>
  
+    <!-- ОНОВЛЕНО: Додано фірмове вікно підтвердження замінює браузерний confirm() -->
+    <div id="confirm-modal" class="modal-overlay" style="z-index: 110000;">
+        <div class="modal-box" style="border-color: #cbd5e1; max-width: 380px; padding: 22px; text-align: center;">
+            <div class="card-title" id="confirm-modal-title" style="font-size: 16px; margin-bottom: 10px; text-transform: none; letter-spacing: 0.5px; color: #115e59;">Підтвердження</div>
+            <p id="confirm-modal-text" style="font-size: 14px; color: #475569; margin-bottom: 22px; line-height: 1.4; font-weight: 500; text-align: center;"></p>
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <button id="confirm-modal-ok" class="btn-submit" style="margin-top: 0; padding: 10px; font-size: 14px; flex: 1;">ОК</button>
+                <button id="confirm-modal-cancel" class="btn-submit" style="margin-top: 0; padding: 10px; font-size: 14px; background: #94a3b8; flex: 1;">Скасувати</button>
+            </div>
+        </div>
+    </div>
+ 
     <div id="signal-toast-notification" class="signal-toast" onclick="hideSignalToast()">
         <div id="signal-toast-accent" class="signal-toast-accent"></div>
         <span id="signal-toast-text">Текст примітки</span>
@@ -454,7 +466,6 @@
             document.getElementById('modal-content-audio').classList.toggle('hidden', tabName !== 'audio');
         }
  
-        // ДОДАНО: Універсальна функція сповіщень замість браузерного alert()
         function showToastMessage(text, type = 'info') {
             const toast = document.getElementById('signal-toast-notification');
             const txt = document.getElementById('signal-toast-text');
@@ -462,9 +473,9 @@
             
             if (!toast || !txt) return;
             
-            let color = '#3b82f6'; // Інформаційний синій за замовчуванням
-            if (type === 'error') color = '#ef4444'; // Червоний колір для помилок
-            if (type === 'success') color = '#22c55e'; // Зелений колір для успіху
+            let color = '#3b82f6'; 
+            if (type === 'error') color = '#ef4444'; 
+            if (type === 'success') color = '#22c55e'; 
             
             if (accent) {
                 accent.style.backgroundColor = color;
@@ -477,8 +488,35 @@
             if (toastTimeoutId) clearTimeout(toastTimeoutId);
             toastTimeoutId = setTimeout(() => { toast.classList.remove('show'); }, 4500);
         }
+ 
+        // ДОДАНО: Асинхронна функція заміни вікна confirm()
+        function customConfirm(text, title = "Підтвердження дії") {
+            return new Promise((resolve) => {
+                document.getElementById('confirm-modal-title').innerText = title;
+                document.getElementById('confirm-modal-text').innerText = text;
+                const modal = document.getElementById('confirm-modal');
+                modal.classList.add('show');
+                
+                const onOk = () => {
+                    modal.classList.remove('show');
+                    cleanup();
+                    resolve(true);
+                };
+                const onCancel = () => {
+                    modal.classList.remove('show');
+                    cleanup();
+                    resolve(false);
+                };
+                const cleanup = () => {
+                    document.getElementById('confirm-modal-ok').removeEventListener('click', onOk);
+                    document.getElementById('confirm-modal-cancel').removeEventListener('click', onCancel);
+                };
+                
+                document.getElementById('confirm-modal-ok').addEventListener('click', onOk);
+                document.getElementById('confirm-modal-cancel').addEventListener('click', onCancel);
+            });
+        }
 
-        // ОНОВЛЕНО: Переписано під використання єдиної системи повідомлень
         function handleSignalClick(element) {
             const typeText = element.getAttribute('data-type');
             let msg = "Примітка відсутня";
@@ -498,7 +536,6 @@
             } catch (e) { logSys("Помилка підключення: " + e.message, "error"); }
         });
  
-        // ОНОВЛЕНО: Замінено всі alert() на showToastMessage()
         async function executeLogin() {
             const pdInput = document.getElementById('login-pd-input');
             const passInput = document.getElementById('login-password-input');
@@ -591,7 +628,6 @@
             document.getElementById('new-pd-password').value = "";
         }
 
-        // ОНОВЛЕНО: Замінено alert() на showToastMessage()
         async function executeChangeOwnPassword() {
             const newPw = document.getElementById('new-pd-password').value.trim();
             if (!newPw) { 
@@ -935,8 +971,10 @@
             });
         }
  
-        function removeSinglePhoto(idx) {
-            if (confirm("Видалити цю фотографію з картки пікета?")) {
+        // ОНОВЛЕНО: Переведено на кастомний діалог customConfirm
+        async function removeSinglePhoto(idx) {
+            const confirmed = await customConfirm("Видалити цю фотографію з картки пікета?", "❌ Видалення фото");
+            if (confirmed) {
                 activeNotePhotos.splice(idx, 1);
                 renderModalPhotosPreview();
             }
@@ -966,8 +1004,10 @@
             });
         }
  
-        function removeSingleAudio(idx) {
-            if (confirm("Видалити цей аудіозапис з картки пікета?")) {
+        // ОНОВЛЕНО: Переведено на кастомний діалог customConfirm
+        async function removeSingleAudio(idx) {
+            const confirmed = await customConfirm("Видалити цей аудіозапис з картки пікета?", "❌ Видалення аудіо");
+            if (confirmed) {
                 const urlToRemove = activeNoteAudios[idx];
                 activeNoteAudios.splice(idx, 1);
                  
@@ -984,7 +1024,7 @@
         function handleFileSelectText(input) {
             const status = document.getElementById('file-count-status');
             if (input.files.length > 0) {
-                status.innerText = `Обрано нових фото: ${input.files.length}`;
+                status.innerText = `Обрано нових photo: ${input.files.length}`;
             } else {
                 status.innerText = "Файли не обрано";
             }
@@ -1019,8 +1059,10 @@
             }
         }
  
-        function clearNoteText() {
-            if (confirm("Очистити весь текст цієї нотатки?")) {
+        // ОНОВЛЕНО: Переведено на кастомний діалог customConfirm
+        async function clearNoteText() {
+            const confirmed = await customConfirm("Очистити весь текст цієї нотатки?", "🧹 Очищення тексту");
+            if (confirmed) {
                 document.getElementById('note-textarea').value = "";
             }
         }
@@ -1174,8 +1216,10 @@
             }
         }
  
+        // ОНОВЛЕНО: Переведено на кастомний діалог customConfirm
         async function executeDeleteNote() {
-            if (!confirm("Ви впевнені, що хочете ПОВНІСТЮ ВИДАЛИТИ дані з цього пікета?")) return;
+            const confirmed = await customConfirm("Ви впевнені, що хочете ПОВНІСТЮ ВИДАЛИТИ дані з цього пікета?", "⚠️ Увага!");
+            if (!confirmed) return;
             
             const btn = document.getElementById('btn-save-note');
             btn.disabled = true;
@@ -1256,6 +1300,7 @@
             if (isChecked) document.getElementById('clear-km-input').value = "";
         }
  
+        // ОНОВЛЕНО: Переведено на кастомний діалог customConfirm замість вікна з зображення image_af80fc.png
         async function executeDataClear() {
             const isClearAllPd = document.getElementById('clear-all-pd-checkbox').checked;
             const kmValue = document.getElementById('clear-km-input').value.trim();
@@ -1269,7 +1314,9 @@
                 url += `&km=eq.${parseInt(kmValue)}`;
             }
  
-            if (!confirm("Підтвердити видалення даних про обкошування?")) return;
+            const confirmed = await customConfirm("Підтвердити видалення даних про обкошування?", "🗑️ Видалення даних");
+            if (!confirmed) return;
+            
             toggleClearModal(false);
  
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey, 'Content-Type': 'application/json' };
