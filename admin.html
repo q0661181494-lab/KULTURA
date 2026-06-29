@@ -103,7 +103,6 @@
 
         .secure-numeric-input { -webkit-text-security: disc !important; text-security: disc !important; }
 
-        /* ДОДАНО: Ізольовані стилі для кастомного вікна повідомлень/підтверджень */
         #confirm-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 110000; align-items: center; justify-content: center; padding: 12px; box-sizing: border-box; }
         #confirm-modal.show { display: flex; }
         #confirm-modal .modal-box { background: white; padding: 22px; border-radius: 16px; width: 100%; max-width: 380px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #cbd5e1; text-align: center; }
@@ -230,7 +229,7 @@
                     </div>
                 </div>
 
-                <div class="km-section">
+                <div class="km-section" style="margin-bottom: 8px;">
                     <div class="km-pk-row">
                         <div class="km-col">
                             <span class="sub-heading">Кінець (КМ)</span>
@@ -242,6 +241,9 @@
                         </div>
                     </div>
                 </div>
+
+                <label class="track-label">5. Примітка / Додаткова інформація:</label>
+                <input type="text" id="sig-notes" class="input-field" placeholder="Наприклад: щогла, ордината, дефект тощо">
             </div>
 
             <button class="btn-submit" onclick="saveDataToCloud()">Зберегти в базу даних</button>
@@ -331,7 +333,7 @@
         let selectedPds = [];
         let currentObjectType = 'peregon'; 
         let currentSignalObjectType = 'signal'; 
-        const graphiteColor = '#475569'; // Статичний колір за замовчуванням для вкладки "Інше"
+        const graphiteColor = '#475569'; 
 
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
@@ -348,7 +350,6 @@
             document.getElementById('system-debug-panel').classList.toggle('active');
         }
 
-        // ДОДАНО: Асинхронна заміна для confirm()
         function customConfirm(text, title = "Підтвердження дії") {
             return new Promise((resolve) => {
                 document.getElementById('confirm-modal-title').innerText = title;
@@ -377,7 +378,6 @@
             });
         }
 
-        // ДОДАНО: Асинхронна заміна для alert()
         function customAlert(text, title = "Сповіщення") {
             return new Promise((resolve) => {
                 document.getElementById('confirm-modal-title').innerText = title;
@@ -403,6 +403,7 @@
             logSys(type === 'other' ? "Обрано тип об'єкта: Інше (фіксований графітовий колір)." : "Обрано тип об'єкта: Світлофор.");
         }
 
+        // ОНОВЛЕНО: Додано очищення поля sig-notes
         function clearFormInputs() {
             document.getElementById('admin-pd-num').value = "";
             document.getElementById('admin-peregon').value = "";
@@ -418,8 +419,7 @@
             document.getElementById('sig-start-pk').value = "";
             document.getElementById('sig-end-km').value = "";
             document.getElementById('sig-end-pk').value = "";
-            document.getElementById('sig-chk-neparna').checked = true;
-            document.getElementById('sig-chk-parna').checked = false;
+            document.getElementById('sig-notes').value = "";
             setSignalObjectType('signal');
 
             logSys("Всі поля форми конфігурації очищено.");
@@ -435,7 +435,7 @@
             logSys(`Перемкнуто режим на: ${mode === 'lines' ? 'Дільниці' : 'Світлофори/інше'}`);
         }
 
-        // ОНОВЛЕНО: Додано await для кастомних сповіщень
+        // ОНОВЛЕНО: Додано зчитування та відправку поля notes у Supabase
         async function saveDataToCloud() {
             const pdRaw = document.getElementById('admin-pd-num').value.trim();
             if (!pdRaw) {
@@ -498,7 +498,7 @@
                     }
 
                     if (successCount === trackTypes.length) {
-                        logSys(`Усі записи дільниці (${successCount}) успешно додано!`, "success");
+                        logSys(`Усі записи дільниці (${successCount}) успішно додано!`, "success");
                         await customAlert("Дані дільниці успішно збережено!", "✅ Успішно");
                         clearFormInputs(); 
                         loadPdsForCleaning();
@@ -515,6 +515,7 @@
                 const startPk = parseInt(document.getElementById('sig-start-pk').value);
                 const endKm = parseInt(document.getElementById('sig-end-km').value);
                 const endPk = parseInt(document.getElementById('sig-end-pk').value);
+                const sigNotes = document.getElementById('sig-notes').value.trim();
 
                 if (!sigName || isNaN(startKm) || isNaN(startPk)) {
                     await customAlert("Заповніть обов'язкові початкові координати об'єкта!", "⚠️ Помилка");
@@ -543,7 +544,8 @@
                             end_km: isNaN(endKm) ? startKm : endKm,
                             end_pk: isNaN(endPk) ? startPk : endPk,
                             signal_type: currentSignalObjectType === 'other' ? 'інше' : 'світлофор',
-                            color_hex: currentSignalObjectType === 'other' ? graphiteColor : null
+                            color_hex: currentSignalObjectType === 'other' ? graphiteColor : null,
+                            notes: sigNotes || null  /* Додано відправку стовпця примітки */
                         };
 
                         const res = await fetch(`${baseDbUrl}/rest/v1/signals`, {
@@ -584,7 +586,6 @@
             if(drop) drop.classList.toggle('show');
         }
 
-        // ОНОВЛЕНО: Переведено на асинхронну логіку та customAlert()
         async function verifyAdminPassword() {
             const enteredPass = document.getElementById('admin-password-input').value.trim();
             if (!enteredPass) {
@@ -627,7 +628,6 @@
             }
         }
 
-        // ОНОВЛЕНО: Переведено на customConfirm() та customAlert()
         async function executeChangeAdminPassword() {
             const passwordInput = document.getElementById('new-admin-password');
             const newAdminPw = passwordInput.value.trim();
@@ -718,6 +718,7 @@
             }
         }
 
+        // ОНОВЛЕНО: Візуальне відображення примітки у картці перегляду бази даних
         function renderModalCards(data, table) {
             const container = document.getElementById('modal-db-cards-container');
             container.innerHTML = "";
@@ -753,6 +754,7 @@
                         <button class="btn-card-delete" onclick="deleteSingleItem('lines_config', ${item.id})">Видалити</button>
                     `;
                 } else {
+                    const displayNotes = item.notes ? `<div style="font-size: 12px; margin-top: 4px; color: #0d9488; font-style: italic;">📝 Примітка: ${item.notes}</div>` : '';
                     cardContent = `
                         <div class="db-card-content">
                             <div class="db-card-top">
@@ -764,6 +766,7 @@
                             <div class="db-card-limits">
                                 Межі: <b>${item.km} КМ</b> (ПК-${item.piket}) → <b>${item.end_km || item.km} КМ</b> (ПК-${item.end_pk || item.piket})
                             </div>
+                            ${displayNotes}
                         </div>
                         <button class="btn-card-delete" onclick="deleteSingleItem('signals', ${item.id})">Видалити</button>
                     `;
@@ -785,7 +788,6 @@
             });
         }
 
-        // ОНОВЛЕНО: Замінено confirm() та alert()
         async function deleteSingleItem(table, id) {
             const confirmed = await customConfirm("Видалити цей запис безповоротно?", "🗑️ Видалення запису");
             if(!confirmed) return;
@@ -875,6 +877,7 @@
             loadItemsForCleaning();
         }
 
+        // ОНОВЛЕНО: Відображення примітки у списку вибору для очищення околотків
         async function loadItemsForCleaning() {
             const box = document.getElementById('cleaning-records-box');
             const list = document.getElementById('cleaning-records-list');
@@ -928,13 +931,14 @@
                     div.style = "display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:8px; border:1px solid #e2e8f0; font-size:13px;";
                     const cleanDisplay = String(item.pd).startsWith("ПД-") ? item.pd : `ПД-${item.pd}`;
                     const badgeColor = item.signal_type === 'інше' ? (item.color_hex || '#475569') : '#f59e0b';
+                    const notesLabel = item.notes ? ` <span style="color:#0d9488; font-style:italic; font-size:12px;">(${item.notes})</span>` : '';
                     
                     div.innerHTML = `
                         <input type="checkbox" class="clean-item-chk" data-table="signals" data-id="${item.id}" style="width:18px; height:18px; accent-color:#ef4444; margin:0; cursor:pointer;">
                         <div style="flex:1; color:#115e59; text-align:left;">
                             <span style="font-weight:bold; font-size:10px; background:#e6f4ea; padding:2px 5px; border-radius:4px; margin-right:4px; color:#115e59;">${cleanDisplay}</span>
                             <span style="font-weight:bold; font-size:10px; background:${badgeColor}; color:white; padding:2px 5px; border-radius:4px; margin-right:4px; text-transform:uppercase;">${item.signal_type || 'сигнал'}</span>
-                            <b>${item.signal_type === 'інше' ? '📦' : '🚦'} ${item.signal_name}</b> (${item.track_type} колія, ${item.km} км)
+                            <b>${item.signal_type === 'інше' ? '📦' : '🚦'} ${item.signal_name}</b> (${item.track_type} колія, ${item.km} км)${notesLabel}
                         </div>
                     `;
                     list.appendChild(div);
@@ -945,7 +949,6 @@
             }
         }
 
-        // ОНОВЛЕНО: Переведено на кастомний асинхронний діалог
         async function clearSelectedPdTracks() {
             const checkedInputs = document.querySelectorAll('.clean-item-chk:checked');
             if (checkedInputs.length === 0) {
