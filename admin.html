@@ -102,6 +102,11 @@
         .debug-toggle-btn:hover { background: rgba(148, 163, 184, 0.35); opacity: 1; }
 
         .secure-numeric-input { -webkit-text-security: disc !important; text-security: disc !important; }
+
+        /* ДОДАНО: Ізольовані стилі для кастомного вікна повідомлень/підтверджень */
+        #confirm-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 110000; align-items: center; justify-content: center; padding: 12px; box-sizing: border-box; }
+        #confirm-modal.show { display: flex; }
+        #confirm-modal .modal-box { background: white; padding: 22px; border-radius: 16px; width: 100%; max-width: 380px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #cbd5e1; text-align: center; }
     </style>
 </head>
 <body>
@@ -307,6 +312,17 @@
         </div>
     </div>
 
+    <div id="confirm-modal">
+        <div class="modal-box">
+            <div class="card-title" id="confirm-modal-title" style="font-size: 16px; margin-bottom: 10px; font-weight: 800; color: #115e59; text-transform: none; letter-spacing: 0.5px;">Підтвердження</div>
+            <p id="confirm-modal-text" style="font-size: 14px; color: #475569; margin-bottom: 22px; line-height: 1.4; font-weight: 500; text-align: center; opacity: 1;"></p>
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <button id="confirm-modal-ok" class="btn-submit" style="margin-top: 0; padding: 10px; font-size: 14px; flex: 1;">ОК</button>
+                <button id="confirm-modal-cancel" class="btn-submit" style="margin-top: 0; padding: 10px; font-size: 14px; background: #94a3b8; flex: 1;">Скасувати</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const fullKey = "sb_publishable_0-purk_0ckyXmGdYaWyA_g_JRl_O-mh";
         const baseDbUrl = "https://zcyntywoftcahfjwqldr.supabase.co";
@@ -330,6 +346,54 @@
 
         function toggleDebugPanel() {
             document.getElementById('system-debug-panel').classList.toggle('active');
+        }
+
+        // ДОДАНО: Асинхронна заміна для confirm()
+        function customConfirm(text, title = "Підтвердження дії") {
+            return new Promise((resolve) => {
+                document.getElementById('confirm-modal-title').innerText = title;
+                document.getElementById('confirm-modal-text').innerText = text;
+                document.getElementById('confirm-modal-cancel').style.display = 'block';
+                const modal = document.getElementById('confirm-modal');
+                modal.classList.add('show');
+                
+                const onOk = () => {
+                    modal.classList.remove('show');
+                    cleanup();
+                    resolve(true);
+                };
+                const onCancel = () => {
+                    modal.classList.remove('show');
+                    cleanup();
+                    resolve(false);
+                };
+                const cleanup = () => {
+                    document.getElementById('confirm-modal-ok').removeEventListener('click', onOk);
+                    document.getElementById('confirm-modal-cancel').removeEventListener('click', onCancel);
+                };
+                
+                document.getElementById('confirm-modal-ok').addEventListener('click', onOk);
+                document.getElementById('confirm-modal-cancel').addEventListener('click', onCancel);
+            });
+        }
+
+        // ДОДАНО: Асинхронна заміна для alert()
+        function customAlert(text, title = "Сповіщення") {
+            return new Promise((resolve) => {
+                document.getElementById('confirm-modal-title').innerText = title;
+                document.getElementById('confirm-modal-text').innerText = text;
+                document.getElementById('confirm-modal-cancel').style.display = 'none';
+                const modal = document.getElementById('confirm-modal');
+                modal.classList.add('show');
+                
+                const onOk = () => {
+                    modal.classList.remove('show');
+                    document.getElementById('confirm-modal-ok').removeEventListener('click', onOk);
+                    resolve(true);
+                };
+                
+                document.getElementById('confirm-modal-ok').addEventListener('click', onOk);
+            });
         }
 
         function setSignalObjectType(type) {
@@ -371,10 +435,11 @@
             logSys(`Перемкнуто режим на: ${mode === 'lines' ? 'Дільниці' : 'Світлофори/інше'}`);
         }
 
+        // ОНОВЛЕНО: Додано await для кастомних сповіщень
         async function saveDataToCloud() {
             const pdRaw = document.getElementById('admin-pd-num').value.trim();
             if (!pdRaw) {
-                alert("Будь ласка, спочатку вкажіть номер ПД (околоток)!");
+                await customAlert("Будь ласка, спочатку вкажіть номер ПД (околоток)!", "⚠️ Помилка");
                 return;
             }
 
@@ -395,7 +460,7 @@
                 const endPk = parseInt(document.getElementById('admin-end-pk').value);
                 
                 if (!name || isNaN(startKm) || isNaN(startPk) || isNaN(endKm) || isNaN(endPk)) {
-                    alert("Заповніть усі обов'язкові поля для дільниці!");
+                    await customAlert("Заповніть усі обов'язкові поля для дільниці!", "⚠️ Помилка");
                     return;
                 }
 
@@ -403,7 +468,7 @@
                 if (document.getElementById('chk-neparna').checked) trackTypes.push("непарна");
                 if (document.getElementById('chk-parna').checked) trackTypes.push("парна");
                 if (trackTypes.length === 0) {
-                    alert("Оберіть хоча б одну колію дільниці!");
+                    await customAlert("Оберіть хоча б одну колію дільниці!", "⚠️ Помилка");
                     return;
                 }
 
@@ -433,8 +498,8 @@
                     }
 
                     if (successCount === trackTypes.length) {
-                        logSys(`Усі записи дільниці (${successCount}) успішно додано!`, "success");
-                        alert("Дані дільниці успішно збережено!");
+                        logSys(`Усі записи дільниці (${successCount}) успешно додано!`, "success");
+                        await customAlert("Дані дільниці успішно збережено!", "✅ Успішно");
                         clearFormInputs(); 
                         loadPdsForCleaning();
                     } else {
@@ -452,7 +517,7 @@
                 const endPk = parseInt(document.getElementById('sig-end-pk').value);
 
                 if (!sigName || isNaN(startKm) || isNaN(startPk)) {
-                    alert("Заповніть обов'язкові початкові координати об'єкта!");
+                    await customAlert("Заповніть обов'язкові початкові координати об'єкта!", "⚠️ Помилка");
                     return;
                 }
 
@@ -460,7 +525,7 @@
                 if (document.getElementById('sig-chk-neparna').checked) trackTypes.push("непарна");
                 if (document.getElementById('sig-chk-parna').checked) trackTypes.push("парна");
                 if (trackTypes.length === 0) {
-                    alert("Оберіть колію для об'єкта!");
+                    await customAlert("Оберіть колію для об'єкта!", "⚠️ Помилка");
                     return;
                 }
 
@@ -478,7 +543,6 @@
                             end_km: isNaN(endKm) ? startKm : endKm,
                             end_pk: isNaN(endPk) ? startPk : endPk,
                             signal_type: currentSignalObjectType === 'other' ? 'інше' : 'світлофор',
-                            // Автоматично пишемо фіксований графітовий колір для "інше" або null для світлофора
                             color_hex: currentSignalObjectType === 'other' ? graphiteColor : null
                         };
 
@@ -492,12 +556,12 @@
 
                     if (successCount === trackTypes.length) {
                         logSys(`Успішно додано об'єктів: ${successCount}!`, "success");
-                        alert("Об'єкт успішно збережено в базу!");
+                        await customAlert("Об'єкт успішно збережено в базу!", "✅ Успішно");
                         clearFormInputs(); 
                         loadPdsForCleaning();
                     } else {
                         logSys(`Помилка при збереженні записів.`, "error");
-                        alert("Помилка збереження. Перевірте монітор.");
+                        await customAlert("Помилка збереження. Перевірте монітор.", "❌ Помилка");
                     }
                 } catch (e) {
                     logSys(`Помилка мережі: ${e.message}`, "error");
@@ -520,10 +584,11 @@
             if(drop) drop.classList.toggle('show');
         }
 
+        // ОНОВЛЕНО: Переведено на асинхронну логіку та customAlert()
         async function verifyAdminPassword() {
             const enteredPass = document.getElementById('admin-password-input').value.trim();
             if (!enteredPass) {
-                alert("Будь ласка, введіть пароль!");
+                await customAlert("Будь ласка, введіть пароль!", "⚠️ Увага");
                 return;
             }
             
@@ -547,7 +612,7 @@
                     document.getElementById('screen-admin').style.display = 'block';
                     loadPdsForCleaning();
                 } else {
-                    alert("Невірний пароль адміністратора!");
+                    await customAlert("Невірний пароль адміністратора!", "❌ Доступ відхилено");
                     logSys("Спроба несанкціонованого входу", "error");
                 }
             } catch (e) {
@@ -557,21 +622,23 @@
                     document.getElementById('screen-admin').style.display = 'block';
                     loadPdsForCleaning();
                 } else {
-                    alert("Помилка авторизації: " + e.message);
+                    await customAlert("Помилка авторизації: " + e.message, "❌ Помилка");
                 }
             }
         }
 
+        // ОНОВЛЕНО: Переведено на customConfirm() та customAlert()
         async function executeChangeAdminPassword() {
             const passwordInput = document.getElementById('new-admin-password');
             const newAdminPw = passwordInput.value.trim();
             
             if (!newAdminPw) {
-                alert("Будь ласка, введіть новий пароль для адміністратора!");
+                await customAlert("Будь ласка, введіть новий пароль для адміністратора!", "⚠️ Помилка");
                 return;
             }
             
-            if (!confirm("Ви впевнені, що хочете змінити пароль адміністратора сайту?")) return;
+            const confirmed = await customConfirm("Ви впевнені, що хочете змінити пароль адміністратора сайту?", "🔑 Зміна пароля");
+            if (!confirmed) return;
             
             const headers = { 
                 'apikey': fullKey, 
@@ -600,15 +667,15 @@
                 }
                 
                 if (res.ok) {
-                    alert("Пароль адміністратора успішно змінено у хмарі!");
+                    await customAlert("Пароль адміністратора успішно змінено у хмарі!", "✅ Успішно");
                     passwordInput.value = "";
                     logSys("Пароль головного адміністратора змінено", "success");
                 } else {
-                    alert("Не вдалося оновити пароль.");
+                    await customAlert("Не вдалося оновити пароль.", "❌ Помилка");
                     logSys("Помилка оновлення пароля", "error");
                 }
             } catch (e) {
-                alert("Помилка підключення: " + e.message);
+                await customAlert("Помилка підключення: " + e.message, "❌ Помилка");
             }
         }
 
@@ -718,8 +785,11 @@
             });
         }
 
+        // ОНОВЛЕНО: Замінено confirm() та alert()
         async function deleteSingleItem(table, id) {
-            if(!confirm("Видалити цей запис безповоротно?")) return;
+            const confirmed = await customConfirm("Видалити цей запис безповоротно?", "🗑️ Видалення запису");
+            if(!confirmed) return;
+
             const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
             try {
                 const res = await fetch(`${baseDbUrl}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers });
@@ -728,10 +798,10 @@
                     loadTableDataFromModal();
                     loadPdsForCleaning();
                 } else {
-                    alert("Не вдалося видалити запис.");
+                    await customAlert("Не вдалося видалити запис.", "❌ Помилка");
                 }
             } catch(e) {
-                alert("Помилка: " + e.message);
+                await customAlert("Помилка: " + e.message, "❌ Помилка");
             }
         }
 
@@ -875,16 +945,16 @@
             }
         }
 
+        // ОНОВЛЕНО: Переведено на кастомний асинхронний діалог
         async function clearSelectedPdTracks() {
             const checkedInputs = document.querySelectorAll('.clean-item-chk:checked');
             if (checkedInputs.length === 0) {
-                alert("Будь ласка, спочатку оберіть галочками конкретні записи, які ви хочете видалити!");
+                await customAlert("Будь ласка, спочатку оберіть галочками конкретні записи, які ви хочете видалити!", "⚠️ Увага");
                 return;
             }
             
-            if (!confirm(`Ви впевнені, що хочете видалити вибрані записи (${checkedInputs.length} шт.) безповоротно?`)) {
-                return;
-            }
+            const confirmed = await customConfirm(`Ви впевнені, що хочете видалити вибрані записи (${checkedInputs.length} шт.) безповоротно?`, "⚠️ Очищення околотків");
+            if (!confirmed) return;
             
             const groups = { lines_config: [], signals: [] };
             checkedInputs.forEach(input => {
@@ -912,11 +982,11 @@
                 }
                 
                 logSys(`Успішно видалено ${totalDeleted} записів!`, 'success');
-                alert(`Успішно видалено ${totalDeleted} записів із бази даних!`);
+                await customAlert(`Успішно видалено ${totalDeleted} записів із бази даних!`, "✅ Успішно");
                 await loadPdsForCleaning(); 
             } catch(e) {
                 logSys("Помилка при видаленні: " + e.message, 'error');
-                alert("Виникла помилка під час видалення: " + e.message);
+                await customAlert("Виникла помилка під час видалення: " + e.message, "❌ Помилка");
             }
         }
     </script>
