@@ -730,7 +730,8 @@
                     }
 
                     if (leftSignal) {
-                        const signalNote = leftSignal.signal_type || leftSignal.signal || 'Примітка відсутня';
+                        // ОНОВЛЕНО: Тепер текст береться безпосередньо з поля примітки notes
+                        const signalNote = leftSignal.notes || 'Примітка відсутня';
                         const isOtherObj = leftSignal.signal_type === 'інше';
                         leftMargin.innerHTML = `
                             <span class="${isOtherObj ? 'infra-badge' : 'signal-badge'}" 
@@ -800,7 +801,8 @@
                     }
 
                     if (rightSignal) {
-                        const signalNote = rightSignal.signal_type || rightSignal.signal || 'Примітка відсутня';
+                        // ОНОВЛЕНО: Тепер текст береться безпосередньо з поля примітки notes
+                        const signalNote = rightSignal.notes || 'Примітка відсутня';
                         const isOtherObj = rightSignal.signal_type === 'інше';
                         rightMargin.innerHTML = `
                             <span class="${isOtherObj ? 'infra-badge' : 'signal-badge'}" 
