@@ -136,15 +136,15 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: #cbd5e1;       /* Світло-сірий колір */
-            color: #334155;            /* Темно-сірий колір шрифту для читабельності */
-            padding: 2px 5px;          /* Зменшені внутрішні поля */
-            border-radius: 4px;        /* Квадратна форма із закругленими кутами */
-            font-size: 10px;           /* Зменшений розмір шрифту */
+            background: #cbd5e1;
+            color: #334155;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 10px;
             font-weight: 800;
             border: 1px solid #94a3b8;
-            min-width: 36px;           /* Зменшена мінімальна ширина */
-            max-width: 42px;           /* Гарантує, що синя межа станції залишиться видимою */
+            min-width: 36px;
+            max-width: 42px;
             box-sizing: border-box;
             white-space: nowrap;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12);
@@ -304,6 +304,10 @@
                     </div>
                 </div>
             </div>
+
+            <div id="notes-actions-bar" class="hidden">
+                <button class="btn-submit" onclick="toggleClearNotesModal(true)" style="background: transparent; border: 2px solid #ef4444; color: #ef4444; margin-top: 12px; box-shadow: none;">🗑️ Очистити інформацію нотаток</button>
+            </div>
         </div>
     </div>
  
@@ -381,7 +385,6 @@
         <div id="lightbox-photo-counter" class="lightbox-counter">1 / 1</div>
     </div>
  
-    <!-- ОНОВЛЕНО: Додано фірмове вікно підтвердження замінює браузерний confirm() -->
     <div id="confirm-modal" class="modal-overlay" style="z-index: 110000;">
         <div class="modal-box" style="border-color: #cbd5e1; max-width: 380px; padding: 22px; text-align: center;">
             <div class="card-title" id="confirm-modal-title" style="font-size: 16px; margin-bottom: 10px; text-transform: none; letter-spacing: 0.5px; color: #115e59;">Підтвердження</div>
@@ -390,6 +393,33 @@
                 <button id="confirm-modal-ok" class="btn-submit" style="margin-top: 0; padding: 10px; font-size: 14px; flex: 1;">ОК</button>
                 <button id="confirm-modal-cancel" class="btn-submit" style="margin-top: 0; padding: 10px; font-size: 14px; background: #94a3b8; flex: 1;">Скасувати</button>
             </div>
+        </div>
+    </div>
+
+    <div id="clear-notes-modal" class="modal-overlay" style="z-index: 105000;">
+        <div class="modal-box" style="border-color: #fca5a5;">
+            <div class="card-title" style="color: #dc2626; font-size: 16px; margin-bottom: 12px;">🗑️ Очищення нотаток</div>
+            
+            <div class="form-group">
+                <label style="color: #115e59;">Введіть номер кілометра (порожньо — весь околоток):</label>
+                <input type="number" id="clear-notes-km-input" class="form-control" placeholder="Наприклад: 69">
+            </div>
+            
+            <label style="display:block; font-weight:700; font-size:11px; margin-bottom:6px; color:#115e59; text-transform:uppercase;">Оберіть компоненти для видалення:</label>
+            <div style="margin-bottom: 18px; display: flex; flex-direction: column; gap: 8px;">
+                <label class="checkbox-container" style="background:#f8fafc; border:1px solid #cbd5e1; color:#334155; margin-bottom:0; padding:10px;">
+                    <input type="checkbox" id="delete-type-text" checked> 📝 Текст нотатки / Зауваження
+                </label>
+                <label class="checkbox-container" style="background:#f8fafc; border:1px solid #cbd5e1; color:#334155; margin-bottom:0; padding:10px;">
+                    <input type="checkbox" id="delete-type-photo" checked> 📸 Прикріплені фотографії
+                </label>
+                <label class="checkbox-container" style="background:#f8fafc; border:1px solid #cbd5e1; color:#334155; margin-bottom:0; padding:10px;">
+                    <input type="checkbox" id="delete-type-audio" checked> 🎙️ Голосові записи (аудіо)
+                </label>
+            </div>
+            
+            <button class="btn-submit" onclick="executeNotesDataClear()" style="background: #dc2626; margin-top: 8px;">Підтвердити видалення</button>
+            <button class="btn-submit" onclick="toggleClearNotesModal(false)" style="background: #94a3b8; margin-top: 8px;">Скасувати</button>
         </div>
     </div>
  
@@ -448,11 +478,13 @@
             document.getElementById('system-debug-panel').classList.toggle('active');
         }
  
+        // ОНОВЛЕНО: Тепер функція додатково керує відображенням панелі для нотаток
         function switchWorkMode(mode) {
             currentMode = mode;
             document.getElementById('tab-mowing').classList.toggle('active', mode === 'mowing');
             document.getElementById('tab-notes').classList.toggle('active', mode === 'notes');
             document.getElementById('mowing-actions-bar').classList.toggle('hidden', mode === 'notes');
+            document.getElementById('notes-actions-bar').classList.toggle('hidden', mode === 'mowing');
             filterDiagramByKm();
         }
  
@@ -489,7 +521,6 @@
             toastTimeoutId = setTimeout(() => { toast.classList.remove('show'); }, 4500);
         }
  
-        // ДОДАНО: Асинхронна функція заміни вікна confirm()
         function customConfirm(text, title = "Підтвердження дії") {
             return new Promise((resolve) => {
                 document.getElementById('confirm-modal-title').innerText = title;
@@ -971,7 +1002,6 @@
             });
         }
  
-        // ОНОВЛЕНО: Переведено на кастомний діалог customConfirm
         async function removeSinglePhoto(idx) {
             const confirmed = await customConfirm("Видалити цю фотографію з картки пікета?", "❌ Видалення фото");
             if (confirmed) {
@@ -1004,7 +1034,6 @@
             });
         }
  
-        // ОНОВЛЕНО: Переведено на кастомний діалог customConfirm
         async function removeSingleAudio(idx) {
             const confirmed = await customConfirm("Видалити цей аудіозапис з картки пікета?", "❌ Видалення аудіо");
             if (confirmed) {
@@ -1059,7 +1088,6 @@
             }
         }
  
-        // ОНОВЛЕНО: Переведено на кастомний діалог customConfirm
         async function clearNoteText() {
             const confirmed = await customConfirm("Очистити весь текст цієї нотатки?", "🧹 Очищення тексту");
             if (confirmed) {
@@ -1216,7 +1244,6 @@
             }
         }
  
-        // ОНОВЛЕНО: Переведено на кастомний діалог customConfirm
         async function executeDeleteNote() {
             const confirmed = await customConfirm("Ви впевнені, що хочете ПОВНІСТЮ ВИДАЛИТИ дані з цього пікета?", "⚠️ Увага!");
             if (!confirmed) return;
@@ -1300,7 +1327,6 @@
             if (isChecked) document.getElementById('clear-km-input').value = "";
         }
  
-        // ОНОВЛЕНО: Переведено на кастомний діалог customConfirm замість вікна з зображення image_af80fc.png
         async function executeDataClear() {
             const isClearAllPd = document.getElementById('clear-all-pd-checkbox').checked;
             const kmValue = document.getElementById('clear-km-input').value.trim();
@@ -1329,6 +1355,72 @@
                     filterDiagramByKm();
                 }
             } catch (e) { showToastMessage("Помилка: " + e.message, "error"); }
+        }
+
+        // ДОДАНО: Керування модальним вікном очищення нотаток
+        function toggleClearNotesModal(show) {
+            const modal = document.getElementById('clear-notes-modal');
+            if (show) {
+                modal.classList.add('show');
+                document.getElementById('clear-notes-km-input').value = "";
+                document.getElementById('delete-type-text').checked = true;
+                document.getElementById('delete-type-photo').checked = true;
+                document.getElementById('delete-type-audio').checked = true;
+            } else { modal.classList.remove('show'); }
+        }
+
+        // ДОДАНО: Логіка виконання вибіркового/повного видалення нотаток з Supabase
+        async function executeNotesDataClear() {
+            const delText = document.getElementById('delete-type-text').checked;
+            const delPhoto = document.getElementById('delete-type-photo').checked;
+            const delAudio = document.getElementById('delete-type-audio').checked;
+            const kmValue = document.getElementById('clear-notes-km-input').value.trim();
+
+            if (!delText && !delPhoto && !delAudio) {
+                showToastMessage("Оберіть хоча б один компонент для видалення!", "error");
+                return;
+            }
+
+            const confirmed = await customConfirm("Ви впевнені, що хочете видалити обрані компоненти нотаток?", "🗑️ Очищення нотаток");
+            if (!confirmed) return;
+
+            toggleClearNotesModal(false);
+            logSys(`Запуск очищення нотаток для ${currentPD}...`);
+
+            try {
+                let res;
+                // Якщо обрано всі три галочки — повністю видаляємо записи з бази
+                if (delText && delPhoto && delAudio) {
+                    let q = supabaseClient.from('piket_notes').delete().eq('pd', currentPD);
+                    if (kmValue) q = q.eq('km', parseInt(kmValue));
+                    res = await q;
+                } else {
+                    // Якщо обрано вибірково — обнуляємо лише потрібні стовпці
+                    let updatePayload = {};
+                    if (delText) updatePayload.note_text = null;
+                    if (delPhoto) updatePayload.photo_url = null;
+                    if (delAudio) updatePayload.audio_url = null;
+
+                    let q = supabaseClient.from('piket_notes').update(updatePayload).eq('pd', currentPD);
+                    if (kmValue) q = q.eq('km', parseInt(kmValue));
+                    res = await q;
+                }
+
+                if (res.error) throw res.error;
+
+                showToastMessage("Дані нотаток успішно очищено!", "success");
+                logSys("Компоненти карток пікетів успішно оновлено", "success");
+
+                // Перезавантаження даних у систему для оновлення іконок на діаграмі
+                const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
+                const resNotes = await fetch(`${baseDbUrl}/rest/v1/piket_notes?pd=eq.${encodeURIComponent(currentPD)}`, { headers });
+                globalNotesData = await resNotes.json();
+                
+                filterDiagramByKm();
+            } catch (e) {
+                logSys("Помилка видалення нотаток: " + e.message, "error");
+                showToastMessage("Не вдалося видалити дані: " + e.message, "error");
+            }
         }
     </script>
 </body>
