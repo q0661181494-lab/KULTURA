@@ -131,7 +131,7 @@
         .signal-badge { display: inline-flex; align-items: center; justify-content: center; background: #1e293b; color: #ffffff; padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid #475569; min-width: 42px; box-sizing: border-box; z-index: 5; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
         .signal-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; background-color: #22c55e; border-radius: 50%; margin-right: 4px; box-shadow: 0 0 6px #22c55e; }
 
-        /* ОНОВЛЕНО: Додано компактний стиль для об'єктів інфраструктури "Інше" */
+        /* Компактний стиль для об'єктів інфраструктури "Інше" */
         .infra-badge {
             display: inline-flex;
             align-items: center;
@@ -382,7 +382,7 @@
     </div>
  
     <div id="signal-toast-notification" class="signal-toast" onclick="hideSignalToast()">
-        <div class="signal-toast-accent"></div>
+        <div id="signal-toast-accent" class="signal-toast-accent"></div>
         <span id="signal-toast-text">Текст примітки</span>
     </div>
  
@@ -454,20 +454,38 @@
             document.getElementById('modal-content-audio').classList.toggle('hidden', tabName !== 'audio');
         }
  
-        function handleSignalClick(element) {
-            const typeText = element.getAttribute('data-type');
+        // ДОДАНО: Універсальна функція сповіщень замість браузерного alert()
+        function showToastMessage(text, type = 'info') {
             const toast = document.getElementById('signal-toast-notification');
             const txt = document.getElementById('signal-toast-text');
+            const accent = document.getElementById('signal-toast-accent');
             
-            if (typeText && typeText !== 'undefined' && typeText !== 'не вказано' && typeText.trim() !== '') {
-                txt.innerText = typeText.trim();
-            } else {
-                txt.innerText = "Примітка відсутня";
+            if (!toast || !txt) return;
+            
+            let color = '#3b82f6'; // Інформаційний синій за замовчуванням
+            if (type === 'error') color = '#ef4444'; // Червоний колір для помилок
+            if (type === 'success') color = '#22c55e'; // Зелений колір для успіху
+            
+            if (accent) {
+                accent.style.backgroundColor = color;
+                accent.style.boxShadow = `0 0 8px ${color}`;
             }
             
+            txt.innerText = text;
             toast.classList.add('show');
+            
             if (toastTimeoutId) clearTimeout(toastTimeoutId);
-            toastTimeoutId = setTimeout(() => { toast.classList.remove('show'); }, 5000);
+            toastTimeoutId = setTimeout(() => { toast.classList.remove('show'); }, 4500);
+        }
+
+        // ОНОВЛЕНО: Переписано під використання єдиної системи повідомлень
+        function handleSignalClick(element) {
+            const typeText = element.getAttribute('data-type');
+            let msg = "Примітка відсутня";
+            if (typeText && typeText !== 'undefined' && typeText !== 'не вказано' && typeText.trim() !== '') {
+                msg = typeText.trim();
+            }
+            showToastMessage(msg, 'info');
         }
  
         function hideSignalToast() {
@@ -480,6 +498,7 @@
             } catch (e) { logSys("Помилка підключення: " + e.message, "error"); }
         });
  
+        // ОНОВЛЕНО: Замінено всі alert() на showToastMessage()
         async function executeLogin() {
             const pdInput = document.getElementById('login-pd-input');
             const passInput = document.getElementById('login-password-input');
@@ -489,7 +508,7 @@
             const password = passInput.value.trim();
             
             if (!pdNum || !password) {
-                alert("Будь ласка, введіть номер околотку та пароль!");
+                showToastMessage("Будь ласка, введіть номер околотку та пароль!", "error");
                 return;
             }
 
@@ -515,7 +534,7 @@
                     if (pwData[0].password === password) {
                         isAuthorized = true;
                     } else {
-                        alert("Невірний пароль для цього околотку!");
+                        showToastMessage("Невірний пароль для цього околотку!", "error");
                         logSys(`Помилка входу для ${roleName}: невірний пароль`, "error");
                         return;
                     }
@@ -525,7 +544,7 @@
                         isAuthorized = true;
                         logSys(`Вхід за дефолтним ключем для лінії ${roleName}`, "info");
                     } else {
-                        alert("Невірний пароль! За замовчуванням пароль — це подвійний номер вашого ПД (наприклад, 0101).");
+                        showToastMessage("Невірний пароль! Спробуйте дефолтний подвійний номер вашого ПД.", "error");
                         logSys(`Відхилено спробу входу для ${roleName}`, "error");
                         return;
                     }
@@ -559,7 +578,7 @@
                 }
             } catch (e) { 
                 logSys("Помилка завантаження даних: " + e.message, "error"); 
-                alert("Помилка підключення: " + e.message);
+                showToastMessage("Помилка підключення: " + e.message, "error");
             } finally {
                 loginBtn.disabled = false;
                 loginBtn.innerHTML = 'Увійти в кабінет';
@@ -572,9 +591,13 @@
             document.getElementById('new-pd-password').value = "";
         }
 
+        // ОНОВЛЕНО: Замінено alert() на showToastMessage()
         async function executeChangeOwnPassword() {
             const newPw = document.getElementById('new-pd-password').value.trim();
-            if (!newPw) { return alert("Будь ласка, введіть новий пароль!"); }
+            if (!newPw) { 
+                showToastMessage("Будь ласка, введіть новий пароль!", "error");
+                return;
+            }
             
             logSys(`Запис нового пароля для ${currentPD}...`);
             try {
@@ -584,12 +607,12 @@
                     
                 if (error) throw error;
                 
-                alert("Пароль вашого околотку успішно оновлено!");
+                showToastMessage("Пароль вашого околотку успішно оновлено!", "success");
                 logSys("Конфігурацію пароля змінено користувачем", "success");
                 togglePasswordChangeBlock();
             } catch (e) {
                 logSys("Помилка оновлення пароля: " + e.message, "error");
-                alert("Не вдалося зберегти: " + e.message);
+                showToastMessage("Не вдалося зберегти: " + e.message, "error");
             }
         }
  
@@ -686,7 +709,6 @@
                     const leftMargin = document.createElement('div');
                     leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
                     
-                    // ОНОВЛЕНО: Пошук лівих об'єктів/сигналів за правилами діаграми (з лінійними межами)
                     let leftSignal = signalsData.find(s => isLeftTrack(s.track_type) && parseInt(s.km) === km && parseInt(s.piket) === pk);
                     if (!leftSignal) {
                         leftSignal = signalsData.find(s => {
@@ -819,7 +841,6 @@
                     const rightMargin = document.createElement('div');
                     rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
                     
-                    // ОНОВЛЕНО: Пошук правих об'єктів/сигналів за правилами діаграми (з лінійними межами)
                     let rightSignal = signalsData.find(s => isRightTrack(s.track_type) && parseInt(s.km) === km && parseInt(s.piket) === pk);
                     if (!rightSignal) {
                         rightSignal = signalsData.find(s => {
@@ -1051,7 +1072,7 @@
  
             } catch (err) {
                 console.error(err);
-                alert("Помилка доступу до мікрофона: " + err.message);
+                showToastMessage("Помилка доступу до мікрофона: " + err.message, "error");
                 statusText.innerText = "Помилка мікрофона";
             }
         }
@@ -1146,7 +1167,7 @@
                 filterDiagramByKm();
             } catch(e) {
                 logSys("Помилка: " + e.message, "error");
-                alert("Не вдалося зберегти: " + e.message);
+                showToastMessage("Не вдалося зберегти: " + e.message, "error");
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Зберегти зміни";
@@ -1180,7 +1201,7 @@
                 filterDiagramByKm();
             } catch(e) {
                 logSys("Помилка видалення: " + e.message, "error");
-                alert("Не вдалося видалити рядок: " + e.message);
+                showToastMessage("Не вдалося видалити рядок: " + e.message, "error");
             } finally {
                 btn.disabled = false;
             }
@@ -1200,20 +1221,23 @@
         }
  
         async function saveMowingProgress() {
-            if (selectedPiketsToSave.length === 0) { alert("Ви не вибрали жодного пікета!"); return; }
+            if (selectedPiketsToSave.length === 0) { 
+                showToastMessage("Ви не вибрали жодного пікета!", "error"); 
+                return; 
+            }
             const dateValue = document.getElementById('work-date-input').value;
             const recordsToSend = selectedPiketsToSave.map(p => ({ ...p, date: dateValue }));
  
             try {
                 const { error = null } = await supabaseClient.from('mowing').upsert(recordsToSend);
                 if (error) throw error;
-                alert("Роботу успішно зафіксовано!");
+                showToastMessage("Роботу успішно зафіксовано!", "success");
                 selectedPiketsToSave = [];
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
                 globalMowingData = await resMowing.json();
                 filterDiagramByKm();
-            } catch (e) { alert("Помилка: " + e.message); }
+            } catch (e) { showToastMessage("Помилка: " + e.message, "error"); }
         }
  
         function toggleClearModal(show) {
@@ -1238,7 +1262,10 @@
             let url = `${baseDbUrl}/rest/v1/mowing?pd=eq.${encodeURIComponent(currentPD)}`;
  
             if (!isClearAllPd) {
-                if (!kmValue) return alert("Введіть номер кілометра!");
+                if (!kmValue) {
+                    showToastMessage("Введіть номер кілометра!", "error");
+                    return;
+                }
                 url += `&km=eq.${parseInt(kmValue)}`;
             }
  
@@ -1249,12 +1276,12 @@
             try {
                 const response = await fetch(url, { method: 'DELETE', headers });
                 if (response.ok) {
-                    alert("Дані успішно очищено!");
+                    showToastMessage("Дані успішно очищено!", "success");
                     const resMowing = await fetch(`${baseDbUrl}/rest/v1/mowing`, { headers });
                     globalMowingData = await resMowing.json();
                     filterDiagramByKm();
                 }
-            } catch (e) { alert("Помилка: " + e.message); }
+            } catch (e) { showToastMessage("Помилка: " + e.message, "error"); }
         }
     </script>
 </body>
