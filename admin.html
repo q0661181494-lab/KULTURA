@@ -88,8 +88,11 @@
         .badge-signal { background: #f59e0b; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; text-transform: uppercase; }
         .db-card-name { font-size: 14px; color: #1e293b; font-weight: 700; margin-bottom: 4px; }
         .db-card-limits { font-size: 12px; color: #64748b; }
-        .btn-card-delete { background: #fee2e2; color: #dc2626; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; margin-left: 8px; }
+        
+        .btn-card-delete { background: #fee2e2; color: #dc2626; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; margin-left: 4px; }
         .btn-card-delete:hover { background: #fca5a5; }
+        .btn-card-edit { background: #e0f2fe; color: #0369a1; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; margin-left: 8px; }
+        .btn-card-edit:hover { background: #bae6fd; }
 
         /* Оптимізований монітор системи — виїзна фіксована панель знизу */
         .debug-panel { flex-shrink: 0; width: 100%; max-width: 480px; position: fixed; bottom: -210px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 10px; background-color: rgba(230, 244, 234, 0.98); backdrop-filter: blur(6px); border: 1px solid #c2e7d9; color: #115e59; border-radius: 12px 12px 0 0; font-size: 11px; font-family: monospace; box-shadow: 0 -4px 20px rgba(11,94,89,0.15); box-sizing: border-box; transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
@@ -246,7 +249,7 @@
                 <input type="text" id="sig-notes" class="input-field" placeholder="Наприклад: щогла, ордината, дефект тощо">
             </div>
 
-            <button class="btn-submit" onclick="saveDataToCloud()">Зберегти в базу даних</button>
+            <button id="main-form-submit-btn" class="btn-submit" onclick="saveDataToCloud()">Зберегти в базу даних</button>
 
             <hr class="section-divider">
 
@@ -335,6 +338,11 @@
         let currentSignalObjectType = 'signal'; 
         const graphiteColor = '#475569'; 
 
+        // КЕШ ТА РЕЖИМ РЕДАГУВАННЯ
+        let modalFetchedData = [];
+        let editingItemId = null;
+        let editingTable = null;
+
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
             if(!con) return;
@@ -403,7 +411,6 @@
             logSys(type === 'other' ? "Обрано тип об'єкта: Інше (фіксований графітовий колір)." : "Обрано тип об'єкта: Світлофор.");
         }
 
-        // ОНОВЛЕНО: Додано очищення поля sig-notes
         function clearFormInputs() {
             document.getElementById('admin-pd-num').value = "";
             document.getElementById('admin-peregon').value = "";
@@ -422,6 +429,15 @@
             document.getElementById('sig-notes').value = "";
             setSignalObjectType('signal');
 
+            // Скидання стану редагування запису
+            editingItemId = null;
+            editingTable = null;
+            const submitBtn = document.getElementById('main-form-submit-btn');
+            if (submitBtn) {
+                submitBtn.innerText = "Зберегти в базу даних";
+                submitBtn.style.backgroundColor = "#0d9488";
+            }
+
             logSys("Всі поля форми конфігурації очищено.");
         }
 
@@ -435,7 +451,6 @@
             logSys(`Перемкнуто режим на: ${mode === 'lines' ? 'Дільниці' : 'Світлофори/інше'}`);
         }
 
-        // ОНОВЛЕНО: Додано зчитування та відправку поля notes у Supabase
         async function saveDataToCloud() {
             const pdRaw = document.getElementById('admin-pd-num').value.trim();
             if (!pdRaw) {
@@ -452,6 +467,87 @@
                 'Prefer': 'return=representation'
             };
 
+            // ЛОГІКА РЕДАГУВАННЯ ІСНУЮЧОГО ЗАПИСУ (PATCH)
+            if (editingItemId && editingTable) {
+                logSys(`Спроба оновлення запису ID ${editingItemId} у таблиці ${editingTable}...`);
+                try {
+                    let payload = {};
+                    if (editingTable === 'lines_config') {
+                        const name = document.getElementById('admin-peregon').value.trim();
+                        const startKm = parseInt(document.getElementById('admin-start-km').value);
+                        const startPk = parseInt(document.getElementById('admin-start-pk').value);
+                        const endKm = parseInt(document.getElementById('admin-end-km').value);
+                        const endPk = parseInt(document.getElementById('admin-end-pk').value);
+                        
+                        if (!name || isNaN(startKm) || isNaN(startPk) || isNaN(endKm) || isNaN(endPk)) {
+                            await customAlert("Заповніть усі обов'язкові поля для дільниці!", "⚠️ Помилка");
+                            return;
+                        }
+                        
+                        let singleTrack = document.getElementById('chk-neparna').checked ? "непарна" : "парна";
+                        const typeUkr = currentObjectType === 'station' ? 'станція' : 'перегін';
+
+                        payload = {
+                            pd: pdNum,
+                            name: name,
+                            type: typeUkr,
+                            track_type: singleTrack, 
+                            start_km: startKm,
+                            start_pk: startPk,
+                            end_km: endKm,
+                            end_pk: endPk
+                        };
+                    } else if (editingTable === 'signals') {
+                        const sigName = document.getElementById('sig-name').value.trim();
+                        const startKm = parseInt(document.getElementById('sig-start-km').value);
+                        const startPk = parseInt(document.getElementById('sig-start-pk').value);
+                        const endKm = parseInt(document.getElementById('sig-end-km').value);
+                        const endPk = parseInt(document.getElementById('sig-end-pk').value);
+                        const sigNotes = document.getElementById('sig-notes').value.trim();
+
+                        if (!sigName || isNaN(startKm) || isNaN(startPk)) {
+                            await customAlert("Заповніть обов'язкові початкові координати об'єкта!", "⚠️ Помилка");
+                            return;
+                        }
+
+                        let singleTrack = document.getElementById('sig-chk-neparna').checked ? "непарна" : "парна";
+
+                        payload = {
+                            pd: pdNum,
+                            signal_name: sigName,
+                            track_type: singleTrack, 
+                            km: startKm,
+                            piket: startPk,
+                            end_km: isNaN(endKm) ? startKm : endKm,
+                            end_pk: isNaN(endPk) ? startPk : endPk,
+                            signal_type: currentSignalObjectType === 'other' ? 'інше' : 'світлофор',
+                            color_hex: currentSignalObjectType === 'other' ? graphiteColor : null,
+                            notes: sigNotes || null 
+                        };
+                    }
+
+                    const res = await fetch(`${baseDbUrl}/rest/v1/${editingTable}?id=eq.${editingItemId}`, {
+                        method: 'PATCH',
+                        headers,
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        logSys(`Запис ID ${editingItemId} успішно оновлено!`, "success");
+                        await customAlert("Дані запису успішно оновлено в базі!", "✅ Успішно");
+                        clearFormInputs(); 
+                        loadPdsForCleaning();
+                    } else {
+                        logSys(`Помилка під час оновлення запису ID ${editingItemId}.`, "error");
+                        await customAlert("Не вдалося оновити дані запису.", "❌ Помилка");
+                    }
+                } catch (e) {
+                    logSys(`Помилка мережі при редагуванні: ${e.message}`, "error");
+                }
+                return; // Виходимо з функції
+            }
+
+            // СТАНДАРТНА ЛОГІКА СТВОРЕННЯ НОВОГО ЗАПИСУ (POST)
             if (currentAdminMode === 'lines') {
                 const name = document.getElementById('admin-peregon').value.trim();
                 const startKm = parseInt(document.getElementById('admin-start-km').value);
@@ -545,7 +641,7 @@
                             end_pk: isNaN(endPk) ? startPk : endPk,
                             signal_type: currentSignalObjectType === 'other' ? 'інше' : 'світлофор',
                             color_hex: currentSignalObjectType === 'other' ? graphiteColor : null,
-                            notes: sigNotes || null  /* Додано відправку стовпця примітки */
+                            notes: sigNotes || null 
                         };
 
                         const res = await fetch(`${baseDbUrl}/rest/v1/signals`, {
@@ -698,6 +794,8 @@
                 const res = await fetch(`${baseDbUrl}/rest/v1/${table}?select=*`, { headers });
                 const data = await res.json();
                 
+                modalFetchedData = data; // Зберігаємо завантажені дані глобально для редагування
+
                 if(table === 'lines_config') {
                     data.sort((a,b) => String(a.pd).localeCompare(String(b.pd)) || a.start_km - b.start_km);
                 } else {
@@ -718,7 +816,6 @@
             }
         }
 
-        // ОНОВЛЕНО: Візуальне відображення примітки у картці перегляду бази даних
         function renderModalCards(data, table) {
             const container = document.getElementById('modal-db-cards-container');
             container.innerHTML = "";
@@ -751,7 +848,10 @@
                                 Межі: <b>${item.start_km} КМ</b> (ПК-${item.start_pk}) → <b>${item.end_km} КМ</b> (ПК-${item.end_pk})
                             </div>
                         </div>
-                        <button class="btn-card-delete" onclick="deleteSingleItem('lines_config', ${item.id})">Видалити</button>
+                        <div>
+                            <button class="btn-card-edit" onclick="startEditItem('lines_config', ${item.id})">Редагувати</button>
+                            <button class="btn-card-delete" onclick="deleteSingleItem('lines_config', ${item.id})">Видалити</button>
+                        </div>
                     `;
                 } else {
                     const displayNotes = item.notes ? `<div style="font-size: 12px; margin-top: 4px; color: #0d9488; font-style: italic;">📝 Примітка: ${item.notes}</div>` : '';
@@ -768,12 +868,66 @@
                             </div>
                             ${displayNotes}
                         </div>
-                        <button class="btn-card-delete" onclick="deleteSingleItem('signals', ${item.id})">Видалити</button>
+                        <div>
+                            <button class="btn-card-edit" onclick="startEditItem('signals', ${item.id})">Редагувати</button>
+                            <button class="btn-card-delete" onclick="deleteSingleItem('signals', ${item.id})">Видалити</button>
+                        </div>
                     `;
                 }
                 card.innerHTML = cardContent;
                 container.appendChild(card);
             });
+        }
+
+        // НОВА ФУНКЦІЯ: Запуск процесу редагування обраного елемента
+        function startEditItem(table, id) {
+            const item = modalFetchedData.find(i => i.id === id);
+            if (!item) return;
+
+            editingItemId = id;
+            editingTable = table;
+
+            // Змінюємо текст головної кнопки на формі
+            const submitBtn = document.getElementById('main-form-submit-btn');
+            if (submitBtn) {
+                submitBtn.innerText = `💾 Оновити запис (ID: ${id})`;
+                submitBtn.style.backgroundColor = "#0284c7"; // Зміна кольору на синій для індикації
+            }
+
+            // Очищуємо "ПД-" для текстового поля
+            let pdNumOnly = String(item.pd).replace("ПД-", "");
+            document.getElementById('admin-pd-num').value = pdNumOnly;
+
+            if (table === 'lines_config') {
+                switchAdminMode('lines');
+                setObjectType(item.type === 'станція' ? 'station' : 'peregon');
+                document.getElementById('admin-peregon').value = item.name || "";
+                
+                // Проставляємо одну конкретну колію
+                document.getElementById('chk-neparna').checked = (item.track_type === 'непарна');
+                document.getElementById('chk-parna').checked = (item.track_type === 'парна');
+
+                document.getElementById('admin-start-km').value = item.start_km || "";
+                document.getElementById('admin-start-pk').value = item.start_pk || "";
+                document.getElementById('admin-end-km').value = item.end_km || "";
+                document.getElementById('admin-end-pk').value = item.end_pk || "";
+            } else {
+                switchAdminMode('signals');
+                setSignalObjectType(item.signal_type === 'інше' ? 'other' : 'signal');
+                document.getElementById('sig-name').value = item.signal_name || "";
+                
+                document.getElementById('sig-chk-neparna').checked = (item.track_type === 'непарна');
+                document.getElementById('sig-chk-parna').checked = (item.track_type === 'парна');
+
+                document.getElementById('sig-start-km').value = item.km || "";
+                document.getElementById('sig-start-pk').value = item.piket || "";
+                document.getElementById('sig-end-km').value = item.end_km || "";
+                document.getElementById('sig-end-pk').value = item.end_pk || "";
+                document.getElementById('sig-notes').value = item.notes || "";
+            }
+
+            closeDatabaseModal();
+            logSys(`Завантажено режим редагування для запису ID ${id} (${table})`);
         }
 
         function filterModalCards() {
@@ -877,7 +1031,6 @@
             loadItemsForCleaning();
         }
 
-        // ОНОВЛЕНО: Відображення примітки у списку вибору для очищення околотків
         async function loadItemsForCleaning() {
             const box = document.getElementById('cleaning-records-box');
             const list = document.getElementById('cleaning-records-list');
