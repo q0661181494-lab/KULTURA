@@ -97,7 +97,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Стиль фіксації кнопки збереження на дисплеї */
+        /* Стиль фіксації...</style> кнопки збереження на дисплеї */
         .sticky-save-btn {
             position: fixed !important;
             bottom: 16px !important;
@@ -478,7 +478,6 @@
             document.getElementById('system-debug-panel').classList.toggle('active');
         }
  
-        // ОНОВЛЕНО: Тепер функція додатково керує відображенням панелі для нотаток
         function switchWorkMode(mode) {
             currentMode = mode;
             document.getElementById('tab-mowing').classList.toggle('active', mode === 'mowing');
@@ -788,7 +787,8 @@
                     }
 
                     if (leftSignal) {
-                        const signalNote = leftSignal.signal_type === 'інше' ? `Об'єкт: ${leftSignal.signal_name}` : (leftSignal.signal_type || 'Світлофор');
+                        // ОНОВЛЕНО: Дані беруться безпосередньо зі стовпця примітки notes
+                        const signalNote = leftSignal.notes || 'Примітка відсутня';
                         const isOtherObj = leftSignal.signal_type === 'інше';
                         leftMargin.innerHTML = `
                             <span class="${isOtherObj ? 'infra-badge' : 'signal-badge'}" 
@@ -920,7 +920,8 @@
                     }
 
                     if (rightSignal) {
-                        const signalNote = rightSignal.signal_type === 'інше' ? `Об'єкт: ${rightSignal.signal_name}` : (rightSignal.signal_type || 'Світлофор');
+                        // ОНОВЛЕНО: Дані беруться безпосередньо зі стовпця примітки notes
+                        const signalNote = rightSignal.notes || 'Примітка відсутня';
                         const isOtherObj = rightSignal.signal_type === 'інше';
                         rightMargin.innerHTML = `
                             <span class="${isOtherObj ? 'infra-badge' : 'signal-badge'}" 
@@ -1133,7 +1134,7 @@
                      
                     stream.getTracks().forEach(track => track.stop()); 
                 };
- 
+
                 mediaRecorder.start();
                 btn.classList.add('recording');
                 btn.innerHTML = "🛑";
@@ -1210,7 +1211,7 @@
                     }
                 }
                 const totalAudiosList = [...existingServerAudios, ...uploadedAudioUrls];
-
+ 
                 const notePayload = {
                     pd: currentPD,
                     km: activeNoteKm,
@@ -1356,8 +1357,7 @@
                 }
             } catch (e) { showToastMessage("Помилка: " + e.message, "error"); }
         }
-
-        // ДОДАНО: Керування модальним вікном очищення нотаток
+ 
         function toggleClearNotesModal(show) {
             const modal = document.getElementById('clear-notes-modal');
             if (show) {
@@ -1368,50 +1368,46 @@
                 document.getElementById('delete-type-audio').checked = true;
             } else { modal.classList.remove('show'); }
         }
-
-        // ДОДАНО: Логіка виконання вибіркового/повного видалення нотаток з Supabase
+ 
         async function executeNotesDataClear() {
             const delText = document.getElementById('delete-type-text').checked;
             const delPhoto = document.getElementById('delete-type-photo').checked;
             const delAudio = document.getElementById('delete-type-audio').checked;
             const kmValue = document.getElementById('clear-notes-km-input').value.trim();
-
+ 
             if (!delText && !delPhoto && !delAudio) {
                 showToastMessage("Оберіть хоча б один компонент для видалення!", "error");
                 return;
             }
-
+ 
             const confirmed = await customConfirm("Ви впевнені, що хочете видалити обрані компоненти нотаток?", "🗑️ Очищення нотаток");
             if (!confirmed) return;
-
+ 
             toggleClearNotesModal(false);
             logSys(`Запуск очищення нотаток для ${currentPD}...`);
-
+ 
             try {
                 let res;
-                // Якщо обрано всі три галочки — повністю видаляємо записи з бази
                 if (delText && delPhoto && delAudio) {
                     let q = supabaseClient.from('piket_notes').delete().eq('pd', currentPD);
                     if (kmValue) q = q.eq('km', parseInt(kmValue));
                     res = await q;
                 } else {
-                    // Якщо обрано вибірково — обнуляємо лише потрібні стовпці
                     let updatePayload = {};
                     if (delText) updatePayload.note_text = null;
                     if (delPhoto) updatePayload.photo_url = null;
                     if (delAudio) updatePayload.audio_url = null;
-
+ 
                     let q = supabaseClient.from('piket_notes').update(updatePayload).eq('pd', currentPD);
                     if (kmValue) q = q.eq('km', parseInt(kmValue));
                     res = await q;
                 }
-
+ 
                 if (res.error) throw res.error;
-
+ 
                 showToastMessage("Дані нотаток успішно очищено!", "success");
                 logSys("Компоненти карток пікетів успішно оновлено", "success");
-
-                // Перезавантаження даних у систему для оновлення іконок на діаграмі
+ 
                 const headers = { 'apikey': fullKey, 'authorization': 'Bearer ' + fullKey };
                 const resNotes = await fetch(`${baseDbUrl}/rest/v1/piket_notes?pd=eq.${encodeURIComponent(currentPD)}`, { headers });
                 globalNotesData = await resNotes.json();
