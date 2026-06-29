@@ -74,24 +74,29 @@
         /* Модальне вікно */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 94, 89, 0.5); z-index: 100; justify-content: center; align-items: center; padding: 12px; box-sizing: border-box; }
         .modal-window { background: white; width: 100%; max-width: 440px; height: 85vh; border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: hidden; border: 1px solid #d1fae5; position: relative; }
+        .modal-window * { box-sizing: border-box; }
         .modal-header { background: #115e59; color: white; padding: 14px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .modal-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; font-weight: bold; }
         .modal-filter-bar { padding: 10px 14px; background: #f0fdf4; border-bottom: 1px solid #c2e7d9; display: flex; align-items: center; gap: 10px; justify-content: space-between; }
         .modal-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: #f8fafc; }
         
-        .db-card { background: white; border: 1px solid #e2e8f0; padding: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; }
-        .db-card-content { flex: 1; }
-        .db-card-top { display: flex; gap: 6px; font-weight: bold; font-size: 13px; margin-bottom: 4px; }
+        /* Картки бази даних та блок дій */
+        .db-card { background: white; border: 1px solid #e2e8f0; padding: 12px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .db-card-content { flex: 1; min-width: 0; }
+        .db-card-top { display: flex; gap: 6px; font-weight: bold; font-size: 13px; margin-bottom: 4px; flex-wrap: wrap; }
         .badge-pd { background: #e6f4ea; color: #115e59; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
         .badge-type { background: #0d9488; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; text-transform: uppercase; }
         .badge-station { background: #6366f1; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; text-transform: uppercase; }
         .badge-signal { background: #f59e0b; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; text-transform: uppercase; }
-        .db-card-name { font-size: 14px; color: #1e293b; font-weight: 700; margin-bottom: 4px; }
+        .db-card-name { font-size: 14px; color: #1e293b; font-weight: 700; margin-bottom: 4px; word-break: break-word; }
         .db-card-limits { font-size: 12px; color: #64748b; }
         
-        .btn-card-delete { background: #fee2e2; color: #dc2626; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; margin-left: 4px; }
+        /* Адаптивний контейнер для кнопок дій */
+        .db-card-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+        .db-card-actions button { width: 85px; border: none; padding: 7px 0; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; text-align: center; margin: 0 !important; box-sizing: border-box; }
+        .btn-card-delete { background: #fee2e2; color: #dc2626; }
         .btn-card-delete:hover { background: #fca5a5; }
-        .btn-card-edit { background: #e0f2fe; color: #0369a1; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; margin-left: 8px; }
+        .btn-card-edit { background: #e0f2fe; color: #0369a1; }
         .btn-card-edit:hover { background: #bae6fd; }
 
         /* Оптимізований монітор системи — виїзна фіксована панель знизу */
@@ -100,7 +105,7 @@
         .debug-title { font-weight: bold; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #c2e7d9; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
         .debug-scroll { max-height: 90px; overflow-y: auto; text-align: left; }
         
-        /* Кнопка виклику монітора в лівому нижньому кутку екрана (як у Кабінеті ПД) */
+        /* Кнопка виклику монітора */
         .debug-toggle-btn { position: fixed; bottom: 4px; left: 4px; width: 26px; height: 26px; background: rgba(148, 163, 184, 0.12); color: #475569; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; user-select: none; transition: background 0.2s, opacity 0.2s; opacity: 0.6; }
         .debug-toggle-btn:hover { background: rgba(148, 163, 184, 0.35); opacity: 1; }
 
@@ -338,7 +343,6 @@
         let currentSignalObjectType = 'signal'; 
         const graphiteColor = '#475569'; 
 
-        // КЕШ ТА РЕЖИМ РЕДАГУВАННЯ
         let modalFetchedData = [];
         let editingItemId = null;
         let editingTable = null;
@@ -429,7 +433,6 @@
             document.getElementById('sig-notes').value = "";
             setSignalObjectType('signal');
 
-            // Скидання стану редагування запису
             editingItemId = null;
             editingTable = null;
             const submitBtn = document.getElementById('main-form-submit-btn');
@@ -467,7 +470,6 @@
                 'Prefer': 'return=representation'
             };
 
-            // ЛОГІКА РЕДАГУВАННЯ ІСНУЮЧОГО ЗАПИСУ (PATCH)
             if (editingItemId && editingTable) {
                 logSys(`Спроба оновлення запису ID ${editingItemId} у таблиці ${editingTable}...`);
                 try {
@@ -544,10 +546,9 @@
                 } catch (e) {
                     logSys(`Помилка мережі при редагуванні: ${e.message}`, "error");
                 }
-                return; // Виходимо з функції
+                return;
             }
 
-            // СТАНДАРТНА ЛОГІКА СТВОРЕННЯ НОВОГО ЗАПИСУ (POST)
             if (currentAdminMode === 'lines') {
                 const name = document.getElementById('admin-peregon').value.trim();
                 const startKm = parseInt(document.getElementById('admin-start-km').value);
@@ -794,7 +795,7 @@
                 const res = await fetch(`${baseDbUrl}/rest/v1/${table}?select=*`, { headers });
                 const data = await res.json();
                 
-                modalFetchedData = data; // Зберігаємо завантажені дані глобально для редагування
+                modalFetchedData = data;
 
                 if(table === 'lines_config') {
                     data.sort((a,b) => String(a.pd).localeCompare(String(b.pd)) || a.start_km - b.start_km);
@@ -848,7 +849,7 @@
                                 Межі: <b>${item.start_km} КМ</b> (ПК-${item.start_pk}) → <b>${item.end_km} КМ</b> (ПК-${item.end_pk})
                             </div>
                         </div>
-                        <div>
+                        <div class="db-card-actions">
                             <button class="btn-card-edit" onclick="startEditItem('lines_config', ${item.id})">Редагувати</button>
                             <button class="btn-card-delete" onclick="deleteSingleItem('lines_config', ${item.id})">Видалити</button>
                         </div>
@@ -868,7 +869,7 @@
                             </div>
                             ${displayNotes}
                         </div>
-                        <div>
+                        <div class="db-card-actions">
                             <button class="btn-card-edit" onclick="startEditItem('signals', ${item.id})">Редагувати</button>
                             <button class="btn-card-delete" onclick="deleteSingleItem('signals', ${item.id})">Видалити</button>
                         </div>
@@ -879,7 +880,6 @@
             });
         }
 
-        // НОВА ФУНКЦІЯ: Запуск процесу редагування обраного елемента
         function startEditItem(table, id) {
             const item = modalFetchedData.find(i => i.id === id);
             if (!item) return;
@@ -887,14 +887,12 @@
             editingItemId = id;
             editingTable = table;
 
-            // Змінюємо текст головної кнопки на формі
             const submitBtn = document.getElementById('main-form-submit-btn');
             if (submitBtn) {
                 submitBtn.innerText = `💾 Оновити запис (ID: ${id})`;
-                submitBtn.style.backgroundColor = "#0284c7"; // Зміна кольору на синій для індикації
+                submitBtn.style.backgroundColor = "#0284c7"; 
             }
 
-            // Очищуємо "ПД-" для текстового поля
             let pdNumOnly = String(item.pd).replace("ПД-", "");
             document.getElementById('admin-pd-num').value = pdNumOnly;
 
@@ -903,7 +901,6 @@
                 setObjectType(item.type === 'станція' ? 'station' : 'peregon');
                 document.getElementById('admin-peregon').value = item.name || "";
                 
-                // Проставляємо одну конкретну колію
                 document.getElementById('chk-neparna').checked = (item.track_type === 'непарна');
                 document.getElementById('chk-parna').checked = (item.track_type === 'парна');
 
