@@ -445,6 +445,12 @@
                     <button id="btn-chart-month" class="tab-btn active" onclick="setChartPeriod('month')">За місяць</button>
                 </div>
 
+                <div id="chart-month-stepper" style="display: flex; align-items: center; justify-content: space-between; background: #f0fdf4; padding: 6px 12px; border-radius: 10px; border: 1px solid #c2e7d9; box-sizing: border-box;">
+                    <button class="tab-btn" style="max-width: 45px; background: #0d9488; color: white; padding: 6px;" onclick="adjustChartMonth(-1)">◀</button>
+                    <span id="chart-month-display-label" style="color: #115e59; font-weight: 800; font-size: 14px; letter-spacing: 0.5px; text-transform: uppercase;">Червень 2026</span>
+                    <button id="btn-chart-month-next" class="tab-btn" style="max-width: 45px; background: #0d9488; color: white; padding: 6px;" onclick="adjustChartMonth(1)">▶</button>
+                </div>
+
                 <div class="multiselect-dropdown" style="position: relative; width: 100%;">
                     <div class="multiselect-header" onclick="toggleChartDropdown()" style="width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; background: white; color: #115e59; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; box-sizing: border-box; height: 41px;">
                         <span id="chart-pd-label">Усі ПД (Околотки)</span>
@@ -491,6 +497,8 @@
         let mowingChartInstance = null;
         let chartPeriod = 'month';
         let chartSelectedPds = [];
+        let chartMonthFocus = new Date(); // Стеж за поточним об'єктом дати для фільтрації місяців
+        const ukrMonthsList = ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"];
  
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
@@ -529,6 +537,7 @@
         async function initApp() {
             logSys("Запуск рейкової платформи...");
             initMowingChart(); // Ініціалізація структури графіка
+            updateChartMonthStepperLabel(); // Формування стартового підпису місяця
             await reloadDataFromCloud();
             buildChartPdDropdown(); // Побудова списку фільтра ПД
             updateMowingChart(); // Розрахунок та виведення первинної аналітики
@@ -931,22 +940,65 @@
             chartPeriod = period;
             document.getElementById('btn-chart-today').classList.toggle('active', period === 'today');
             document.getElementById('btn-chart-month').classList.toggle('active', period === 'month');
+            
+            // Керування видимістю кнопок-стрілочок вибору місяця
+            document.getElementById('chart-month-stepper').style.display = (period === 'month') ? 'flex' : 'none';
+            
             updateMowingChart();
+        }
+
+        // ФУНКЦІЯ ПЕРЕМИКАННЯ МІСЯЦІВ СТРІЛОЧКАМИ
+        function adjustChartMonth(direction) {
+            chartMonthFocus.setMonth(chartMonthFocus.getMonth() + direction);
+            
+            // Жорстке обмеження: не давати гортати в майбутнє далі за сьогоднішній реальний місяць
+            const currentRealDate = new Date();
+            if (chartMonthFocus > currentRealDate) {
+                chartMonthFocus.setMonth(currentRealDate.getMonth());
+                chartMonthFocus.setFullYear(currentRealDate.getFullYear());
+            }
+            
+            updateChartMonthStepperLabel();
+            updateMowingChart();
+        }
+
+        // ОНОВЛЕННЯ ТЕКСТОВОГО ПІДПИСУ МІСЯЦЯ ТА СТАНУ КНОПКИ "ВПЕРЕД"
+        function updateChartMonthStepperLabel() {
+            const monthText = ukrMonthsList[chartMonthFocus.getMonth()];
+            const yearText = chartMonthFocus.getFullYear();
+            document.getElementById('chart-month-display-label').innerText = `${monthText} ${yearText}`;
+            
+            // Якщо ми у поточному реальному місяці, блокуємо стрілочку "вперед"
+            const currentRealDate = new Date();
+            const isCurrentMonthNow = (chartMonthFocus.getFullYear() === currentRealDate.getFullYear() && chartMonthFocus.getMonth() === currentRealDate.getMonth());
+            
+            const nextBtn = document.getElementById('btn-chart-month-next');
+            if (isCurrentMonthNow) {
+                nextBtn.style.opacity = "0.35";
+                nextBtn.style.pointerEvents = "none";
+            } else {
+                nextBtn.style.opacity = "1";
+                nextBtn.style.pointerEvents = "auto";
+            }
         }
 
         function updateMowingChart() {
             if (!mowingChartInstance) return;
 
             const todayStr = new Date().toISOString().split('T')[0];
-            const currentYearMonth = new Date().toISOString().slice(0, 7); // формат "YYYY-MM"
+            
+            // Динамічне формування маски року та місяця на основі фокусу степпера
+            const targetYear = chartMonthFocus.getFullYear();
+            const targetMonth = String(chartMonthFocus.getMonth() + 1).padStart(2, '0');
+            const matchYearMonthStr = `${targetYear}-${targetMonth}`; // "YYYY-MM"
 
             // Фільтруємо записи
             let filtered = mowingData.filter(item => {
                 if (item.status !== 'green') return false;
                 
-                // Перевірка періоду за датою запису
+                // Перевірка обраного періоду
                 if (chartPeriod === 'today' && item.date !== todayStr) return false;
-                if (chartPeriod === 'month' && (!item.date || !item.date.startsWith(currentYearMonth))) return false;
+                if (chartPeriod === 'month' && (!item.date || !item.date.startsWith(matchYearMonthStr))) return false;
                 
                 // Перевірка обраних околотків
                 if (chartSelectedPds.length > 0 && !chartSelectedPds.includes(item.pd)) return false;
