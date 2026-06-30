@@ -83,7 +83,7 @@
             cursor: pointer;
             box-sizing: border-box;
         }
- 
+
         .nav-link:hover, .admin-menu-btn:hover {
             background-color: #e6f4ea;
         }
@@ -94,40 +94,40 @@
             pointer-events: none;
         }
         
-        /* Головна картка з м'якою шавлієвою рамкою */
+        /* ОПТИМІЗОВАНО: Компактна головна картка */
         .screen { 
             background: white; 
-            padding: 20px; 
+            padding: 14px 16px; 
             border-radius: 16px; 
             box-shadow: 0 10px 25px rgba(11, 94, 89, 0.05); 
             width: 100%; 
             box-sizing: border-box; 
-            margin-bottom: 24px; 
+            margin-bottom: 12px; 
             border: 1px solid #d1fae5;
             transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s;
         }
  
-        /* ...Особливий фокус без стрибків */
+        /* ОПТИМІЗОВАНО: Компактний фокус введення */
         .screen.welcome-focus {
-            margin-top: 10px;
-            transform: scale(1.02);
+            margin-top: 6px;
+            transform: scale(1.01);
             box-shadow: 0 20px 40px rgba(11, 94, 89, 0.12);
             border-color: #a7f3d0;
-            padding: 30px 20px;
+            padding: 16px;
         }
  
-        /* СОЛІДНИЙ ЗАГОЛОВОК ЗАГЛАВНИМИ ЛІТЕРАМИ */
+        /* ОПТИМІЗОВАНО: Акуратний заголовок */
         h2 { 
             margin-top: 0; 
             margin-bottom: 6px; 
-            font-size: 18px; 
+            font-size: 16px; 
             color: #115e59; 
             font-weight: 800; 
             text-align: center; 
             text-transform: uppercase; 
-            letter-spacing: 1.8px; 
+            letter-spacing: 1.2px; 
         }
-        p { color: #0f766e; font-size: 13px; margin-top: 0; margin-bottom: 16px; text-align: center; opacity: 0.8; }
+        p { color: #0f766e; font-size: 13px; margin-top: 0; margin-bottom: 12px; text-align: center; opacity: 0.8; }
         
         /* Поля введення */
         .input-field { width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background-color: white; color: #115e59; font-weight: 500; transition: all 0.2s; }
@@ -141,10 +141,10 @@
         
         .welcome-focus .pd-container-box {
             background: #f0fdf4;
-            padding: 24px;
+            padding: 16px;
             border-radius: 14px;
             border: 1px dashed #0d9488;
-            margin-top: 10px;
+            margin-top: 6px;
             animation: pulse-border 2.5s infinite ease-in-out; 
         }
         
@@ -409,8 +409,8 @@
         </div>
  
         <div class="screen welcome-focus" id="screen-charts">
-            <h2 id="main-screen-title">ВХІД У СИСТЕМУ ДІАГРАМ</h2>
-            <p id="main-screen-desc">введіть номер околотка для формування лінійного графіка</p>
+            <h2 id="main-screen-title" style="display: none;">ВХІД У СИСТЕМУ ДІАГРАМ</h2>
+            <p id="main-screen-desc" style="margin-bottom: 12px; font-weight: bold;">введіть номер околотка</p>
             
             <div class="pd-container-box">
                 <div class="pd-input-row">
@@ -437,8 +437,6 @@
 
         <div class="screen" id="screen-mowing-analytics">
             <h2>📊 Моніторинг обкошування</h2>
-            <p>Обсяг виконаних робіт (1 пікет = 100 метрів)</p>
-            
             <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
                 <div class="mode-tabs" style="margin-bottom: 0;">
                     <button id="btn-chart-today" class="tab-btn" onclick="setChartPeriod('today')">За сьогодні</button>
@@ -460,7 +458,7 @@
                 </div>
             </div>
 
-            <div id="mowing-column-chart" style="min-height: 280px; width: 100%;"></div>
+            <div id="mowing-column-chart" style="min-height: 230px; width: 100%;"></div>
         </div>
 
         <div class="app-footer">
@@ -497,7 +495,7 @@
         let mowingChartInstance = null;
         let chartPeriod = 'month';
         let chartSelectedPds = [];
-        let chartMonthFocus = new Date(); // Стеж за поточним об'єктом дати для фільтрації місяців
+        let chartMonthFocus = new Date(); 
         const ukrMonthsList = ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"];
  
         function logSys(text, status = 'info') {
@@ -536,11 +534,11 @@
 
         async function initApp() {
             logSys("Запуск рейкової платформи...");
-            initMowingChart(); // Ініціалізація структури графіка
-            updateChartMonthStepperLabel(); // Формування стартового підпису місяця
+            initMowingChart(); 
+            updateChartMonthStepperLabel(); 
             await reloadDataFromCloud();
-            buildChartPdDropdown(); // Побудова списку фільтра ПД
-            updateMowingChart(); // Розрахунок та виведення первинної аналітики
+            buildChartPdDropdown(); 
+            updateMowingChart(); 
             document.getElementById('filter-pd-input').focus();
         }
  
@@ -587,8 +585,9 @@
             if (!pdNum) {
                 screenCard.classList.add('welcome-focus');
                 tabsBlock.style.display = 'none';
-                mainTitle.innerText = "ВХІД У СИСТЕМУ ДІАГРАМ";
-                mainDesc.innerText = "введіть номер околотка для формування лінійного графіка";
+                mainTitle.style.display = 'none'; // ОПТИМІЗОВАНО
+                mainDesc.style.display = 'block';
+                mainDesc.innerText = "введіть номер околотка";
                 container.innerHTML = "";
                 return;
             }
@@ -600,8 +599,9 @@
  
             screenCard.classList.remove('welcome-focus');
             tabsBlock.style.display = 'block';
+            mainTitle.style.display = 'block';
             mainTitle.innerText = "ДВОКОЛІЙНА ДІАГРАМА";
-            mainDesc.innerText = "Стан обкошування брівок парної та непарної колій";
+            mainDesc.style.display = 'none'; // ОПТИМІЗОВАНО: Приховуємо опис для розвантаження мобільного екрана
  
             const fullPdName = "ПД-" + pdNum;
             const filtered = tracksData.filter(t => cleanPd(t.pd) === fullPdName && !sanitizeString(t.type).includes('станція'));
@@ -761,7 +761,6 @@
                     const leftMargin = document.createElement('div');
                     leftMargin.className = `info-margin margin-left ${isLeftStation ? 'station-bracket-left' : ''}`;
                     
-                    // МОДЕРНІЗОВАНО: Пошук лівих сигналів з урахуванням лінійних меж (початку та кінця)
                     let leftSignal = signalsData.find(s => isLeftTrack(s.track_type) && parseInt(s.km) === km && parseInt(s.piket) === pk);
                     if (!leftSignal) {
                         leftSignal = signalsData.find(s => {
@@ -831,7 +830,6 @@
                     const rightMargin = document.createElement('div');
                     rightMargin.className = `info-margin margin-right ${isRightStation ? 'station-bracket-right' : ''}`;
                     
-                    // МОДЕРНІЗОВАНО: Пошук правих сигналів з урахуванням лінійних меж (початку та кінця)
                     let rightSignal = signalsData.find(s => isRightTrack(s.track_type) && parseInt(s.km) === km && parseInt(s.piket) === pk);
                     if (!rightSignal) {
                         rightSignal = signalsData.find(s => {
@@ -863,14 +861,13 @@
             logSys(`Діаграму оновлено успішно.`, 'info');
         }
 
-        // ==========================================
-        // НОВІ ФУНКЦІЇ ДЛЯ КЕРУВАННЯ СТОВПЧАСТОЮ ДІАГРАМОЮ
-        // ==========================================
+        // КЕРУВАННЯ СТОВПЧАСТОЮ ДІАГРАМОЮ
 
+        // ОПТИМІЗОВАНО: Висоту зменшено до 230 для кращої мобільної посадки
         function initMowingChart() {
             const options = {
                 series: [{ name: 'Обкошено колії', data: [] }],
-                chart: { type: 'bar', height: 280, toolbar: { show: false }, fontFamily: '-apple-system, sans-serif' },
+                chart: { type: 'bar', height: 230, toolbar: { show: false }, fontFamily: '-apple-system, sans-serif' },
                 colors: ['#0d9488'],
                 plotOptions: { bar: { borderRadius: 6, horizontal: false, columnWidth: '45%', dataLabels: { position: 'top' } } },
                 dataLabels: { enabled: true, formatter: val => val + " км", offsetY: -20, style: { fontSize: '11px', colors: ["#115e59"], fontWeight: 'bold' } },
@@ -941,17 +938,13 @@
             document.getElementById('btn-chart-today').classList.toggle('active', period === 'today');
             document.getElementById('btn-chart-month').classList.toggle('active', period === 'month');
             
-            // Керування видимістю кнопок-стрілочок вибору місяця
             document.getElementById('chart-month-stepper').style.display = (period === 'month') ? 'flex' : 'none';
-            
             updateMowingChart();
         }
 
-        // ФУНКЦІЯ ПЕРЕМИКАННЯ МІСЯЦІВ СТРІЛОЧКАМИ
         function adjustChartMonth(direction) {
             chartMonthFocus.setMonth(chartMonthFocus.getMonth() + direction);
             
-            // Жорстке обмеження: не давати гортати в майбутнє далі за сьогоднішній реальний місяць
             const currentRealDate = new Date();
             if (chartMonthFocus > currentRealDate) {
                 chartMonthFocus.setMonth(currentRealDate.getMonth());
@@ -962,13 +955,11 @@
             updateMowingChart();
         }
 
-        // ОНОВЛЕННЯ ТЕКСТОВОГО ПІДПИСУ МІСЯЦЯ ТА СТАНУ КНОПКИ "ВПЕРЕД"
         function updateChartMonthStepperLabel() {
             const monthText = ukrMonthsList[chartMonthFocus.getMonth()];
             const yearText = chartMonthFocus.getFullYear();
             document.getElementById('chart-month-display-label').innerText = `${monthText} ${yearText}`;
             
-            // Якщо ми у поточному реальному місяці, блокуємо стрілочку "вперед"
             const currentRealDate = new Date();
             const isCurrentMonthNow = (chartMonthFocus.getFullYear() === currentRealDate.getFullYear() && chartMonthFocus.getMonth() === currentRealDate.getMonth());
             
@@ -986,34 +977,26 @@
             if (!mowingChartInstance) return;
 
             const todayStr = new Date().toISOString().split('T')[0];
-            
-            // Динамічне формування маски року та місяця на основі фокусу степпера
             const targetYear = chartMonthFocus.getFullYear();
             const targetMonth = String(chartMonthFocus.getMonth() + 1).padStart(2, '0');
-            const matchYearMonthStr = `${targetYear}-${targetMonth}`; // "YYYY-MM"
+            const matchYearMonthStr = `${targetYear}-${targetMonth}`; 
 
-            // Фільтруємо записи
             let filtered = mowingData.filter(item => {
                 if (item.status !== 'green') return false;
                 
-                // Перевірка обраного періоду
                 if (chartPeriod === 'today' && item.date !== todayStr) return false;
                 if (chartPeriod === 'month' && (!item.date || !item.date.startsWith(matchYearMonthStr))) return false;
-                
-                // Перевірка обраних околотків
                 if (chartSelectedPds.length > 0 && !chartSelectedPds.includes(item.pd)) return false;
                 
                 return true;
             });
 
-            // Групування кількості рядків за ПД
             let countsMap = {};
             filtered.forEach(item => {
                 if(!countsMap[item.pd]) countsMap[item.pd] = 0;
                 countsMap[item.pd]++;
             });
 
-            // Гарантуємо наявність на графіку обраних у списку ПД, навіть якщо по них 0 кілометрів
             if (chartSelectedPds.length > 0) {
                 chartSelectedPds.forEach(pd => {
                     if(!countsMap[pd]) countsMap[pd] = 0;
@@ -1022,7 +1005,6 @@
 
             let categories = Object.keys(countsMap).sort((a,b) => String(a).localeCompare(String(b)));
             let seriesData = categories.map(pd => {
-                // Кожен рядок = 1 пікет = 0.1 км
                 return parseFloat((countsMap[pd] * 0.1).toFixed(1));
             });
 
@@ -1035,7 +1017,6 @@
             }]);
         }
 
-        // Клік поза випадаючим списком мультиселекту для його згортання
         document.addEventListener('click', (e) => {
             const dropdown = document.getElementById('chart-pd-list-options');
             if (dropdown && !dropdown.contains(e.target) && !e.target.closest('.multiselect-header')) {
