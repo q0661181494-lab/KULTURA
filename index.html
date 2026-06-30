@@ -275,14 +275,14 @@
             white-space: nowrap;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12);
         }
-
+ 
         /* Зони обкошування */
         .mowing-bank-zone { flex: 1; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.04); padding: 0 4px; text-align: center; line-height: 1.2; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); background-color: #fff; }
         .piket-center-core { width: 42px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #115e59; background: #e6f4ea; border-radius: 5px; margin: 0 6px; z-index: 2; border: 1px solid #a7f3d0; box-sizing: border-box; }
         
         /* Напівпрозорий колір для відображення робіт суміжного ПД */
         .inactive-bank { opacity: 0.50 !important; filter: grayscale(15%); }
-
+ 
         /* Рейкова нитка */
         .rail-line-visual { width: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; background: #cbd5e1; }
         .rail-line-visual::before, .rail-line-visual::after { content: ""; position: absolute; top: 0; width: 2px; height: 100%; background: #475569; }
@@ -389,10 +389,15 @@
             letter-spacing: 0.5px;
         }
 
+        /* Додаткові стилі для мультиселекту графіка обкошування */
+        .multiselect-options.show { display: block !important; }
+        .multiselect-item:hover { background: #f0fdf4; }
+
         @media (max-width: 600px) { .debug-panel { width: calc(100% - 20px); } }
         @keyframes blink-cursor { 0%, 100% { opacity: 0; } 50% { opacity: 0.8; } }
         @keyframes pulse-border { 0%, 100% { box-shadow: 0 0 0 rgba(13, 148, 136, 0); } 50% { box-shadow: 0 0 14px rgba(13, 148, 136, 0.15); border-color: #0d9488; } }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body>
  
@@ -430,6 +435,28 @@
             <div id="diagram-render-zone" class="railway-canvas"></div>
         </div>
 
+        <div class="screen" id="screen-mowing-analytics">
+            <h2>📊 Моніторинг обкошування</h2>
+            <p>Обсяг виконаних робіт (1 пікет = 100 метрів)</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+                <div class="mode-tabs" style="margin-bottom: 0;">
+                    <button id="btn-chart-today" class="tab-btn" onclick="setChartPeriod('today')">За сьогодні</button>
+                    <button id="btn-chart-month" class="tab-btn active" onclick="setChartPeriod('month')">За місяць</button>
+                </div>
+
+                <div class="multiselect-dropdown" style="position: relative; width: 100%;">
+                    <div class="multiselect-header" onclick="toggleChartDropdown()" style="width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; background: white; color: #115e59; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; box-sizing: border-box; height: 41px;">
+                        <span id="chart-pd-label">Усі ПД (Околотки)</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="multiselect-options" id="chart-pd-list-options" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #a7f3d0; border-radius: 10px; margin-top: 4px; max-height: 160px; overflow-y: auto; z-index: 100; box-sizing: border-box; padding: 4px;"></div>
+                </div>
+            </div>
+
+            <div id="mowing-column-chart" style="min-height: 280px; width: 100%;"></div>
+        </div>
+
         <div class="app-footer">
             © 2026 Сергій Шинкаренко
         </div>
@@ -459,6 +486,11 @@
         let signalsData = [];
         let currentMode = 'pd';
         let toastTimeout;
+
+        // Нові змінні для модуля діаграми
+        let mowingChartInstance = null;
+        let chartPeriod = 'month';
+        let chartSelectedPds = [];
  
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
@@ -496,7 +528,10 @@
 
         async function initApp() {
             logSys("Запуск рейкової платформи...");
+            initMowingChart(); // Ініціалізація структури графіка
             await reloadDataFromCloud();
+            buildChartPdDropdown(); // Побудова списку фільтра ПД
+            updateMowingChart(); // Розрахунок та виведення первинної аналітики
             document.getElementById('filter-pd-input').focus();
         }
  
@@ -513,7 +548,7 @@
                 const resSignals = await fetch(`${baseDbUrl}/rest/v1/signals?select=*`, { headers });
                 signalsData = await resSignals.json();
  
-                logSys(`Синхронізовано з хмарою. Ліній: ${tracksData.length}, Об'єктів: ${signalsData.length}`, 'success');
+                logSys(`Синхронізовано з хмарою. Ліній: ${tracksData.length}, ...Обкошувань: ${mowingData.length}`, 'success');
             } catch (e) {
                 logSys("Помилка завантаження: " + e.message, 'error');
             }
@@ -728,9 +763,8 @@
                             return curVal >= sVal && curVal <= eVal;
                         });
                     }
-
+ 
                     if (leftSignal) {
-                        // ОНОВЛЕНО: Тепер текст береться безпосередньо з поля примітки notes
                         const signalNote = leftSignal.notes || 'Примітка відсутня';
                         const isOtherObj = leftSignal.signal_type === 'інше';
                         leftMargin.innerHTML = `
@@ -799,9 +833,8 @@
                             return curVal >= sVal && curVal <= eVal;
                         });
                     }
-
+ 
                     if (rightSignal) {
-                        // ОНОВЛЕНО: Тепер текст береться безпосередньо з поля примітки notes
                         const signalNote = rightSignal.notes || 'Примітка відсутня';
                         const isOtherObj = rightSignal.signal_type === 'інше';
                         rightMargin.innerHTML = `
@@ -820,6 +853,143 @@
             }
             logSys(`Діаграму оновлено успішно.`, 'info');
         }
+
+        // ==========================================
+        // НОВІ ФУНКЦІЇ ДЛЯ КЕРУВАННЯ СТОВПЧАСТОЮ ДІАГРАМОЮ
+        // ==========================================
+
+        function initMowingChart() {
+            const options = {
+                series: [{ name: 'Обкошено колії', data: [] }],
+                chart: { type: 'bar', height: 280, toolbar: { show: false }, fontFamily: '-apple-system, sans-serif' },
+                colors: ['#0d9488'],
+                plotOptions: { bar: { borderRadius: 6, horizontal: false, columnWidth: '45%', dataLabels: { position: 'top' } } },
+                dataLabels: { enabled: true, formatter: val => val + " км", offsetY: -20, style: { fontSize: '11px', colors: ["#115e59"], fontWeight: 'bold' } },
+                xaxis: { categories: [], labels: { style: { colors: '#0f766e', fontWeight: 600 } } },
+                yaxis: { title: { text: 'Відстань (км)', style: { color: '#115e59', fontWeight: 600 } }, labels: { formatter: val => val.toFixed(1) + " км" } },
+                grid: { borderColor: '#f1f5f9' },
+                tooltip: { y: { formatter: val => val.toFixed(1) + " км виконаної роботи" } }
+            };
+
+            mowingChartInstance = new ApexCharts(document.querySelector("#mowing-column-chart"), options);
+            mowingChartInstance.render();
+        }
+
+        function toggleChartDropdown() {
+            document.getElementById('chart-pd-list-options').classList.toggle('show');
+        }
+
+        function buildChartPdDropdown() {
+            const container = document.getElementById('chart-pd-list-options');
+            if(!container) return;
+
+            const uniquePds = [...new Set(mowingData.map(item => item.pd))].sort((a,b) => String(a).localeCompare(String(b)));
+            container.innerHTML = "";
+
+            uniquePds.forEach(pd => {
+                const div = document.createElement('div');
+                div.style = "display:flex; align-items:center; padding:8px; font-size:13px; color:#115e59; font-weight:500; cursor:pointer; border-radius:6px;";
+                
+                const chk = document.createElement('input');
+                chk.type = 'checkbox';
+                chk.value = pd;
+                chk.style = "margin-right:8px; width:16px; height:16px; accent-color:#0d9488;";
+                chk.onchange = (e) => handleChartPdSelection(pd, e.target.checked);
+
+                div.appendChild(chk);
+                const span = document.createElement('span');
+                span.innerText = String(pd).startsWith("ПД-") ? pd : `ПД-${pd}`;
+                div.appendChild(span);
+
+                div.onclick = (e) => {
+                    if(e.target !== chk) {
+                        chk.checked = !chk.checked;
+                        handleChartPdSelection(pd, chk.checked);
+                    }
+                };
+                container.appendChild(div);
+            });
+        }
+
+        function handleChartPdSelection(pd, isChecked) {
+            if(isChecked) {
+                if(!chartSelectedPds.includes(pd)) chartSelectedPds.push(pd);
+            } else {
+                chartSelectedPds = chartSelectedPds.filter(v => v !== pd);
+            }
+
+            const label = document.getElementById('chart-pd-label');
+            if(chartSelectedPds.length === 0) {
+                label.innerText = "Усі ПД (Околотки)";
+            } else {
+                label.innerText = chartSelectedPds.map(x => String(x).startsWith("ПД-") ? x : `ПД-${x}`).join(', ');
+            }
+            updateMowingChart();
+        }
+
+        function setChartPeriod(period) {
+            chartPeriod = period;
+            document.getElementById('btn-chart-today').classList.toggle('active', period === 'today');
+            document.getElementById('btn-chart-month').classList.toggle('active', period === 'month');
+            updateMowingChart();
+        }
+
+        function updateMowingChart() {
+            if (!mowingChartInstance) return;
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            const currentYearMonth = new Date().toISOString().slice(0, 7); // формат "YYYY-MM"
+
+            // Фільтруємо записи
+            let filtered = mowingData.filter(item => {
+                if (item.status !== 'green') return false;
+                
+                // Перевірка періоду за датою запису
+                if (chartPeriod === 'today' && item.date !== todayStr) return false;
+                if (chartPeriod === 'month' && (!item.date || !item.date.startsWith(currentYearMonth))) return false;
+                
+                // Перевірка обраних околотків
+                if (chartSelectedPds.length > 0 && !chartSelectedPds.includes(item.pd)) return false;
+                
+                return true;
+            });
+
+            // Групування кількості рядків за ПД
+            let countsMap = {};
+            filtered.forEach(item => {
+                if(!countsMap[item.pd]) countsMap[item.pd] = 0;
+                countsMap[item.pd]++;
+            });
+
+            // Гарантуємо наявність на графіку обраних у списку ПД, навіть якщо по них 0 кілометрів
+            if (chartSelectedPds.length > 0) {
+                chartSelectedPds.forEach(pd => {
+                    if(!countsMap[pd]) countsMap[pd] = 0;
+                });
+            }
+
+            let categories = Object.keys(countsMap).sort((a,b) => String(a).localeCompare(String(b)));
+            let seriesData = categories.map(pd => {
+                // Кожен рядок = 1 пікет = 0.1 км
+                return parseFloat((countsMap[pd] * 0.1).toFixed(1));
+            });
+
+            mowingChartInstance.updateOptions({
+                xaxis: { categories: categories.map(c => String(c).startsWith("ПД-") ? c : `ПД-${c}`) }
+            });
+            mowingChartInstance.updateSeries([{
+                name: 'Обкошено колії',
+                data: seriesData
+            }]);
+        }
+
+        // Клік поза випадаючим списком мультиселекту для його згортання
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('chart-pd-list-options');
+            if (dropdown && !dropdown.contains(e.target) && !e.target.closest('.multiselect-header')) {
+                dropdown.classList.remove('show');
+            }
+        });
  
         window.onload = initApp;
     </script>
