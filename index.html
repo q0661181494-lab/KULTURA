@@ -397,7 +397,6 @@
         @keyframes blink-cursor { 0%, 100% { opacity: 0; } 50% { opacity: 0.8; } }
         @keyframes pulse-border { 0%, 100% { box-shadow: 0 0 0 rgba(13, 148, 136, 0); } 50% { box-shadow: 0 0 14px rgba(13, 148, 136, 0.15); border-color: #0d9488; } }
     </style>
-    <!-- Підключення бібліотеки сучасних інтерактивних графіків ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body>
@@ -436,25 +435,21 @@
             <div id="diagram-render-zone" class="railway-canvas"></div>
         </div>
 
-        <!-- КАРТКА СТОВПЧАСТОЇ ДІАГРАМІ З МОНІТОРИНГОМ ОБКОШУВАННЯ -->
         <div class="screen" id="screen-mowing-analytics">
             <h2>📊 Моніторинг обкошування</h2>
             
             <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-                <!-- ОПТИМІЗОВАНО: Період "За сьогодні" тепер обрано за замовчуванням (клас active) -->
                 <div class="mode-tabs" style="margin-bottom: 0;">
                     <button id="btn-chart-today" class="tab-btn active" onclick="setChartPeriod('today')">За сьогодні</button>
                     <button id="btn-chart-month" class="tab-btn" onclick="setChartPeriod('month')">За місяць</button>
                 </div>
 
-                <!-- Кнопки-стрілочки (Stepper) для вибору місяця (приховані за замовчуванням, бо активне "За сьогодні") -->
                 <div id="chart-month-stepper" style="display: none; align-items: center; justify-content: space-between; background: #f0fdf4; padding: 6px 12px; border-radius: 10px; border: 1px solid #c2e7d9; box-sizing: border-box;">
                     <button class="tab-btn" style="max-width: 45px; background: #0d9488; color: white; padding: 6px;" onclick="adjustChartMonth(-1)">◀</button>
                     <span id="chart-month-display-label" style="color: #115e59; font-weight: 800; font-size: 14px; letter-spacing: 0.5px; text-transform: uppercase;">Червень 2026</span>
                     <button id="btn-chart-month-next" class="tab-btn" style="max-width: 45px; background: #0d9488; color: white; padding: 6px;" onclick="adjustChartMonth(1)">▶</button>
                 </div>
 
-                <!-- Мультиселект вибору околотків -->
                 <div class="multiselect-dropdown" style="position: relative; width: 100%;">
                     <div class="multiselect-header" onclick="toggleChartDropdown()" style="width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; background: white; color: #115e59; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; box-sizing: border-box; height: 41px;">
                         <span id="chart-pd-label">Усі ПД (Околотки)</span>
@@ -499,7 +494,7 @@
 
         // Нові змінні для модуля діаграми
         let mowingChartInstance = null;
-        let chartPeriod = 'today'; // ОПТИМІЗОВАНО: за замовчуванням виводимо поточний день
+        let chartPeriod = 'today'; // за замовчуванням виводимо поточний день
         let chartSelectedPds = [];
         let chartMonthFocus = new Date(); 
         const ukrMonthsList = ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"];
@@ -869,7 +864,7 @@
 
         // КЕРУВАННЯ СТОВПЧАСТОЮ ДІАГРАМОЮ
 
-        // ОПТИМІЗОВАНО: Додано параметр tickPlacement: 'on' для суворого центрування підписів ПД під стовпцем
+        // ПРОФЕСІЙНЕ ОНОВЛЕННЯ: tickPlacement змінено на 'between', додано повне вимкнення приховування міток на мобільних пристроях
         function initMowingChart() {
             const options = {
                 series: [{ name: 'Обкошено колії', data: [] }],
@@ -877,7 +872,15 @@
                 colors: ['#0d9488'],
                 plotOptions: { bar: { borderRadius: 6, horizontal: false, columnWidth: '45%', dataLabels: { position: 'top' } } },
                 dataLabels: { enabled: true, formatter: val => val + " км", offsetY: -20, style: { fontSize: '11px', colors: ["#115e59"], fontWeight: 'bold' } },
-                xaxis: { categories: [], tickPlacement: 'on', labels: { style: { colors: '#0f766e', fontWeight: 600 } } },
+                xaxis: { 
+                    categories: [], 
+                    tickPlacement: 'between', // ПРОФЕСІЙНИЙ ФІКС: стовпці більше НЕ притискаються до країв
+                    labels: { 
+                        show: true,
+                        hideOverlappingLabels: false, // ПРОФЕСІЙНИЙ ФІКС: підписи більше не зникають на телефонах
+                        style: { colors: '#0f766e', fontWeight: 600 } 
+                    } 
+                },
                 yaxis: { title: { text: 'Відстань (км)', style: { color: '#115e59', fontWeight: 600 } }, labels: { formatter: val => val.toFixed(1) + " км" } },
                 grid: { borderColor: '#f1f5f9' },
                 tooltip: { y: { formatter: val => val.toFixed(1) + " км виконаної роботи" } }
@@ -979,6 +982,7 @@
             }
         }
 
+        // ПРОФЕСІЙНЕ ОНОВЛЕННЯ: Суворе збереження та форсування центрування міток при кожній динамічній перебудові графіка
         function updateMowingChart() {
             if (!mowingChartInstance) return;
 
@@ -1015,7 +1019,14 @@
             });
 
             mowingChartInstance.updateOptions({
-                xaxis: { categories: categories.map(c => String(c).startsWith("ПД-") ? c : `ПД-${c}`) }
+                xaxis: { 
+                    categories: categories.map(c => String(c).startsWith("ПД-") ? c : `ПД-${c}`),
+                    tickPlacement: 'between', // Повторно форсуємо суворе центрування при кожному апдейті
+                    labels: {
+                        show: true,
+                        hideOverlappingLabels: false // Повторно забороняємо зникнення міток на смартфонах
+                    }
+                }
             });
             mowingChartInstance.updateSeries([{
                 name: 'Обкошено колії',
