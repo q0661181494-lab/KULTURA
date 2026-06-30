@@ -397,6 +397,7 @@
         @keyframes blink-cursor { 0%, 100% { opacity: 0; } 50% { opacity: 0.8; } }
         @keyframes pulse-border { 0%, 100% { box-shadow: 0 0 0 rgba(13, 148, 136, 0); } 50% { box-shadow: 0 0 14px rgba(13, 148, 136, 0.15); border-color: #0d9488; } }
     </style>
+    <!-- Підключення бібліотеки сучасних інтерактивних графіків ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body>
@@ -435,6 +436,7 @@
             <div id="diagram-render-zone" class="railway-canvas"></div>
         </div>
 
+        <!-- КАРТКА СТОВПЧАСТОЇ ДІАГРАМІ З МОНІТОРИНГОМ ОБКОШУВАННЯ -->
         <div class="screen" id="screen-mowing-analytics">
             <h2>📊 Моніторинг обкошування</h2>
             
@@ -444,12 +446,21 @@
                     <button id="btn-chart-month" class="tab-btn" onclick="setChartPeriod('month')">За місяць</button>
                 </div>
 
+                <!-- Степпер для вибору ДНЯ (активний за замовчуванням для кнопки "За сьогодні") -->
+                <div id="chart-day-stepper" style="display: flex; align-items: center; justify-content: space-between; background: #f0fdf4; padding: 6px 12px; border-radius: 10px; border: 1px solid #c2e7d9; box-sizing: border-box;">
+                    <button class="tab-btn" style="max-width: 45px; background: #0d9488; color: white; padding: 6px;" onclick="adjustChartDay(-1)">◀</button>
+                    <span id="chart-day-display-label" style="color: #115e59; font-weight: 800; font-size: 14px; letter-spacing: 0.5px; text-transform: uppercase;">30 червня 2026</span>
+                    <button id="btn-chart-day-next" class="tab-btn" style="max-width: 45px; background: #0d9488; color: white; padding: 6px;" onclick="adjustChartDay(1)">▶</button>
+                </div>
+
+                <!-- Кнопки-стрілочки (Stepper) для вибору МІСЯЦЯ -->
                 <div id="chart-month-stepper" style="display: none; align-items: center; justify-content: space-between; background: #f0fdf4; padding: 6px 12px; border-radius: 10px; border: 1px solid #c2e7d9; box-sizing: border-box;">
                     <button class="tab-btn" style="max-width: 45px; background: #0d9488; color: white; padding: 6px;" onclick="adjustChartMonth(-1)">◀</button>
                     <span id="chart-month-display-label" style="color: #115e59; font-weight: 800; font-size: 14px; letter-spacing: 0.5px; text-transform: uppercase;">Червень 2026</span>
                     <button id="btn-chart-month-next" class="tab-btn" style="max-width: 45px; background: #0d9488; color: white; padding: 6px;" onclick="adjustChartMonth(1)">▶</button>
                 </div>
 
+                <!-- Мультиселект вибору околотків -->
                 <div class="multiselect-dropdown" style="position: relative; width: 100%;">
                     <div class="multiselect-header" onclick="toggleChartDropdown()" style="width: 100%; padding: 11px; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 14px; background: white; color: #115e59; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; box-sizing: border-box; height: 41px;">
                         <span id="chart-pd-label">Усі ПД (Околотки)</span>
@@ -497,7 +508,10 @@
         let chartPeriod = 'today'; 
         let chartSelectedPds = [];
         let chartMonthFocus = new Date(); 
+        let chartDayFocus = new Date(); // Фокусна дата для щоденного перелистування
+        
         const ukrMonthsList = ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"];
+        const ukrMonthsGenitive = ["січня", "лютого", "березня", "квітня", "травня", "червня", "липня", "серпня", "вересня", "жовтня", "листопада", "грудня"];
  
         function logSys(text, status = 'info') {
             const con = document.getElementById('debug-console');
@@ -537,6 +551,7 @@
             logSys("Запуск рейкової платформи...");
             initMowingChart(); 
             updateChartMonthStepperLabel(); 
+            updateChartDayStepperLabel(); // Ініціалізація підпису дня
             await reloadDataFromCloud();
             buildChartPdDropdown(); 
             updateMowingChart(); 
@@ -872,7 +887,7 @@
                 plotOptions: { bar: { borderRadius: 6, horizontal: false, columnWidth: '45%', dataLabels: { position: 'top' } } },
                 dataLabels: { enabled: true, formatter: val => val + " км", offsetY: -20, style: { fontSize: '11px', colors: ["#115e59"], fontWeight: 'bold' } },
                 xaxis: { 
-                    type: 'category', // Явно декларуємо тип осі
+                    type: 'category',
                     categories: [], 
                     tickPlacement: 'between', 
                     labels: { 
@@ -947,10 +962,51 @@
             document.getElementById('btn-chart-today').classList.toggle('active', period === 'today');
             document.getElementById('btn-chart-month').classList.toggle('active', period === 'month');
             
+            // Керування відображенням відповідних степперів
+            document.getElementById('chart-day-stepper').style.display = (period === 'today') ? 'flex' : 'none';
             document.getElementById('chart-month-stepper').style.display = (period === 'month') ? 'flex' : 'none';
+            
             updateMowingChart();
         }
 
+        // ЛОГІКА СТЕППЕРА ДЛЯ ДНІВ ("За сьогодні")
+        function adjustChartDay(direction) {
+            chartDayFocus.setDate(chartDayFocus.getDate() + direction);
+            
+            const currentRealDate = new Date();
+            // Запобігаємо виходу в майбутнє
+            if (chartDayFocus > currentRealDate) {
+                chartDayFocus.setDate(currentRealDate.getDate());
+                chartDayFocus.setMonth(currentRealDate.getMonth());
+                chartDayFocus.setFullYear(currentRealDate.getFullYear());
+            }
+            
+            updateChartDayStepperLabel();
+            updateMowingChart();
+        }
+
+        function updateChartDayStepperLabel() {
+            const day = chartDayFocus.getDate();
+            const monthText = ukrMonthsGenitive[chartDayFocus.getMonth()];
+            const yearText = chartDayFocus.getFullYear();
+            document.getElementById('chart-day-display-label').innerText = `${day} ${monthText} ${yearText}`;
+            
+            const currentRealDate = new Date();
+            const isTodayNow = (chartDayFocus.getFullYear() === currentRealDate.getFullYear() && 
+                                chartDayFocus.getMonth() === currentRealDate.getMonth() && 
+                                chartDayFocus.getDate() === currentRealDate.getDate());
+            
+            const nextBtn = document.getElementById('btn-chart-day-next');
+            if (isTodayNow) {
+                nextBtn.style.opacity = "0.35";
+                nextBtn.style.pointerEvents = "none";
+            } else {
+                nextBtn.style.opacity = "1";
+                nextBtn.style.pointerEvents = "auto";
+            }
+        }
+
+        // ЛОГІКА СТЕППЕРА ДЛЯ МІСЯЦІВ ("За місяць")
         function adjustChartMonth(direction) {
             chartMonthFocus.setMonth(chartMonthFocus.getMonth() + direction);
             
@@ -982,19 +1038,24 @@
             }
         }
 
-        // ПРОФЕСІЙНЕ ВИРІШЕННЯ БАГУ: Монолітне синхронне оновлення осей та серій в одному виклику з примусовим перемальовуванням шляхів
         function updateMowingChart() {
             if (!mowingChartInstance) return;
 
-            const todayStr = new Date().toISOString().split('T')[0];
-            const targetYear = chartMonthFocus.getFullYear();
+            // Генеруємо YYYY-MM-DD рядок на основі стану chartDayFocus
+            const targetYearDay = chartDayFocus.getFullYear();
+            const targetMonthDay = String(chartDayFocus.getMonth() + 1).padStart(2, '0');
+            const targetDayDay = String(chartDayFocus.getDate()).padStart(2, '0');
+            const targetDayStr = `${targetYearDay}-${targetMonthDay}-${targetDayDay}`;
+
+            const targetYearMonth = chartMonthFocus.getFullYear();
             const targetMonth = String(chartMonthFocus.getMonth() + 1).padStart(2, '0');
-            const matchYearMonthStr = `${targetYear}-${targetMonth}`; 
+            const matchYearMonthStr = `${targetYearMonth}-${targetMonth}`; 
 
             let filtered = mowingData.filter(item => {
                 if (item.status !== 'green') return false;
                 
-                if (chartPeriod === 'today' && item.date !== todayStr) return false;
+                // Фільтрація відповідно до обраного степпера
+                if (chartPeriod === 'today' && item.date !== targetDayStr) return false;
                 if (chartPeriod === 'month' && (!item.date || !item.date.startsWith(matchYearMonthStr))) return false;
                 if (chartSelectedPds.length > 0 && !chartSelectedPds.includes(item.pd)) return false;
                 
@@ -1018,7 +1079,7 @@
                 return parseFloat((countsMap[pd] * 0.1).toFixed(1));
             });
 
-            // Використовуємо один єдиний об'єднаний updateOptions(..., true, true) для синхронної побудови стовпців та осі Х
+            // Об'єднаний updateOptions для запобігання десинхронізації стовпців
             mowingChartInstance.updateOptions({
                 xaxis: { 
                     type: 'category',
@@ -1034,7 +1095,7 @@
                     name: 'Обкошено колії',
                     data: seriesData
                 }]
-            }, true, true); // (redrawPaths = true, animate = true) — примусовий скид внутрішнього кешу сітки
+            }, true, true);
         }
 
         document.addEventListener('click', (e) => {
