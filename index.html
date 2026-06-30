@@ -492,9 +492,9 @@
         let currentMode = 'pd';
         let toastTimeout;
 
-        // Нові змінні для модуля діаграми
+        // Змінні для модуля діаграми
         let mowingChartInstance = null;
-        let chartPeriod = 'today'; // за замовчуванням виводимо поточний день
+        let chartPeriod = 'today'; 
         let chartSelectedPds = [];
         let chartMonthFocus = new Date(); 
         const ukrMonthsList = ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"];
@@ -864,7 +864,6 @@
 
         // КЕРУВАННЯ СТОВПЧАСТОЮ ДІАГРАМОЮ
 
-        // ПРОФЕСІЙНЕ ОНОВЛЕННЯ: tickPlacement змінено на 'between', додано повне вимкнення приховування міток на мобільних пристроях
         function initMowingChart() {
             const options = {
                 series: [{ name: 'Обкошено колії', data: [] }],
@@ -873,11 +872,12 @@
                 plotOptions: { bar: { borderRadius: 6, horizontal: false, columnWidth: '45%', dataLabels: { position: 'top' } } },
                 dataLabels: { enabled: true, formatter: val => val + " км", offsetY: -20, style: { fontSize: '11px', colors: ["#115e59"], fontWeight: 'bold' } },
                 xaxis: { 
+                    type: 'category', // Явно декларуємо тип осі
                     categories: [], 
-                    tickPlacement: 'between', // ПРОФЕСІЙНИЙ ФІКС: стовпці більше НЕ притискаються до країв
+                    tickPlacement: 'between', 
                     labels: { 
                         show: true,
-                        hideOverlappingLabels: false, // ПРОФЕСІЙНИЙ ФІКС: підписи більше не зникають на телефонах
+                        hideOverlappingLabels: false, 
                         style: { colors: '#0f766e', fontWeight: 600 } 
                     } 
                 },
@@ -982,7 +982,7 @@
             }
         }
 
-        // ПРОФЕСІЙНЕ ОНОВЛЕННЯ: Суворе збереження та форсування центрування міток при кожній динамічній перебудові графіка
+        // ПРОФЕСІЙНЕ ВИРІШЕННЯ БАГУ: Монолітне синхронне оновлення осей та серій в одному виклику з примусовим перемальовуванням шляхів
         function updateMowingChart() {
             if (!mowingChartInstance) return;
 
@@ -1018,20 +1018,23 @@
                 return parseFloat((countsMap[pd] * 0.1).toFixed(1));
             });
 
+            // Використовуємо один єдиний об'єднаний updateOptions(..., true, true) для синхронної побудови стовпців та осі Х
             mowingChartInstance.updateOptions({
                 xaxis: { 
+                    type: 'category',
                     categories: categories.map(c => String(c).startsWith("ПД-") ? c : `ПД-${c}`),
-                    tickPlacement: 'between', // Повторно форсуємо суворе центрування при кожному апдейті
+                    tickPlacement: 'between',
                     labels: {
                         show: true,
-                        hideOverlappingLabels: false // Повторно забороняємо зникнення міток на смартфонах
+                        hideOverlappingLabels: false,
+                        style: { colors: '#0f766e', fontWeight: 600 }
                     }
-                }
-            });
-            mowingChartInstance.updateSeries([{
-                name: 'Обкошено колії',
-                data: seriesData
-            }]);
+                },
+                series: [{
+                    name: 'Обкошено колії',
+                    data: seriesData
+                }]
+            }, true, true); // (redrawPaths = true, animate = true) — примусовий скид внутрішнього кешу сітки
         }
 
         document.addEventListener('click', (e) => {
